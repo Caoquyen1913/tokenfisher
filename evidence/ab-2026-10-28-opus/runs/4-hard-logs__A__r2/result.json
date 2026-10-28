@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 26712,
+  "stop_reason": "end_turn",
+  "session_id": "62a98ed1-1ecc-4c7f-8f2e-f1ba0ca51fc7",
+  "total_cost_usd": 0.2307924,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17259,
+    "cache_read_input_tokens": 198902,
+    "output_tokens": 2645,
+    "output_tokens_details": {
+      "thinking_tokens": 188
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17259,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 695,
+        "cache_read_input_tokens": 43968,
+        "cache_creation_input_tokens": 1827,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1827
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2645,
+      "cacheReadInputTokens": 198902,
+      "cacheCreationInputTokens": 17259,
+      "webSearchRequests": 0,
+      "costUSD": 0.2307924,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 188,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed the cause of the 500 errors on `POST /checkout`: any order with an item priced at 1,000 or more failed. `npm test` passes (7 of 7), and the new tests fail on the old code.\n\n**Root cause:** The log has 37 checkout 500s, and every one is the same `TypeError: Cannot read properties of null (reading '1')` thrown in `parseAmount` (`src/money.js:5`). In each case, the debug line just before the error shows a price with a thousands separator: `\"2,450.50\"` (12 times), `\"1,299.00\"` (15) or `\"1,005.99\"` (10). No other price format appears anywhere in the log's checkout payloads. That's why the errors were intermittent: only orders containing an item at 1,000 or more failed.\n\n`parseAmount` uses a pattern that only accepts plain numbers like `12.50`, so commas made the match return `null`. The code then read from that `null` without checking. The comment says it should throw `Error('Invalid amount: …')` for bad input, but it never did.\n\n**Fix (`src/money.js`):**\n- **Separators:** `parseAmount` now accepts properly grouped thousands separators (`1,234,567.89`) and removes the commas before converting. Badly grouped input like `12,34` or `1,23.00` is still rejected.\n- **Bad input:** it now throws the documented `Invalid amount: <input>` error instead of crashing on `null`. The server still returns a 500 for these, as before, but the log now names the bad value.\n\n**Regression test (`test/checkout-thousands.test.js`):**\n- The three prices from the log parse to the right number of cents.\n- Malformed amounts throw the descriptive error.\n- A full `POST /checkout` request using the payload from order `ord_10135` returns 200 with `totalCents: 245050`.\n\nI also ran the tests against the original `src/`: all 3 new tests failed, and the request test got the 500 seen in production.\n\nInvalid amounts are bad client input, so returning 400 instead of 500 would arguably be more accurate. I didn't make that change in `src/server.js`.",
+  "ttft_ms": 2996,
+  "type": "result",
+  "duration_ms": 39523,
+  "uuid": "c5e469be-14c2-4842-bfc1-5b3516e9d40b",
+  "ttft_stream_ms": 1719,
+  "time_to_request_ms": 96,
+  "time_to_request_phases_ms": {
+    "other": 18,
+    "system_prompt": 15,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 19,
+    "input_hooks": 2,
+    "tool_pool_refresh": 4,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 8,
+    "message_normalization": 2,
+    "client_creation": 5,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 46,
+  "time_to_request_cpu_ms": 156,
+  "time_to_request_major_faults": 3844,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 13,
+    "cpu_ms": 31,
+    "major_faults": 562
+  },
+  "first_content_frame_ms": 1719,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

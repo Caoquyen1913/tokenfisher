@@ -1,0 +1,101 @@
+{
+  "config": {
+    "model": "opus",
+    "reps": 3,
+    "baseline": "A",
+    "margin": 0.05
+  },
+  "arms": {
+    "A": {
+      "n": 15,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.22322973333333332,
+      "totalCost": 3.3484459999999996,
+      "tokens": 190610.4,
+      "output": 2664,
+      "turns": 5.6,
+      "errors": 0
+    },
+    "B": {
+      "n": 15,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.19087126666666665,
+      "totalCost": 2.863069,
+      "tokens": 164256.73333333334,
+      "output": 3229.3333333333335,
+      "turns": 5.666666666666667,
+      "errors": 0
+    },
+    "C": {
+      "n": 15,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.08579376000000001,
+      "totalCost": 1.2869064000000001,
+      "tokens": 184296.73333333334,
+      "output": 2343.4,
+      "turns": 6.933333333333334,
+      "errors": 0
+    },
+    "D": {
+      "n": 15,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.1994206133333333,
+      "totalCost": 2.9913091999999994,
+      "tokens": 172513.26666666666,
+      "output": 3494.6,
+      "turns": 6,
+      "errors": 0
+    }
+  },
+  "comparisons": {
+    "B": {
+      "pairs": 15,
+      "costCut": [
+        0.14495589894536143,
+        0.0037227220192598276,
+        0.27190344443972403
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "C": {
+      "pairs": 15,
+      "costCut": [
+        0.6156705528474999,
+        0.570459392946081,
+        0.656970313689482
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "D": {
+      "pairs": 15,
+      "costCut": [
+        0.10665747633379785,
+        -0.010869184926512343,
+        0.2417721523460954
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": false
+    }
+  }
+}

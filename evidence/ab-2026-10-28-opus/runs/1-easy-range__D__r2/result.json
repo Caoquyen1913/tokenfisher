@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 6180,
+  "stop_reason": "end_turn",
+  "session_id": "6942f71a-f6bb-4c07-889a-b64a4e2b4c28",
+  "total_cost_usd": 0.09107360000000002,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 7834,
+    "cache_read_input_tokens": 100188,
+    "output_tokens": 417,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7834,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 98,
+        "cache_read_input_tokens": 35939,
+        "cache_creation_input_tokens": 440,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 440
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 417,
+      "cacheReadInputTokens": 100188,
+      "cacheCreationInputTokens": 7834,
+      "webSearchRequests": 0,
+      "costUSD": 0.09107360000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed it, and `range(1, 5)` now returns `[1, 2, 3, 4, 5]`. The loop in `src/range.js:4` stopped one number early because it checked `i < end`; it now checks `i <= end`, so the last number is included.\n\n`npm test` passes both tests.",
+  "ttft_ms": 2134,
+  "type": "result",
+  "duration_ms": 13363,
+  "uuid": "4c70fde3-a2ea-4029-b1f1-4ca7b7b3dacc",
+  "ttft_stream_ms": 1238,
+  "time_to_request_ms": 220,
+  "time_to_request_phases_ms": {
+    "other": 27,
+    "system_prompt": 121,
+    "resume_other": 1,
+    "process_user_input": 4,
+    "input_attachments": 19,
+    "input_hooks": 3,
+    "tool_pool_refresh": 4,
+    "init_message": 8,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 8,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 10
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 95,
+  "time_to_request_cpu_ms": 390,
+  "time_to_request_major_faults": 4164,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 13,
+    "cpu_ms": 31,
+    "major_faults": 355
+  },
+  "first_content_frame_ms": 1238,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

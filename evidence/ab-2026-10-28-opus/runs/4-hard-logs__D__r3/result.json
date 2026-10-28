@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 32536,
+  "stop_reason": "end_turn",
+  "session_id": "c6ee9a17-d2a9-4d4a-a186-9c4df642176b",
+  "total_cost_usd": 0.2259078,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 14262,
+    "cache_read_input_tokens": 219319,
+    "output_tokens": 3395,
+    "output_tokens_details": {
+      "thinking_tokens": 521
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14262,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 788,
+        "cache_read_input_tokens": 40779,
+        "cache_creation_input_tokens": 2028,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2028
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3395,
+      "cacheReadInputTokens": 219319,
+      "cacheCreationInputTokens": 14262,
+      "webSearchRequests": 0,
+      "costUSD": 0.2259078,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 521,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The intermittent 500s on `POST /checkout` came from prices written with a comma as a thousands separator, like `\"1,299.00\"`. That's fixed, a regression test is added, and `npm test` passes (7/7).\n\n**What the log shows:** there are 37 `POST /checkout 500` errors in `logs/app.log`, all with the same `TypeError: Cannot read properties of null (reading '1')` at `parseAmount (src/money.js:5)`. Exactly 37 requests in the log had a comma in the price (`1,299.00`, `2,450.50`, `1,005.99`), and they are the same 37 that failed. No order with a comma in the price ever succeeded, and no order without one failed. It looked intermittent only because few products cost ≥ 1,000.\n\n**Root cause:** in `src/money.js`, the pattern in `parseAmount` (`/^(\\d+)(?:\\.(\\d{1,2}))?$/`) doesn't match a comma. When it fails to match, the result is `null`, and the code reads `m[1]` without checking for that. So it crashed with a TypeError instead of throwing the `Invalid amount` error its own comment promises.\n\n**Fix (`src/money.js`):**\n- The pattern now accepts correctly placed thousands separators (`\\d{1,3}(?:,\\d{3})+`) and strips the commas before converting.\n- Input that still isn't a valid amount now throws `Error('Invalid amount: <input>')`, as the comment says it should.\n\n**Regression test (`test/checkout-thousands.test.js`):**\n- Checks that `1,299.00`, `2,450.50` and `1,000,000` parse correctly.\n- Checks that malformed input (`1,29.00`, `12,`, `abc`, etc.) gets the `Invalid amount` error.\n- Sends one of the failing orders from the log (`ord_10135`, quantity 3 at `1,299.00`) through the request handler and checks for a 200 with a total of 389700 cents.\n\nWith the fix temporarily removed, all 3 new tests fail; with it in place, all 7 tests pass.\n\n**Decision for you:** a malformed amount still returns 500, because the handler in `src/server.js` turns every exception into 500. Since that's bad input from the client, it should probably return 400. I didn't change it because that changes what the API returns to clients; it's a small change if you want it.",
+  "ttft_ms": 2716,
+  "type": "result",
+  "duration_ms": 48413,
+  "uuid": "64d039f5-5c06-49e7-8153-132b67f0d538",
+  "ttft_stream_ms": 1147,
+  "time_to_request_ms": 156,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 68,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 13,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 2,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 6,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 19
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 55,
+  "time_to_request_cpu_ms": 343,
+  "time_to_request_major_faults": 5628,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 9,
+    "cpu_ms": 32,
+    "major_faults": 547
+  },
+  "first_content_frame_ms": 1148,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

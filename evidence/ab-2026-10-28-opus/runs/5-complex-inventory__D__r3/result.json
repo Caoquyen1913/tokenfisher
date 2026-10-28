@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 73841,
+  "stop_reason": "end_turn",
+  "session_id": "c3b5c107-fdf6-4b89-b6a4-e5eaadf8352f",
+  "total_cost_usd": 0.3920128,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 19356,
+    "cache_read_input_tokens": 189324,
+    "output_tokens": 9963,
+    "output_tokens_details": {
+      "thinking_tokens": 475
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19356,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 775,
+        "cache_read_input_tokens": 43238,
+        "cache_creation_input_tokens": 4663,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4663
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 9963,
+      "cacheReadInputTokens": 189324,
+      "cacheCreationInputTokens": 19356,
+      "webSearchRequests": 0,
+      "costUSD": 0.3920128,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 475,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added reservations with expiry and all 10 points are in. `npm test` passes: 176 tests, 0 failed, including 11 new ones in `test/reservations.test.js`. The 165 existing tests are unchanged.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2`. It checks the quantity first (`INVALID_QTY`), then checks it against what's available (`INSUFFICIENT_STOCK`). Reserving a SKU that has no stock throws `INSUFFICIENT_STOCK`.\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired. A reservation counts as expired once `clock() >= creation time + ttlMs`, and the clock option is the only time source.\n- `confirm(id)` lowers physical stock, deletes the reservation and returns its SKU, which the API needs for its response.\n- An expired reservation stays stored (without counting against stock), so confirming it keeps returning `RESERVATION_EXPIRED` rather than `RESERVATION_NOT_FOUND`. `release(id)` deletes it.\n- `removeItem` now checks against available stock instead of physical stock. This is the only change to existing behaviour, and the spec asked for it.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- The three reservation routes return the status codes and bodies in the spec.\n- `DELETE /reservations/:id` always returns 204 with no body.\n- An error the reservation routes don't recognise is thrown on rather than turned into a response.\n\n**Tests** cover id uniqueness, quantity checks, insufficient stock, the exact moment a reservation expires (still active at ttl−1, expired at ttl), confirming, confirming twice, confirming after release, release being safe to repeat, `removeItem` refusing reserved stock, and every API status code.\n\nTwo things to be aware of:\n- `ttlMs` isn't validated. A missing or invalid value gives a reservation that is expired from the start, so it never holds any stock.\n- Expired reservations that nobody confirms or releases are never deleted, so they build up in memory over time.",
+  "ttft_ms": 2363,
+  "type": "result",
+  "duration_ms": 85027,
+  "uuid": "a37d9aca-bbbb-4aba-9401-44546410d1f6",
+  "ttft_stream_ms": 1138,
+  "time_to_request_ms": 181,
+  "time_to_request_phases_ms": {
+    "other": 25,
+    "system_prompt": 72,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 15,
+    "input_hooks": 3,
+    "tool_pool_refresh": 4,
+    "init_message": 9,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 11,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 25
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 78,
+  "time_to_request_cpu_ms": 374,
+  "time_to_request_major_faults": 4333,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 16,
+    "major_faults": 467
+  },
+  "first_content_frame_ms": 1139,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

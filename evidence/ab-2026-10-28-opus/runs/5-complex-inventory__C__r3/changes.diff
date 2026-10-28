@@ -1,0 +1,225 @@
+diff --git a/src/api.js b/src/api.js
+index 1ed494a..d8612c1 100644
+--- a/src/api.js
++++ b/src/api.js
+@@ -4,7 +4,30 @@ function createApi(store) {
+     const stockMatch = path.match(/^\/stock\/([^/]+)$/);
+     if (method === 'GET' && stockMatch) {
+       const sku = decodeURIComponent(stockMatch[1]);
+-      return { status: 200, body: { sku, stock: store.getStock(sku) } };
++      return { status: 200, body: { sku, stock: store.getStock(sku), available: store.getAvailable(sku) } };
++    }
++    if (method === 'POST' && path === '/reservations') {
++      try {
++        return { status: 201, body: { id: store.reserve(body.sku, body.qty, body.ttlMs) } };
++      } catch (e) {
++        return { status: e.message === 'INSUFFICIENT_STOCK' ? 409 : 400, body: { error: e.message } };
++      }
++    }
++    const resMatch = path.match(/^\/reservations\/([^/]+)(\/confirm)?$/);
++    if (resMatch) {
++      const id = decodeURIComponent(resMatch[1]);
++      if (method === 'POST' && resMatch[2]) {
++        try {
++          const sku = store.confirm(id);
++          return { status: 200, body: { sku, stock: store.getStock(sku) } };
++        } catch (e) {
++          return { status: e.message === 'RESERVATION_EXPIRED' ? 410 : 404, body: { error: e.message } };
++        }
++      }
++      if (method === 'DELETE' && !resMatch[2]) {
++        store.release(id);
++        return { status: 204, body: null };
++      }
+     }
+     if (method === 'POST' && path === '/stock') {
+       try {
+diff --git a/src/store.js b/src/store.js
+index 77755be..518f88a 100644
+--- a/src/store.js
++++ b/src/store.js
+@@ -6,6 +6,19 @@ function createStore({ clock = Date.now } = {}) {
+     if (!Number.isInteger(qty) || qty <= 0) throw new Error('INVALID_QTY');
+   }
+ 
++  const reservations = new Map(); // id -> { sku, qty, expiresAt }
++  let nextId = 1;
++
++  const isExpired = (r) => clock() >= r.expiresAt;
++
++  function getAvailable(sku) {
++    let reserved = 0;
++    for (const r of reservations.values()) {
++      if (r.sku === sku && !isExpired(r)) reserved += r.qty;
++    }
++    return (stock.get(sku) || 0) - reserved;
++  }
++
+   return {
+     clock,
+     addItem(sku, qty) {
+@@ -14,13 +27,31 @@ function createStore({ clock = Date.now } = {}) {
+     },
+     removeItem(sku, qty) {
+       assertQty(qty);
+-      const current = stock.get(sku) || 0;
+-      if (qty > current) throw new Error('INSUFFICIENT_STOCK');
+-      stock.set(sku, current - qty);
++      if (qty > getAvailable(sku)) throw new Error('INSUFFICIENT_STOCK');
++      stock.set(sku, (stock.get(sku) || 0) - qty);
+     },
+     getStock(sku) {
+       return stock.get(sku) || 0;
+     },
++    getAvailable,
++    reserve(sku, qty, ttlMs) {
++      assertQty(qty);
++      if (qty > getAvailable(sku)) throw new Error('INSUFFICIENT_STOCK');
++      const id = `res-${nextId++}`;
++      reservations.set(id, { sku, qty, expiresAt: clock() + ttlMs });
++      return id;
++    },
++    confirm(id) {
++      const r = reservations.get(id);
++      if (!r) throw new Error('RESERVATION_NOT_FOUND');
++      if (isExpired(r)) throw new Error('RESERVATION_EXPIRED');
++      reservations.delete(id);
++      stock.set(r.sku, (stock.get(r.sku) || 0) - r.qty);
++      return r.sku;
++    },
++    release(id) {
++      reservations.delete(id);
++    },
+   };
+ }
+ 
+diff --git a/test/api.test.js b/test/api.test.js
+index 3ef8a0b..48c7260 100644
+--- a/test/api.test.js
++++ b/test/api.test.js
+@@ -17,3 +17,42 @@ test('POST /stock rejects bad qty', () => {
+   assert.deepStrictEqual(api({ method: 'POST', path: '/stock', body: { sku: 'x', qty: -1 } }), { status: 400, body: { error: 'INVALID_QTY' } });
+ });
+ test('unknown route is 404', () => assert.strictEqual(createApi(createStore())({ method: 'GET', path: '/nope' }).status, 404));
++
++function timedApi() {
++  let now = 0;
++  const api = createApi(createStore({ clock: () => now }));
++  api({ method: 'POST', path: '/stock', body: { sku: 'A', qty: 5 } });
++  return { api, advance: (ms) => { now += ms; } };
++}
++
++test('GET /stock returns available', () => {
++  const { api } = timedApi();
++  api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 2, ttlMs: 100 } });
++  const res = api({ method: 'GET', path: '/stock/A' });
++  assert.strictEqual(res.body.stock, 5);
++  assert.strictEqual(res.body.available, 3);
++});
++test('POST /reservations statuses', () => {
++  const { api } = timedApi();
++  const ok = api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 2, ttlMs: 100 } });
++  assert.strictEqual(ok.status, 201);
++  assert.strictEqual(typeof ok.body.id, 'string');
++  assert.deepStrictEqual(api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 9, ttlMs: 100 } }), { status: 409, body: { error: 'INSUFFICIENT_STOCK' } });
++  assert.deepStrictEqual(api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 0, ttlMs: 100 } }), { status: 400, body: { error: 'INVALID_QTY' } });
++});
++test('POST /reservations/:id/confirm', () => {
++  const { api, advance } = timedApi();
++  const id = api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 2, ttlMs: 100 } }).body.id;
++  assert.deepStrictEqual(api({ method: 'POST', path: `/reservations/${id}/confirm` }), { status: 200, body: { sku: 'A', stock: 3 } });
++  assert.deepStrictEqual(api({ method: 'POST', path: `/reservations/${id}/confirm` }), { status: 404, body: { error: 'RESERVATION_NOT_FOUND' } });
++  const id2 = api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 1, ttlMs: 100 } }).body.id;
++  advance(100);
++  assert.deepStrictEqual(api({ method: 'POST', path: `/reservations/${id2}/confirm` }), { status: 410, body: { error: 'RESERVATION_EXPIRED' } });
++});
++test('DELETE /reservations/:id is 204 and idempotent', () => {
++  const { api } = timedApi();
++  const id = api({ method: 'POST', path: '/reservations', body: { sku: 'A', qty: 5, ttlMs: 100 } }).body.id;
++  assert.strictEqual(api({ method: 'DELETE', path: `/reservations/${id}` }).status, 204);
++  assert.strictEqual(api({ method: 'DELETE', path: `/reservations/${id}` }).status, 204);
++  assert.strictEqual(api({ method: 'GET', path: '/stock/A' }).body.available, 5);
++});
+diff --git a/test/store.test.js b/test/store.test.js
+index 8b80ad0..d212e5e 100644
+--- a/test/store.test.js
++++ b/test/store.test.js
+@@ -27,3 +27,78 @@ test('quantities must be positive integers', () => {
+   assert.throws(() => s.addItem('A', 0), /INVALID_QTY/);
+   assert.throws(() => s.addItem('A', 1.5), /INVALID_QTY/);
+ });
++
++function timed() {
++  let now = 1000;
++  const s = createStore({ clock: () => now });
++  return { s, advance: (ms) => { now += ms; } };
++}
++
++test('reserve reduces available but not physical stock', () => {
++  const { s } = timed();
++  s.addItem('A', 10);
++  const id = s.reserve('A', 4, 100);
++  assert.strictEqual(typeof id, 'string');
++  assert.strictEqual(s.getStock('A'), 10);
++  assert.strictEqual(s.getAvailable('A'), 6);
++  assert.notStrictEqual(s.reserve('A', 1, 100), id);
++});
++test('reserve validates qty and availability', () => {
++  const { s } = timed();
++  s.addItem('A', 3);
++  assert.throws(() => s.reserve('A', 0, 100), /INVALID_QTY/);
++  assert.throws(() => s.reserve('A', 1.5, 100), /INVALID_QTY/);
++  assert.throws(() => s.reserve('A', 4, 100), /INSUFFICIENT_STOCK/);
++  s.reserve('A', 3, 100);
++  assert.throws(() => s.reserve('A', 1, 100), /INSUFFICIENT_STOCK/);
++});
++test('reservation expires at creation + ttl', () => {
++  const { s, advance } = timed();
++  s.addItem('A', 5);
++  s.reserve('A', 5, 100);
++  advance(99);
++  assert.strictEqual(s.getAvailable('A'), 0);
++  advance(1);
++  assert.strictEqual(s.getAvailable('A'), 5);
++});
++test('confirm converts reservation to a sale', () => {
++  const { s } = timed();
++  s.addItem('A', 5);
++  const id = s.reserve('A', 2, 100);
++  s.confirm(id);
++  assert.strictEqual(s.getStock('A'), 3);
++  assert.strictEqual(s.getAvailable('A'), 3);
++  assert.throws(() => s.confirm(id), /RESERVATION_NOT_FOUND/);
++});
++test('confirm errors for unknown, released and expired', () => {
++  const { s, advance } = timed();
++  s.addItem('A', 5);
++  assert.throws(() => s.confirm('zzz'), /RESERVATION_NOT_FOUND/);
++  const r = s.reserve('A', 1, 100);
++  s.release(r);
++  assert.throws(() => s.confirm(r), /RESERVATION_NOT_FOUND/);
++  const e = s.reserve('A', 1, 100);
++  advance(100);
++  assert.throws(() => s.confirm(e), /RESERVATION_EXPIRED/);
++  assert.strictEqual(s.getStock('A'), 5);
++});
++test('release frees stock and is idempotent', () => {
++  const { s } = timed();
++  s.addItem('A', 5);
++  const id = s.reserve('A', 5, 100);
++  s.release(id);
++  s.release(id);
++  s.release('unknown');
++  assert.strictEqual(s.getAvailable('A'), 5);
++});
++test('removeItem cannot remove reserved stock', () => {
++  const { s, advance } = timed();
++  s.addItem('A', 5);
++  s.reserve('A', 3, 100);
++  assert.throws(() => s.removeItem('A', 3), /INSUFFICIENT_STOCK/);
++  s.removeItem('A', 2);
++  assert.strictEqual(s.getStock('A'), 3);
++  advance(100);
++  s.removeItem('A', 3);
++  assert.strictEqual(s.getStock('A'), 0);
++});

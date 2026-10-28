@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 25097,
+  "stop_reason": "end_turn",
+  "session_id": "8fa24990-2164-4eed-8fef-ff15039583d6",
+  "total_cost_usd": 0.0783337,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 10687,
+    "cache_read_input_tokens": 176857,
+    "output_tokens": 1788,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10687,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 326,
+        "cache_read_input_tokens": 38037,
+        "cache_creation_input_tokens": 1588,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1588
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1788,
+      "cacheReadInputTokens": 176857,
+      "cacheCreationInputTokens": 10687,
+      "webSearchRequests": 0,
+      "costUSD": 0.0783337,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify(text)` in `src/strings.js` and added 8 tests for it in `test/strings.test.js`. `npm test` passes: 10 of 10, including the 2 existing `capitalize` tests.\n\nIt handles đ/Đ first, then strips diacritics, lowercases, and turns each run of non-`a-z0-9` characters into one hyphen. It trims hyphens at both ends, cuts to 50 characters, and removes any hyphen left at the cut.\n\nThe tests cover:\n- basic lowercasing and hyphenation\n- Vietnamese text, including đ\n- other Latin diacritics\n- collapsing runs of symbols\n- trimming hyphens at both ends\n- empty and symbol-only input\n- the 50-character limit\n- a cut that would land on a hyphen\n\nNon-string input is converted with `String(text)`, so `slugify(null)` returns `'null'`. You didn't specify this case, so say if you'd rather it throw or return an empty string.",
+  "ttft_ms": 3092,
+  "type": "result",
+  "duration_ms": 36181,
+  "uuid": "96fd8c3d-2474-4d1e-9e31-1f6ea225022c",
+  "ttft_stream_ms": 2189,
+  "time_to_request_ms": 117,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 24,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 17,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 9,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 10,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 67,
+  "time_to_request_cpu_ms": 203,
+  "time_to_request_major_faults": 5029,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 12,
+    "cpu_ms": 32,
+    "major_faults": 709
+  },
+  "first_content_frame_ms": 2190,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

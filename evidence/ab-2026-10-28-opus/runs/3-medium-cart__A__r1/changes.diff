@@ -1,0 +1,15 @@
+diff --git a/src/cart.js b/src/cart.js
+index 980a45a..bdc4a73 100644
+--- a/src/cart.js
++++ b/src/cart.js
+@@ -7,8 +7,8 @@ const round2 = (n) => Math.round(n * 100) / 100;
+ // can bring the subtotal down to zero but never below.
+ function total(items, { discount, taxRate = 0 } = {}) {
+   const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+-  const taxed = applyTax(subtotal, taxRate);
+-  return round2(applyDiscount(taxed, discount));
++  const discounted = Math.max(0, applyDiscount(subtotal, discount));
++  return round2(applyTax(discounted, taxRate));
+ }
+ 
+ module.exports = { total };

@@ -1,0 +1,5 @@
+node_modules/
+*.log
+
+# A/B runs hold full transcripts with local paths; publish a curated copy deliberately.
+eval/results/

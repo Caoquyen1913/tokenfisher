@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 93121,
+  "stop_reason": "end_turn",
+  "session_id": "8c28e7af-2ab6-4777-b29b-81e9e443bd33",
+  "total_cost_usd": 0.4585884,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 22263,
+    "cache_read_input_tokens": 192422,
+    "output_tokens": 12098,
+    "output_tokens_details": {
+      "thinking_tokens": 880
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22263,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 775,
+        "cache_read_input_tokens": 45274,
+        "cache_creation_input_tokens": 5534,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 5534
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 12098,
+      "cacheReadInputTokens": 192422,
+      "cacheCreationInputTokens": 22263,
+      "webSearchRequests": 0,
+      "costUSD": 0.4585884,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 880,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are in, and `npm test` passes: 181 tests, 0 failed. That's the 165 existing tests plus 16 new ones.\n\n**Store (`src/store.js`)**\n- `reserve`, `confirm`, `release` and `getAvailable` are added. Every time check uses only the injected `clock`.\n- A reservation is active while `clock() < created + ttlMs`. Availability is physical stock minus the active reservations for that SKU, worked out each time it's read.\n- Expired reservations stay in memory so that `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They no longer count against availability. Nothing ever cleans them up, so the map grows over a long run.\n- `removeItem` now checks against available stock instead of physical stock. `addItem`, `getStock` and the existing errors behave as before.\n- Reservation ids look like `res-1`, `res-2`, …, from a counter in each store.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- The three reservation routes return the status codes from your spec. A `DELETE` returns `204` with `body: null`.\n- An unexpected error from these routes is re-thrown rather than turned into a 4xx.\n\n**Decision for you:** the spec didn't say how to handle a bad `ttlMs`. Without a check, a missing one would create a reservation that never expires, so `reserve` throws `Error('INVALID_TTL')` unless `ttlMs` is a positive finite number, and the API maps that to `400 {error: 'INVALID_TTL'}`. If you'd rather a missing TTL mean something else, such as a default value, that's a small change.\n\n**Tests (`test/reservations.test.js`)** cover:\n- unique ids and invalid quantities\n- not enough stock, and SKUs with no stock\n- expiry exactly at `created + ttlMs`\n- confirming a valid, unknown, released, already-confirmed or expired reservation\n- releasing twice, or with an unknown id, doing nothing\n- `removeItem` refusing reserved stock and allowing it again after expiry\n- reservations on one SKU not affecting another\n- every new API status code",
+  "ttft_ms": 3656,
+  "type": "result",
+  "duration_ms": 102822,
+  "uuid": "b4268364-0665-40e9-84f0-9efcfd66c653",
+  "ttft_stream_ms": 2237,
+  "time_to_request_ms": 161,
+  "time_to_request_phases_ms": {
+    "other": 21,
+    "system_prompt": 66,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 16,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 8,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 8,
+    "message_normalization": 2,
+    "client_creation": 7,
+    "request_build": 18
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 60,
+  "time_to_request_cpu_ms": 280,
+  "time_to_request_major_faults": 4325,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 15,
+    "major_faults": 385
+  },
+  "first_content_frame_ms": 2237,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

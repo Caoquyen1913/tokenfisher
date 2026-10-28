@@ -1,0 +1,4 @@
+{
+  "level": "easy",
+  "prompt": "Implement slugify(text) in src/strings.js. Rules: lowercase; remove diacritics so Vietnamese and other Latin text becomes plain ASCII (đ/Đ becomes d); every run of characters that are not a-z or 0-9 becomes a single hyphen; no leading or trailing hyphens; at most 50 characters, and a slug cut at 50 must not end with a hyphen. Add tests for it next to the existing ones; `npm test` runs them."
+}

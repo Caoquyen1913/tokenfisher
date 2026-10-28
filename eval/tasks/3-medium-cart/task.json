@@ -1,0 +1,5 @@
+{
+  "level": "medium",
+  "testsFrozen": true,
+  "prompt": "`npm test` is failing in this cart-pricing library. Find and fix the bug(s) in src/. Do not change the tests."
+}

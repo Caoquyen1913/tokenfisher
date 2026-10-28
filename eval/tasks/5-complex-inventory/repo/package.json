@@ -1,0 +1,1 @@
+{ "name": "inventory-service", "private": true, "scripts": { "test": "node test/run.js" } }

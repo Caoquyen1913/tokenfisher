@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 53445,
+  "stop_reason": "end_turn",
+  "session_id": "f14dd734-4bee-42fd-bdab-0b3820d7bbf4",
+  "total_cost_usd": 0.3436562,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 21311,
+    "cache_read_input_tokens": 203141,
+    "output_tokens": 6625,
+    "output_tokens_details": {
+      "thinking_tokens": 929
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 21311,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 824,
+        "cache_read_input_tokens": 46673,
+        "cache_creation_input_tokens": 3174,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3174
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 6625,
+      "cacheReadInputTokens": 203141,
+      "cacheCreationInputTokens": 21311,
+      "webSearchRequests": 0,
+      "costUSD": 0.3436562,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 929,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are now in the store and the API, and `npm test` passes: 179 tests, 14 of them new, 0 failures. All existing behavior is unchanged.\n\n**Store (`src/store.js`)**\n- Each reservation records its SKU, quantity and expiry time (creation time + `ttlMs`). It counts as expired once `clock() >= expiry`, and every time check uses only the store's `clock`.\n- `getAvailable(sku)` is physical stock minus the reservations that haven't expired. `getStock` still returns physical stock.\n- `confirm(id)` subtracts the quantity from physical stock and deletes the reservation. It returns `{sku, stock}`, which the API sends back as-is.\n- `removeItem` now checks the requested quantity against available stock instead of physical stock.\n- Expired reservations are kept rather than deleted, so `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They no longer reduce available stock. The catch is that the reservation list grows until you `release` the expired ones.\n- IDs are `res-1`, `res-2`, and so on. They're unique within one store, not across stores.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` return the status codes you listed.\n- `DELETE` returns 204 with `body: null`.\n- An error the routes don't expect is thrown rather than turned into a 400 or 404.\n\n**Tests (`test/reservations.test.js`)** cover the expiry boundary (still active 1ms before, expired at exactly creation + `ttlMs`), confirming twice, confirming after release or expiry, `release` being safe to call again, `removeItem` being blocked by reservations until they expire, and each route's status codes.\n\n**Decision for you:** your spec doesn't say what to do with a missing or invalid `ttlMs`. Without a check, a reservation with no `ttlMs` would never expire, so I added one: `reserve` throws `Error('INVALID_TTL')` unless `ttlMs` is a finite number ≥ 0, and the API returns 400 for it. A `ttlMs` of 0 is allowed and expires immediately. Say if you'd rather drop the check or use a different error.",
+  "ttft_ms": 2089,
+  "type": "result",
+  "duration_ms": 64475,
+  "uuid": "f7c809c1-03ff-4df8-af13-4f9c26ccd882",
+  "ttft_stream_ms": 906,
+  "time_to_request_ms": 119,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 24,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 20,
+    "input_hooks": 3,
+    "tool_pool_refresh": 5,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 11,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 68,
+  "time_to_request_cpu_ms": 157,
+  "time_to_request_major_faults": 4295,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 14,
+    "cpu_ms": 16,
+    "major_faults": 718
+  },
+  "first_content_frame_ms": 906,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

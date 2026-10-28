@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 38402,
+  "stop_reason": "end_turn",
+  "session_id": "094e6635-e634-4beb-8dcd-76f9a67c186b",
+  "total_cost_usd": 0.2550696,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 19724,
+    "cache_read_input_tokens": 204688,
+    "output_tokens": 2815,
+    "output_tokens_details": {
+      "thinking_tokens": 355
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19724,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 724,
+        "cache_read_input_tokens": 46521,
+        "cache_creation_input_tokens": 1739,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1739
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2815,
+      "cacheReadInputTokens": 204688,
+      "cacheCreationInputTokens": 19724,
+      "webSearchRequests": 0,
+      "costUSD": 0.2550696,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 355,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found and fixed the bug. `npm test` now passes 7 of 7, and with the fix removed the 3 new tests fail.\n\n**Root cause:** The checkout fails whenever an item's price has a thousands separator. `parseAmount` in `src/money.js` matched prices against `/^(\\d+)(?:\\.(\\d{1,2}))?$/`, which can't handle a comma, so a price like `\"1,299.00\"` gave no match (`null`). The code then read `m[1]` without checking for that, which threw `TypeError: Cannot read properties of null (reading '1')`, and the server turned that into a 500.\n\nThe log backs this up. All 37 `POST /checkout 500` errors have that exact TypeError, and every one of their logged prices has a comma (`1,005.99`, `1,299.00`, `2,450.50`). None of the 1,100+ successful checkouts had a comma in the price. It looked intermittent only because few products cost over 1,000.\n\n**Fix (`src/money.js`):**\n- Prices with correctly placed thousands separators are now accepted (`1,299.00`, `1,000,000`), and the commas are removed before converting.\n- Badly formed input now throws `Error('Invalid amount: <input>')`, which is what the function's own comment said it should do, instead of the TypeError. That input still returns a 500, because the server treats any error from checkout as a 500. If you'd rather return a 400 for bad prices, that's a small change in `src/server.js`.\n\n**Regression test (`test/checkout.test.js`):**\n- It parses the three prices that failed in production and checks the results.\n- It checks that malformed amounts (`1,29.00`, `12,34`, `abc`, an empty string, and others) are rejected with the error message described above.\n- It sends a `POST /checkout` request with a `\"1,299.00\"` item and expects a 200 with `totalCents: 259800`.\n\nOne unrelated oddity: some logged success totals don't match their items. For example, `ord_10180` is 2 × `3.25` but was logged as `total=1015`. The current code calculates 650 for that, so the log may not come from this exact code, or the payload may not be logged in full. I didn't look into it further.",
+  "ttft_ms": 6123,
+  "type": "result",
+  "duration_ms": 51412,
+  "uuid": "fe7b5b3d-7e90-4a36-af51-1a5475e7d213",
+  "ttft_stream_ms": 4624,
+  "time_to_request_ms": 88,
+  "time_to_request_phases_ms": {
+    "other": 17,
+    "system_prompt": 14,
+    "resume_other": 1,
+    "process_user_input": 2,
+    "input_attachments": 16,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 38,
+  "time_to_request_cpu_ms": 109,
+  "time_to_request_major_faults": 2695,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 16,
+    "major_faults": 319
+  },
+  "first_content_frame_ms": 4624,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

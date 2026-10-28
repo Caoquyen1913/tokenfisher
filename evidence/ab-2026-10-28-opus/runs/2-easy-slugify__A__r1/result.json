@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 32095,
+  "stop_reason": "end_turn",
+  "session_id": "a5478bc8-975a-4d90-97f4-177d121086cd",
+  "total_cost_usd": 0.2062968,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 15981,
+    "cache_read_input_tokens": 153984,
+    "output_tokens": 2381,
+    "output_tokens_details": {
+      "thinking_tokens": 147
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15981,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 510,
+        "cache_read_input_tokens": 42535,
+        "cache_creation_input_tokens": 1982,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1982
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2381,
+      "cacheReadInputTokens": 153984,
+      "cacheCreationInputTokens": 15981,
+      "webSearchRequests": 0,
+      "costUSD": 0.2062968,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 147,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added 11 tests for it in `test/strings.test.js`. `npm test` passes all 13 tests, including the 2 that were already there.\n\nHow it works:\n1. It lowercases the text, then splits accented letters into a base letter plus accent marks and strips the marks. That turns \"Tiếng Việt\" into \"tieng viet\" and \"Crème Brûlée\" into \"creme brulee\".\n2. A few Latin letters have no accent to strip, so they're mapped by hand. `đ` becomes `d`, as you asked. I also added `ø→o`, `ł→l`, `ß→ss`, `æ→ae`, `œ→oe`, `ð→d`, `þ→th` and `ı→i` under \"other Latin text\"; trim that list if you'd rather keep it to `đ` only.\n3. Each run of characters other than a–z and 0–9 becomes one hyphen, and hyphens are trimmed from both ends.\n4. The result is cut to 50 characters, and any hyphen left at the end after the cut is removed.\n\nThe tests cover Vietnamese text, `đ/Đ`, other accented Latin text, collapsing runs of symbols, trimming, digits, empty or symbol-only input, the 50-character cut, a cut that would end on a hyphen, and a slug of exactly 50 characters.\n\nCharacters from non-Latin scripts, such as Chinese or Cyrillic, can't be converted to ASCII this way, so they're replaced by hyphens like any other symbol.",
+  "ttft_ms": 4665,
+  "type": "result",
+  "duration_ms": 41191,
+  "uuid": "813eed04-2477-467e-8a7e-f41daeef649d",
+  "ttft_stream_ms": 3359,
+  "time_to_request_ms": 101,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 14,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 19,
+    "input_hooks": 3,
+    "tool_pool_refresh": 4,
+    "init_message": 7,
+    "engine_pickup": 2,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 8,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 51,
+  "time_to_request_cpu_ms": 156,
+  "time_to_request_major_faults": 3135,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 14,
+    "cpu_ms": 31,
+    "major_faults": 395
+  },
+  "first_content_frame_ms": 3359,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

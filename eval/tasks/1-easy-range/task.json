@@ -1,0 +1,4 @@
+{
+  "level": "easy",
+  "prompt": "range(1, 5) in src/range.js should return [1, 2, 3, 4, 5] (both ends inclusive, as its comment says) but it misses the last number. Fix it. `npm test` runs the tests."
+}

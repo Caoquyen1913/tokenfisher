@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 17291,
+  "stop_reason": "end_turn",
+  "session_id": "2fe999b1-737d-4f32-8c0f-f7a45796b801",
+  "total_cost_usd": 0.1285662,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 10007,
+    "cache_read_input_tokens": 139291,
+    "output_tokens": 1031,
+    "output_tokens_details": {
+      "thinking_tokens": 22
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10007,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 373,
+        "cache_read_input_tokens": 38003,
+        "cache_creation_input_tokens": 549,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 549
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1031,
+      "cacheReadInputTokens": 139291,
+      "cacheCreationInputTokens": 10007,
+      "webSearchRequests": 0,
+      "costUSD": 0.1285662,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 22,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed two bugs in `src/cart.js`, and `npm test` now passes all 243 tests. I didn't change any tests.\n\n1. **Tax and discount were applied in the wrong order.** `total()` added tax first and then took the discount off the taxed amount. The comment in the code and the tests both say the discount should come off the pre-tax subtotal. Percent discounts gave the same result either way, which is why only the fixed-discount test caught it.\n2. **A fixed discount could make the total negative.** A discount bigger than the subtotal gave -14.5 instead of 0. The discounted subtotal is now kept at zero or above before tax is applied.\n\nThe fix is in `total()`:\n\n```js\nconst discounted = Math.max(0, applyDiscount(subtotal, discount));\nreturn round2(applyTax(discounted, taxRate));\n```\n\n`discount.js` and `tax.js` are unchanged. I put the zero floor in `cart.js` rather than inside `applyDiscount`, so if anything else calls `applyDiscount` directly it can still return a negative number.",
+  "ttft_ms": 3581,
+  "type": "result",
+  "duration_ms": 28681,
+  "uuid": "00adba38-977e-4686-bc02-0aeed861d380",
+  "ttft_stream_ms": 2166,
+  "time_to_request_ms": 170,
+  "time_to_request_phases_ms": {
+    "other": 21,
+    "system_prompt": 75,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 13,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 9,
+    "message_normalization": 2,
+    "client_creation": 20,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 69,
+  "time_to_request_cpu_ms": 266,
+  "time_to_request_major_faults": 4542,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 10,
+    "cpu_ms": 31,
+    "major_faults": 378
+  },
+  "first_content_frame_ms": 2166,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

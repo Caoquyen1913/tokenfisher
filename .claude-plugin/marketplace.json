@@ -1,0 +1,12 @@
+{
+  "name": "tokenfisher",
+  "owner": { "name": "Kawin Tran" },
+  "metadata": { "description": "tokenfisher: token diet for Claude Code, measured with A/B evals." },
+  "plugins": [
+    {
+      "name": "tokenfisher",
+      "source": "./",
+      "description": "Measure where Claude Code tokens go, audit startup context, and compress noisy shell output."
+    }
+  ]
+}

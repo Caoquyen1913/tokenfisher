@@ -1,0 +1,1 @@
+{ "name": "cart-pricing", "private": true, "scripts": { "test": "node test/run.js" } }

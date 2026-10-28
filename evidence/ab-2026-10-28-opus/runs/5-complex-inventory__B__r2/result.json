@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 48966,
+  "stop_reason": "end_turn",
+  "session_id": "73cd21c2-4628-49bd-b52c-56c479d233c0",
+  "total_cost_usd": 0.2764186,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 15093,
+    "cache_read_input_tokens": 181273,
+    "output_tokens": 5969,
+    "output_tokens_details": {
+      "thinking_tokens": 552
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15093,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 700,
+        "cache_read_input_tokens": 40806,
+        "cache_creation_input_tokens": 2832,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2832
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 5969,
+      "cacheReadInputTokens": 181273,
+      "cacheCreationInputTokens": 15093,
+      "webSearchRequests": 0,
+      "costUSD": 0.2764186,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 552,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added reservations with expiry to the store and the API, and `npm test` passes: 178 tests, 0 failed. That's the 165 existing tests unchanged plus 13 new ones in `test/reservations.test.js`.\n\n**Store (`src/store.js`)**\n- `reserve`, `confirm`, `release` and `getAvailable` work as specified, and expiry uses only the store's `clock()`.\n- `removeItem` now checks against available stock instead of physical stock, so it can't take reserved units. Expired reservations stop counting against availability.\n- Reservation ids are `res-1`, `res-2`, … and are unique within a store.\n- `confirm` returns `{sku, stock}`, which the API passes straight through.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- I added the three reservation routes with the status codes you listed. Any error other than those is re-thrown rather than turned into a response.\n- `DELETE` returns 204 with an empty body object, so the handler's return shape stays the same.\n\n**The new tests cover:**\n- unique ids and quantity checks;\n- reserving more than is available (409 through the API);\n- the exact expiry point: still active at `ttl - 1`, expired at `ttl`;\n- reserving stock again after a reservation expires;\n- confirming, including a second confirm of the same id and confirming a released id;\n- `release` being safe to call again or with an unknown id;\n- `removeItem` refusing reserved stock;\n- every API route and status code.\n\n**Behaviours to be aware of:**\n- **Expired reservations stay in memory.** They're kept so that `confirm` can still return `RESERVATION_EXPIRED` rather than `RESERVATION_NOT_FOUND`. A `release` removes them, but otherwise they build up over time. If that matters, they'd need a cleanup step.\n- **`ttlMs` isn't checked.** The spec didn't say what to do with a bad value. A non-numeric one makes the expiry time `NaN`, and that reservation never expires. I can add an `INVALID_TTL` check if you want it.",
+  "ttft_ms": 1999,
+  "type": "result",
+  "duration_ms": 60994,
+  "uuid": "af80465c-c21b-4538-8471-8e5b9ed7afc7",
+  "ttft_stream_ms": 870,
+  "time_to_request_ms": 99,
+  "time_to_request_phases_ms": {
+    "other": 21,
+    "system_prompt": 18,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 16,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 49,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 4024,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 31,
+    "major_faults": 625
+  },
+  "first_content_frame_ms": 871,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 28200,
+  "stop_reason": "end_turn",
+  "session_id": "743ffc93-7171-4312-a9d4-1eabf97c6b70",
+  "total_cost_usd": 0.198983,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 13528,
+    "cache_read_input_tokens": 182195,
+    "output_tokens": 2714,
+    "output_tokens_details": {
+      "thinking_tokens": 267
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13528,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 644,
+        "cache_read_input_tokens": 40239,
+        "cache_creation_input_tokens": 1834,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1834
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2714,
+      "cacheReadInputTokens": 182195,
+      "cacheCreationInputTokens": 13528,
+      "webSearchRequests": 0,
+      "costUSD": 0.198983,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 267,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The 500s on POST /checkout came from prices written with a thousands separator, like `\"1,299.00\"`. I fixed the price parser to accept them, added a regression test, and `npm test` passes (7/7).\n\n**What the log shows:** `logs/app.log` has 37 checkout errors, all the same crash: `TypeError: Cannot read properties of null (reading '1') at parseAmount (src/money.js:5)`. The request logged just before each error always has one of three prices: `\"1,299.00\"`, `\"2,450.50\"` or `\"1,005.99\"`. That's why it looked intermittent: only orders with an item priced at 1,000 or more were affected.\n\n**Root cause:** `parseAmount`'s pattern only matched plain digits, so a comma made the match come back empty. The code then read from that empty result without checking, which crashed the request. Its own comment says it should throw `Invalid amount: <input>` for bad input, but it never did.\n\n**Fix (`src/money.js`):**\n- Comma thousands separators in the standard format (`1,299.00`, `1,234,567`) are now accepted, and the commas are stripped before converting to cents.\n- Input that isn't a valid amount now gets the `Invalid amount: <input>` error the comment promises.\n\nMalformed input still comes back as a 500, just with a clear message now. Returning a 400 for it would be a separate change to `src/server.js`.\n\n**Regression test (`test/checkout-thousands.test.js`):**\n- Parses the three prices from the log, plus `1,234,567`.\n- Checks that malformed values like `1,29.00`, `,100`, `12,`, `1.234` and `abc` give the `Invalid amount` error.\n- Sends the exact failing request from the log (`ord_10135`, price `\"2,450.50\"`) through the server and expects a 200 with `totalCents: 245050`.\n\nWith the fix temporarily removed, all 3 new tests fail; with it, everything passes.",
+  "ttft_ms": 3872,
+  "type": "result",
+  "duration_ms": 42163,
+  "uuid": "306a3453-97f5-437d-816a-817f9093e497",
+  "ttft_stream_ms": 2220,
+  "time_to_request_ms": 140,
+  "time_to_request_phases_ms": {
+    "other": 17,
+    "system_prompt": 60,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 12,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 5,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 6,
+    "message_normalization": 3,
+    "client_creation": 3,
+    "request_build": 20
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 39,
+  "time_to_request_cpu_ms": 234,
+  "time_to_request_major_faults": 4388,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 9,
+    "cpu_ms": 31,
+    "major_faults": 433
+  },
+  "first_content_frame_ms": 2220,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

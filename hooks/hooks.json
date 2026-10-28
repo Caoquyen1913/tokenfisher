@@ -1,0 +1,17 @@
+{
+  "description": "tokenfisher: compress noisy Bash/PowerShell output before Claude reads it; the full output is saved under ~/.claude/tokenfisher/raw.",
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash|PowerShell",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/squash-hook.js\"",
+            "timeout": 15
+          }
+        ]
+      }
+    ]
+  }
+}

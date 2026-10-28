@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 13827,
+  "stop_reason": "end_turn",
+  "session_id": "80fe280f-8830-4c28-a952-3142423c4295",
+  "total_cost_usd": 0.08092940000000001,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 11033,
+    "cache_read_input_tokens": 176874,
+    "output_tokens": 1909,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11033,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 309,
+        "cache_read_input_tokens": 38042,
+        "cache_creation_input_tokens": 1929,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1929
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1909,
+      "cacheReadInputTokens": 176874,
+      "cacheCreationInputTokens": 11033,
+      "webSearchRequests": 0,
+      "costUSD": 0.08092940000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`slugify` is implemented in `src/strings.js`, and `npm test` passes all 12 tests (the 2 existing ones plus 10 new).\n\nIt lowercases, strips diacritics (with `đ`/`Đ` mapped to `d`), turns each run of characters outside a-z and 0-9 into one hyphen, and trims leading and trailing hyphens. It cuts to 50 characters and then strips any trailing hyphen, so a slug cut at 50 never ends with one.\n\nThe new tests in `test/strings.test.js` cover:\n- Basic hyphenation and diacritics, including Vietnamese text and `đ`/`Đ`.\n- Runs of symbols, trimming, digits, and empty or symbol-only input.\n- 50-character truncation, with and without a hyphen at the cut point.\n\nThe last test only checks that the result is at most 50 characters and doesn't end with a hyphen, so it is looser than the others.",
+  "ttft_ms": 1535,
+  "type": "result",
+  "duration_ms": 22953,
+  "uuid": "2df43869-7358-43e9-bad4-45f1795111ce",
+  "ttft_stream_ms": 1009,
+  "time_to_request_ms": 170,
+  "time_to_request_phases_ms": {
+    "other": 25,
+    "system_prompt": 79,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 17,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 2,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 10
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 69,
+  "time_to_request_cpu_ms": 218,
+  "time_to_request_major_faults": 5246,
+  "input_attachments_detail": {
+    "slowest_producer": "environment",
+    "slowest_producer_ms": 12,
+    "cpu_ms": 15,
+    "major_faults": 576
+  },
+  "first_content_frame_ms": 1009,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

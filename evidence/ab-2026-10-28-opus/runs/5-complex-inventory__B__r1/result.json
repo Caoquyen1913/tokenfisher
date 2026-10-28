@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 72782,
+  "stop_reason": "end_turn",
+  "session_id": "83aa03fc-867c-434f-9891-2a0a27da15cc",
+  "total_cost_usd": 0.3968682,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 19583,
+    "cache_read_input_tokens": 189621,
+    "output_tokens": 10112,
+    "output_tokens_details": {
+      "thinking_tokens": 465
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19583,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 697,
+        "cache_read_input_tokens": 43387,
+        "cache_creation_input_tokens": 4741,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4741
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 10112,
+      "cacheReadInputTokens": 189621,
+      "cacheCreationInputTokens": 19583,
+      "webSearchRequests": 0,
+      "costUSD": 0.3968682,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 465,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry to the store and the API. `npm test` passes: 177 tests, none failing, including 12 new ones in `test/reservations.test.js`. I didn't change any existing behaviour.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2` from a counter.\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired. `getStock(sku)` still returns physical stock.\n- A reservation counts as expired once `clock() >= creation time + ttlMs`, and the clock option is the only time source.\n- `removeItem` now checks against available stock rather than physical stock.\n- Expired reservations stay in memory so that `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They no longer count against availability. They're only cleared when someone calls `release`, so a service that runs for a long time will slowly collect expired entries.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- New routes: `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id`. Each returns the status codes you listed.\n- A successful confirm returns `{sku, stock}`.\n\n**Tests:** the new tests cover:\n- unique ids and validation of `qty`\n- running out of stock\n- the exact moment a reservation expires\n- confirming, including unknown, released, already-confirmed and expired ids\n- calling `release` twice or with an unknown id\n- `removeItem` refusing reserved stock but allowing it once the reservation expires\n- every status code on each new route\n\n`ttlMs` isn't validated because you didn't specify a rule for it. A reservation with a missing or non-numeric `ttlMs` never expires, so it holds that stock until it is confirmed or released. If you want that rejected, an `INVALID_TTL` error returning 400 would be a small addition.",
+  "ttft_ms": 2390,
+  "type": "result",
+  "duration_ms": 83608,
+  "uuid": "f67ee5f5-5edc-449c-a8c0-a1c19c4ee595",
+  "ttft_stream_ms": 954,
+  "time_to_request_ms": 165,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 77,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 17,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 9,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 59,
+  "time_to_request_cpu_ms": 281,
+  "time_to_request_major_faults": 4034,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 15,
+    "major_faults": 376
+  },
+  "first_content_frame_ms": 954,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

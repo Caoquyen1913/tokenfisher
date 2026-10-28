@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 35918,
+  "stop_reason": "end_turn",
+  "session_id": "b12d3764-cf63-4866-9753-65493e0fc937",
+  "total_cost_usd": 0.2235274,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 13171,
+    "cache_read_input_tokens": 259217,
+    "output_tokens": 3313,
+    "output_tokens_details": {
+      "thinking_tokens": 411
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13171,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 669,
+        "cache_read_input_tokens": 41373,
+        "cache_creation_input_tokens": 343,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 343
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 3313,
+      "cacheReadInputTokens": 259217,
+      "cacheCreationInputTokens": 13171,
+      "webSearchRequests": 0,
+      "costUSD": 0.2235274,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 411,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The 500s came from prices of 1,000 or more written with a comma, like `\"1,299.00\"`. I've fixed the price parser to accept them and added a regression test; `npm test` passes, 8 of 8.\n\n**Root cause:** The log has 37 `POST /checkout 500` errors, and every one has the same stack trace: `TypeError: Cannot read properties of null (reading '1') at parseAmount (src/money.js:5)`. In each case the payload logged just before the error has a price with a thousands separator: `\"1,299.00\"` (15 times), `\"2,450.50\"` (12) or `\"1,005.99\"` (10). No other checkout payload has one. The pattern in `parseAmount` doesn't allow commas, so the match came back empty and the next line crashed. That's why only orders containing a high-priced item failed, which made the errors look intermittent.\n\n**Fix in `src/money.js`:**\n- **Commas allowed:** prices with correctly placed commas now parse (`\"1,299.00\"` becomes 129900 cents, `\"1,234,567.8\"` also works).\n- **Clear error for bad input:** anything that still doesn't parse now raises the `Invalid amount: <input>` error the function's comment already promised, instead of the TypeError.\n\n**Regression test in `test/checkout-thousands.test.js`:**\n- The parser handles the exact prices from the log.\n- Wrongly formatted amounts like `\"1,29.00\"`, `\"12,3456\"` and `\"abc\"` raise the clear error.\n- `checkout` adds up an order containing a comma price correctly.\n- `POST /checkout` with `\"2,450.50\"` returns 200 instead of 500.\n\nI ran the new tests against the old `money.js` and all 4 fail, so they would have caught this bug.\n\nOne thing I didn't change: a price that genuinely can't be parsed still makes `POST /checkout` return a 500. The message is clearer now, but that's bad client input, so a 400 would fit better. That's a small change in `src/server.js` if you want it.",
+  "ttft_ms": 3749,
+  "type": "result",
+  "duration_ms": 52700,
+  "uuid": "32de46a9-6831-4f90-ac56-61ba0a26235b",
+  "ttft_stream_ms": 1959,
+  "time_to_request_ms": 147,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 63,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 12,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 5,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 2,
+    "client_creation": 15,
+    "request_build": 10
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 46,
+  "time_to_request_cpu_ms": 218,
+  "time_to_request_major_faults": 4384,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 8,
+    "cpu_ms": 0,
+    "major_faults": 423
+  },
+  "first_content_frame_ms": 1959,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

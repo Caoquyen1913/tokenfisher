@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 24036,
+  "stop_reason": "end_turn",
+  "session_id": "0075f43e-1eda-4063-b6aa-c20bf579440e",
+  "total_cost_usd": 0.16320800000000002,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 10489,
+    "cache_read_input_tokens": 137220,
+    "output_tokens": 2591,
+    "output_tokens_details": {
+      "thinking_tokens": 153
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10489,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 480,
+        "cache_read_input_tokens": 36736,
+        "cache_creation_input_tokens": 2298,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2298
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2591,
+      "cacheReadInputTokens": 137220,
+      "cacheCreationInputTokens": 10489,
+      "webSearchRequests": 0,
+      "costUSD": 0.16320800000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 153,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added tests to `test/strings.test.js`. `npm test` passes all 15 tests: the 2 that were already there and 13 new ones.\n\n**How it works:**\n1. It lowercases the text and splits accented letters into a base letter plus accent marks, then removes the marks. That turns \"ế\" into \"e\", \"ñ\" into \"n\", and so on.\n2. Some letters don't split that way, so a small lookup table handles them. It covers đ/Đ → `d`, as you asked. I also added a few other Latin letters you didn't list: ø → `o`, ł → `l`, ß → `ss`, æ → `ae`, œ → `oe`, þ → `th`, ð → `d`, and dotless ı → `i`. Without these, those letters would turn into hyphens.\n3. Every run of characters that aren't a-z or 0-9 becomes one hyphen, and leading and trailing hyphens are removed.\n4. The slug is cut to 50 characters, and any hyphen left at the end of the cut is removed.\n\n**The new tests cover:** Vietnamese text, đ/Đ, French and Spanish accents, accented input whose marks are already stored separately, collapsing runs of symbols, digits, leading and trailing junk, empty and symbols-only input, the 50-character limit, a cut that lands on a hyphen, a slug of exactly 50 characters, and a long Vietnamese sentence.",
+  "ttft_ms": 2592,
+  "type": "result",
+  "duration_ms": 32149,
+  "uuid": "a7f09aa6-f112-4a93-8f70-c6a061382052",
+  "ttft_stream_ms": 1190,
+  "time_to_request_ms": 149,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 61,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 13,
+    "input_hooks": 2,
+    "tool_pool_refresh": 3,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 6,
+    "message_normalization": 3,
+    "client_creation": 7,
+    "request_build": 19
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 48,
+  "time_to_request_cpu_ms": 328,
+  "time_to_request_major_faults": 4492,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 9,
+    "cpu_ms": 31,
+    "major_faults": 486
+  },
+  "first_content_frame_ms": 1190,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

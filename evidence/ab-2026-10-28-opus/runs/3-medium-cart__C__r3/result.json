@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 6513,
+  "stop_reason": "end_turn",
+  "session_id": "304d5a7a-be0a-45fa-9f9f-17c4de495561",
+  "total_cost_usd": 0.058872100000000004,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 9547,
+    "cache_read_input_tokens": 140581,
+    "output_tokens": 661,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9547,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 148,
+        "cache_read_input_tokens": 38136,
+        "cache_creation_input_tokens": 349,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 349
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 661,
+      "cacheReadInputTokens": 140581,
+      "cacheCreationInputTokens": 9547,
+      "webSearchRequests": 0,
+      "costUSD": 0.058872100000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`npm test` now passes (243 of 243). There were two bugs in `src/`, and I didn't touch the tests.\n\n- **`src/cart.js`:** tax was applied before the discount. The comment in the file says discounts come off the pre-tax subtotal and tax applies to what's left, so I swapped the order.\n- **`src/discount.js`:** a fixed discount larger than the subtotal produced a negative total. It now bottoms out at zero.",
+  "ttft_ms": 1531,
+  "type": "result",
+  "duration_ms": 20399,
+  "uuid": "f4a5f102-b2c6-494c-aa6c-e155003c8c84",
+  "ttft_stream_ms": 905,
+  "time_to_request_ms": 158,
+  "time_to_request_phases_ms": {
+    "other": 24,
+    "system_prompt": 69,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 18,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 8,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 8,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 54,
+  "time_to_request_cpu_ms": 219,
+  "time_to_request_major_faults": 4816,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 31,
+    "major_faults": 528
+  },
+  "first_content_frame_ms": 905,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 26064,
+  "stop_reason": "end_turn",
+  "session_id": "0a1a01f6-f136-416c-b2db-3c083c3c03d0",
+  "total_cost_usd": 0.1916388,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 12808,
+    "cache_read_input_tokens": 180274,
+    "output_tokens": 2654,
+    "output_tokens_details": {
+      "thinking_tokens": 504
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12808,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 698,
+        "cache_read_input_tokens": 39936,
+        "cache_creation_input_tokens": 1417,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1417
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2654,
+      "cacheReadInputTokens": 180274,
+      "cacheCreationInputTokens": 12808,
+      "webSearchRequests": 0,
+      "costUSD": 0.1916388,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 504,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Checkout was returning 500 whenever an item price had a thousands separator, such as `\"2,450.50\"`. That's fixed, there's a regression test, and `npm test` passes (7/7).\n\n**What the log showed (`logs/app.log`):**\n- All 37 `POST /checkout 500` lines have the same error: `TypeError: Cannot read properties of null (reading '1')`.\n- Only 37 checkout payloads in the log have a comma in the price (`\"1,005.99\"`, `\"1,299.00\"`, `\"2,450.50\"`), and every one of them got a 500.\n- Prices without a comma, like `\"12.50\"` or `\"7\"`, never failed. That's why the errors looked intermittent: they depended on how large the item's price was.\n\n**Root cause (`src/money.js`):** `parseAmount` used the pattern `^(\\d+)(?:\\.(\\d{1,2}))?$`, which doesn't allow commas. When the price didn't match, the code still read from the empty result, which threw the TypeError. The function's own comment says it should throw `Invalid amount: <input>` for bad input, but it never did.\n\n**Fix:** `parseAmount` now accepts properly grouped thousands separators (`1,234,567.89`) and strips the commas before converting. Anything else, including badly grouped input like `1,23.00`, now throws the documented `Invalid amount` error.\n\n**Regression test (`test/checkout-thousands.test.js`):** it checks that comma prices parse correctly, including through `checkout()` with the price that failed in production (`\"1,299.00\"` × 2 = 259800 cents). It also checks that malformed amounts throw `Invalid amount`. The old code would have crashed on these cases.\n\nDecision for you: `src/server.js` still turns any exception into a 500, so a truly invalid price now returns a 500 with a clear message instead of a TypeError. Returning 400 for these would be more correct, but it changes how the API responds, so I left it out. It's a small change to the catch block if you want it.",
+  "ttft_ms": 2174,
+  "type": "result",
+  "duration_ms": 37523,
+  "uuid": "33fafe78-28f8-4dfc-8d5a-911eb0d9abc7",
+  "ttft_stream_ms": 981,
+  "time_to_request_ms": 140,
+  "time_to_request_phases_ms": {
+    "other": 17,
+    "system_prompt": 60,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 12,
+    "input_hooks": 2,
+    "tool_pool_refresh": 2,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 6,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 18
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 39,
+  "time_to_request_cpu_ms": 298,
+  "time_to_request_major_faults": 4199,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 8,
+    "cpu_ms": 16,
+    "major_faults": 377
+  },
+  "first_content_frame_ms": 981,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

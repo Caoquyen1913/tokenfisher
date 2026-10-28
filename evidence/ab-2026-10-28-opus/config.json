@@ -1,0 +1,164 @@
+{
+  "started": "2026-10-28T15:45:28.825Z",
+  "arms": {
+    "A": {
+      "label": "baseline",
+      "describe": "Claude Code defaults (opus): built-in skills and agents, your MCP servers and claude.ai connectors loaded",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "--max-budget-usd",
+        "3",
+        "--model",
+        "opus"
+      ]
+    },
+    "B": {
+      "label": "tokenfisher",
+      "describe": "Same model (opus) + tokenfisher output hook + no MCP/connectors + lean-reading prompt",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "--max-budget-usd",
+        "3",
+        "--model",
+        "opus",
+        "--plugin-dir",
+        "C:\\Data\\Dev\\fix-token",
+        "--strict-mcp-config",
+        "--append-system-prompt",
+        "Token discipline (correctness first, then cost):\n- Locate before reading: Grep/Glob first, then Read only the files and line ranges you need (offset/limit for big files; never read a large log whole).\n- Do not re-read a file you already have in context unless it changed.\n- When output says \"[tokenfisher: N lines omitted …]\", Read the saved file only if the omitted part matters.\n- Run the tests after changing code; finish with a short summary of what changed and how it was verified."
+      ]
+    },
+    "C": {
+      "label": "tokenfisher + sonnet",
+      "describe": "B with model routed to Sonnet",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "--max-budget-usd",
+        "3",
+        "--model",
+        "sonnet",
+        "--plugin-dir",
+        "C:\\Data\\Dev\\fix-token",
+        "--strict-mcp-config",
+        "--append-system-prompt",
+        "Token discipline (correctness first, then cost):\n- Locate before reading: Grep/Glob first, then Read only the files and line ranges you need (offset/limit for big files; never read a large log whole).\n- Do not re-read a file you already have in context unless it changed.\n- When output says \"[tokenfisher: N lines omitted …]\", Read the saved file only if the omitted part matters.\n- Run the tests after changing code; finish with a short summary of what changed and how it was verified."
+      ]
+    },
+    "D": {
+      "label": "tokenfisher + effort medium",
+      "describe": "B (opus) with --effort medium",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "--max-budget-usd",
+        "3",
+        "--model",
+        "opus",
+        "--plugin-dir",
+        "C:\\Data\\Dev\\fix-token",
+        "--strict-mcp-config",
+        "--append-system-prompt",
+        "Token discipline (correctness first, then cost):\n- Locate before reading: Grep/Glob first, then Read only the files and line ranges you need (offset/limit for big files; never read a large log whole).\n- Do not re-read a file you already have in context unless it changed.\n- When output says \"[tokenfisher: N lines omitted …]\", Read the saved file only if the omitted part matters.\n- Run the tests after changing code; finish with a short summary of what changed and how it was verified.",
+        "--effort",
+        "medium"
+      ]
+    }
+  },
+  "tasks": [
+    {
+      "id": "1-easy-range",
+      "level": "easy",
+      "prompt": "range(1, 5) in src/range.js should return [1, 2, 3, 4, 5] (both ends inclusive, as its comment says) but it misses the last number. Fix it. `npm test` runs the tests."
+    },
+    {
+      "id": "2-easy-slugify",
+      "level": "easy",
+      "prompt": "Implement slugify(text) in src/strings.js. Rules: lowercase; remove diacritics so Vietnamese and other Latin text becomes plain ASCII (đ/Đ becomes d); every run of characters that are not a-z or 0-9 becomes a single hyphen; no leading or trailing hyphens; at most 50 characters, and a slug cut at 50 must not end with a hyphen. Add tests for it next to the existing ones; `npm test` runs them."
+    },
+    {
+      "id": "3-medium-cart",
+      "level": "medium",
+      "prompt": "`npm test` is failing in this cart-pricing library. Find and fix the bug(s) in src/. Do not change the tests."
+    },
+    {
+      "id": "4-hard-logs",
+      "level": "hard",
+      "prompt": "Users report intermittent HTTP 500 errors on POST /checkout. The production log is in logs/app.log (large). Find the root cause, fix it in src/, and add a regression test under test/ that would have caught it. `npm test` must pass."
+    },
+    {
+      "id": "5-complex-inventory",
+      "level": "complex",
+      "prompt": "Add stock reservations with expiry to this inventory service. Keep all existing behavior.\n\nStore (src/store.js), using the store's clock option as the only time source:\n1. reserve(sku, qty, ttlMs) returns a unique string id. Throws Error('INVALID_QTY') unless qty is a positive integer, and Error('INSUFFICIENT_STOCK') if qty is more than what is available.\n2. getAvailable(sku) = physical stock minus active reservations. getStock(sku) keeps returning physical stock.\n3. A reservation expires when clock() >= creation time + ttlMs; expired reservations no longer count against availability.\n4. confirm(id) turns a reservation into a sale: physical stock goes down by its qty and the reservation is gone. Throws Error('RESERVATION_NOT_FOUND') for unknown, released or already confirmed ids, and Error('RESERVATION_EXPIRED') for expired ones.\n5. release(id) cancels a reservation; calling it again, or with an unknown id, does nothing.\n6. removeItem(sku, qty) must not remove reserved stock: it throws INSUFFICIENT_STOCK if qty is more than what is available.\n\nAPI (src/api.js):\n7. GET /stock/:sku also returns `available`.\n8. POST /reservations with body {sku, qty, ttlMs} returns 201 {id}; 409 {error: 'INSUFFICIENT_STOCK'}; 400 {error: 'INVALID_QTY'}.\n9. POST /reservations/:id/confirm returns 200 {sku, stock}; 404 {error: 'RESERVATION_NOT_FOUND'}; 410 {error: 'RESERVATION_EXPIRED'}.\n10. DELETE /reservations/:id returns 204.\n\nAdd tests for the new behavior. `npm test` must pass."
+    }
+  ],
+  "reps": 3,
+  "model": "opus",
+  "parallel": 2,
+  "budget": 3,
+  "out": "eval/results/full-2026-10-28",
+  "claude": "claude",
+  "timeoutMin": 20
+}

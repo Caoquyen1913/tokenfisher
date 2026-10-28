@@ -1,0 +1,71 @@
+diff --git a/src/strings.js b/src/strings.js
+index 107e994..e749cdf 100644
+--- a/src/strings.js
++++ b/src/strings.js
+@@ -2,8 +2,18 @@ function capitalize(text) {
+   return text ? text[0].toUpperCase() + text.slice(1) : text;
+ }
+ 
++const SLUG_MAX_LENGTH = 50;
++
+ function slugify(text) {
+-  throw new Error('not implemented');
++  return String(text)
++    .normalize('NFD')
++    .replace(/[̀-ͯ]/g, '') // strip combining diacritical marks
++    .replace(/[đĐ]/g, 'd') // đ has no decomposition, so map it explicitly
++    .toLowerCase()
++    .replace(/[^a-z0-9]+/g, '-')
++    .replace(/^-+|-+$/g, '')
++    .slice(0, SLUG_MAX_LENGTH)
++    .replace(/-+$/, '');
+ }
+ 
+ module.exports = { capitalize, slugify };
+diff --git a/test/strings.test.js b/test/strings.test.js
+index a282d44..f91cf7a 100644
+--- a/test/strings.test.js
++++ b/test/strings.test.js
+@@ -1,5 +1,41 @@
+ const assert = require('assert');
+-const { capitalize } = require('../src/strings');
++const { capitalize, slugify } = require('../src/strings');
+ 
+ test('capitalize first letter', () => assert.strictEqual(capitalize('hello'), 'Hello'));
+ test('capitalize empty string', () => assert.strictEqual(capitalize(''), ''));
++
++test('slugify lowercases and hyphenates', () => assert.strictEqual(slugify('Hello World'), 'hello-world'));
++test('slugify removes Vietnamese diacritics', () =>
++  assert.strictEqual(slugify('Tiếng Việt có dấu'), 'tieng-viet-co-dau'));
++test('slugify maps đ and Đ to d', () => assert.strictEqual(slugify('Đường đi'), 'duong-di'));
++test('slugify removes other Latin diacritics', () =>
++  assert.strictEqual(slugify('Crème Brûlée à São Paulo'), 'creme-brulee-a-sao-paulo'));
++test('slugify handles precomposed and decomposed input alike', () =>
++  assert.strictEqual(slugify('Vie\u0302\u0323t'), slugify('Việt')));
++test('slugify collapses runs of non-alphanumerics', () =>
++  assert.strictEqual(slugify('a  --  b!!!c___d'), 'a-b-c-d'));
++test('slugify keeps digits', () => assert.strictEqual(slugify('Top 10 of 2024'), 'top-10-of-2024'));
++test('slugify trims leading and trailing hyphens', () =>
++  assert.strictEqual(slugify('  ...Hello, world!...  '), 'hello-world'));
++test('slugify of only separators is empty', () => assert.strictEqual(slugify(' !@# '), ''));
++test('slugify of empty string is empty', () => assert.strictEqual(slugify(''), ''));
++test('slugify caps length at 50', () => {
++  const slug = slugify('a'.repeat(80));
++  assert.strictEqual(slug, 'a'.repeat(50));
++});
++test('slugify cut at 50 does not end with a hyphen', () => {
++  // 49 letters then a separator: the 50th char would be a hyphen
++  const slug = slugify('a'.repeat(49) + ' bcd');
++  assert.strictEqual(slug, 'a'.repeat(49));
++});
++test('slugify exactly 50 chars is kept whole', () => {
++  const input = 'x'.repeat(25) + '-' + 'y'.repeat(24);
++  assert.strictEqual(slugify(input), input);
++});
++test('slugify long sentence stays within 50 and ends cleanly', () => {
++  const slug = slugify('Hướng dẫn chi tiết cách cài đặt và cấu hình máy chủ web Nginx trên Ubuntu');
++  assert.ok(slug.length <= 50, `length ${slug.length}`);
++  assert.ok(!slug.endsWith('-'));
++  assert.ok(/^[a-z0-9-]+$/.test(slug));
++  assert.strictEqual(slug, 'huong-dan-chi-tiet-cach-cai-dat-va-cau-hinh-may-ch');
++});

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 31854,
+  "stop_reason": "end_turn",
+  "session_id": "a7084844-6d7a-43e3-ae8b-6b7e2a4740a4",
+  "total_cost_usd": 0.13530540000000002,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 15613,
+    "cache_read_input_tokens": 184534,
+    "output_tokens": 5438,
+    "output_tokens_details": {
+      "thinking_tokens": 212
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15613,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 388,
+        "cache_read_input_tokens": 41547,
+        "cache_creation_input_tokens": 3004,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3004
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 5438,
+      "cacheReadInputTokens": 184534,
+      "cacheCreationInputTokens": 15613,
+      "webSearchRequests": 0,
+      "costUSD": 0.13530540000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 212,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Stock reservations with expiry are in, and `npm test` passes (176 tests, 0 failed).\n\n**Store (`src/store.js`)**\n- `reserve`, `confirm`, `release` and `getAvailable` follow your spec, and `getStock` still returns physical stock.\n- Expiry uses the store's `clock` only, and an expired reservation is kept in memory so `confirm` can report `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`.\n- Expired reservations are never purged, so they accumulate in memory until someone calls `release` on them.\n- `confirm` returns the sku, which the API uses for its response.\n- `removeItem` now checks against available stock, so it can no longer remove reserved units.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` also returns `available`.\n- `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` return the status codes and bodies you listed.\n- `ttlMs` isn't validated, since the spec didn't call for it.\n\nI added 6 store tests and 4 API tests covering the new behavior.",
+  "ttft_ms": 1302,
+  "type": "result",
+  "duration_ms": 40430,
+  "uuid": "6d636631-759a-41c6-aa0d-590497e9ff6e",
+  "ttft_stream_ms": 877,
+  "time_to_request_ms": 164,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 68,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 15,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 8,
+    "message_normalization": 2,
+    "client_creation": 17,
+    "request_build": 10
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 64,
+  "time_to_request_cpu_ms": 297,
+  "time_to_request_major_faults": 4367,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 10,
+    "cpu_ms": 16,
+    "major_faults": 434
+  },
+  "first_content_frame_ms": 878,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

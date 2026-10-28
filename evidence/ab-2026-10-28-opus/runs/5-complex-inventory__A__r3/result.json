@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 47270,
+  "stop_reason": "end_turn",
+  "session_id": "c092fe4f-4995-4417-8ea6-fdd029e62c3c",
+  "total_cost_usd": 0.3220942,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 20930,
+    "cache_read_input_tokens": 156511,
+    "output_tokens": 6166,
+    "output_tokens_details": {
+      "thinking_tokens": 678
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20930,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 731,
+        "cache_read_input_tokens": 43867,
+        "cache_creation_input_tokens": 5599,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 5599
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 6166,
+      "cacheReadInputTokens": 156511,
+      "cacheCreationInputTokens": 20930,
+      "webSearchRequests": 0,
+      "costUSD": 0.3220942,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 678,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry, and `npm test` passes: 178 tests, none failing, including 13 new ones in `test/reservations.test.js`. The existing tests pass unchanged, so existing behavior is kept.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2`, which are unique within a store. Time is read only through the store's `clock` option.\n- A reservation counts against `getAvailable` until `clock() >= creation time + ttlMs`. `getStock` still returns physical stock.\n- `confirm(id)` lowers physical stock, deletes the reservation and returns `{sku, stock}`. It throws `RESERVATION_NOT_FOUND` or `RESERVATION_EXPIRED` as you specified.\n- `release(id)` does nothing for unknown or already released ids, and calling it twice is fine.\n- `removeItem` now checks against available stock, so it can't take reserved units.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- The three reservation routes return the status codes you listed. `DELETE` returns 204 with an empty body.\n\nDecisions for you:\n- **Bad `ttlMs` is rejected.** The spec doesn't cover it, but without a check a missing `ttlMs` would make a reservation that never expires. `reserve` now throws `Error('INVALID_TTL')` unless `ttlMs` is a number ≥ 0, and the API returns 400 for it. If you'd rather not add a new error code, the alternative is to accept any value and let a missing `ttlMs` mean the reservation never expires.\n- **Expired reservations are never cleaned up.** They stay in memory so that `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They no longer count against stock, but in a long-running process they will pile up unless released. Deleting them some time after they expire would fix that, and an id confirmed after that point would get `RESERVATION_NOT_FOUND` instead.",
+  "ttft_ms": 2035,
+  "type": "result",
+  "duration_ms": 56018,
+  "uuid": "38cf5bd4-c03a-4aaa-a516-068f009a4834",
+  "ttft_stream_ms": 861,
+  "time_to_request_ms": 88,
+  "time_to_request_phases_ms": {
+    "other": 17,
+    "system_prompt": 14,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 15,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 38,
+  "time_to_request_cpu_ms": 125,
+  "time_to_request_major_faults": 3164,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 11,
+    "cpu_ms": 31,
+    "major_faults": 441
+  },
+  "first_content_frame_ms": 862,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,4 @@
+{
+  "level": "hard",
+  "prompt": "Users report intermittent HTTP 500 errors on POST /checkout. The production log is in logs/app.log (large). Find the root cause, fix it in src/, and add a regression test under test/ that would have caught it. `npm test` must pass."
+}

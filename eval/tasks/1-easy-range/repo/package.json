@@ -1,0 +1,1 @@
+{ "name": "range-lib", "private": true, "scripts": { "test": "node test/run.js" } }

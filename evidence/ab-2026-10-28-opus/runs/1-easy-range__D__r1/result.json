@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 5279,
+  "stop_reason": "end_turn",
+  "session_id": "e0e568e1-95d7-4843-9276-9ba902271f1e",
+  "total_cost_usd": 0.09092220000000001,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 7823,
+    "cache_read_input_tokens": 100171,
+    "output_tokens": 414,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7823,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 97,
+        "cache_read_input_tokens": 35930,
+        "cache_creation_input_tokens": 438,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 438
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 414,
+      "cacheReadInputTokens": 100171,
+      "cacheCreationInputTokens": 7823,
+      "webSearchRequests": 0,
+      "costUSD": 0.09092220000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`range(1, 5)` now returns `[1, 2, 3, 4, 5]`. The loop in `src/range.js:4` stopped one number early because it used `i < end`. I changed it to `i <= end`, so the last number is included, as the comment says.\n\n`npm test` passes both tests.",
+  "ttft_ms": 1577,
+  "type": "result",
+  "duration_ms": 11125,
+  "uuid": "56e8c12b-45d8-46a2-9fdc-e400d7def929",
+  "ttft_stream_ms": 927,
+  "time_to_request_ms": 98,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 20,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 15,
+    "input_hooks": 2,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 48,
+  "time_to_request_cpu_ms": 141,
+  "time_to_request_major_faults": 5100,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 10,
+    "cpu_ms": 31,
+    "major_faults": 762
+  },
+  "first_content_frame_ms": 927,
+  "queued_turn_count": 0,
+  "result_index": 0
+}
