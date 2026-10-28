@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 38545,
+  "stop_reason": "end_turn",
+  "session_id": "2dd6e861-0572-46e0-9b04-62ec071337de",
+  "total_cost_usd": 0.2500562,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17686,
+    "cache_read_input_tokens": 203441,
+    "output_tokens": 3392,
+    "output_tokens_details": {
+      "thinking_tokens": 520
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17686,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 653,
+        "cache_read_input_tokens": 45762,
+        "cache_creation_input_tokens": 460,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 460
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3392,
+      "cacheReadInputTokens": 203441,
+      "cacheCreationInputTokens": 17686,
+      "webSearchRequests": 0,
+      "costUSD": 0.2500562,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 520,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three reported problems in `src/queue.js` and added 9 regression tests. `npm test` now passes, 11 of 11. On the old code, 7 of the new tests failed: hangs, a crash and wrong counts.\n\n**What was wrong and how I fixed it** (in `next()` and `checkIdle()`):\n\n1. **Hang after a failure:** when a job rejected, the queue called `reject` and nothing else. It never lowered the `running` count or started the next job, so each failure used up a slot for good, and with concurrency 1 the queue stopped dead. Now the clean-up runs in a `.finally()`, so it happens whether the job succeeds or fails.\n2. **Jobs that throw or return plain values:** `fn().then(...)` crashed when a job threw synchronously or returned a non-promise. The contract allows both. Each job's result is now wrapped as `new Promise((r) => r(fn()))`, which turns either case into a normal promise. The job still starts right away when `add()` is called.\n3. **`onIdle()` resolving too early:** it only checked that nothing was waiting, not that nothing was running. It now requires both counts to be zero.\n4. **Only one job after `resume()`:** `next()` started at most one job per call. It's now a loop that fills every free slot. This also fixes refilling after a job finishes.\n\n**New tests** in `test/queue.test.js` cover:\n- async and sync failures not stalling the queue\n- jobs that return plain values\n- `onIdle()` waiting for running jobs, resolving straight away when already idle, and resolving after failures\n- the concurrency limit never being exceeded, including when some jobs fail\n- `resume()` filling all 4 slots\n- `pause()` letting running jobs finish without starting new ones\n\nIf the queue is paused with jobs still waiting, `onIdle()` won't resolve until you call `resume()` and those jobs finish. That's what the contract says (\"nothing is pending\"), but callers may not expect it.",
+  "ttft_ms": 4974,
+  "type": "result",
+  "duration_ms": 65658,
+  "uuid": "bfed0934-81a1-4636-867b-04472fb9eff8",
+  "ttft_stream_ms": 3333,
+  "time_to_request_ms": 112,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 18,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 24,
+    "input_hooks": 4,
+    "tool_pool_refresh": 4,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 10,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 62,
+  "time_to_request_cpu_ms": 156,
+  "time_to_request_major_faults": 2868,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 16,
+    "cpu_ms": 16,
+    "major_faults": 405
+  },
+  "first_content_frame_ms": 3333,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

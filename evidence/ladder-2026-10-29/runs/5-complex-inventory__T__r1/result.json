@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 54265,
+  "stop_reason": "end_turn",
+  "session_id": "2919a936-e5d0-4e12-94af-22fd9cdf3e41",
+  "total_cost_usd": 0.2394,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 11910,
+    "cache_read_input_tokens": 52240,
+    "output_tokens": 6682,
+    "output_tokens_details": {
+      "thinking_tokens": 648
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11910,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 951,
+        "cache_read_input_tokens": 16967,
+        "cache_creation_input_tokens": 3563,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3563
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 6682,
+      "cacheReadInputTokens": 52240,
+      "cacheCreationInputTokens": 11910,
+      "webSearchRequests": 0,
+      "costUSD": 0.2394,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 648,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry to the store and the API, plus tests for them. `npm test` passes all 181 tests, the 165 existing ones and 16 new ones.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2`, which are unique within a store. It checks qty first (`INVALID_QTY`), then whether enough stock is available (`INSUFFICIENT_STOCK`).\n- `getAvailable(sku)` is physical stock minus active reservations, worked out from `clock()` each time it's called. `getStock(sku)` still returns physical stock.\n- A reservation expires once `clock() >= created + ttlMs`. The store's `clock` is the only time source.\n- `confirm(id)` lowers physical stock by the reserved qty, removes the reservation and returns `{sku, stock}`. Confirming the same id again, a released id or an unknown id throws `RESERVATION_NOT_FOUND`.\n- Expired reservations are kept in memory so that `confirm` can tell them apart from unknown ids. Confirming one throws `RESERVATION_EXPIRED` every time, and stock doesn't change.\n- `release(id)` removes the reservation. Calling it again or with an unknown id does nothing.\n- `removeItem` now checks against available stock instead of physical stock, so it can't take reserved units. When nothing is reserved it behaves exactly as before.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- I added `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` with the status codes you listed. An error the API doesn't recognise is re-thrown rather than turned into a response. The existing `POST /stock` route is unchanged.\n\n**Tests (`test/reservations.test.js`)** use a fake clock. They cover:\n- expiry at exactly creation time + `ttlMs`\n- stock freed by expiry or release being usable again\n- each `NOT_FOUND` case and the `EXPIRED` case\n- releasing twice\n- `removeItem` refusing reserved stock\n- reservations being separate per SKU\n- every API status code\n\n**Things you may want to change:**\n- **`ttlMs` isn't validated, because the spec doesn't name an error for it.** A non-numeric `ttlMs` (for example, missing from the request body) makes a reservation that never expires. I can reject it, for example with `INVALID_TTL` and a 400, if you want.\n- **Expired reservations are never cleaned up.** They stay in memory until they're released, so the store grows over a long-running process.\n- **Availability is recalculated on every call.** `getAvailable` scans every stored reservation, which is fine at this scale but would need a per-SKU index if volume grows.",
+  "ttft_ms": 2568,
+  "type": "result",
+  "duration_ms": 64804,
+  "uuid": "3359e81e-5ffa-491e-83d7-37b2ad2d0f29",
+  "ttft_stream_ms": 1289,
+  "time_to_request_ms": 124,
+  "time_to_request_phases_ms": {
+    "other": 18,
+    "system_prompt": 64,
+    "resume_other": 0,
+    "process_user_input": 2,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 5,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 6
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 3854,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 0,
+    "major_faults": 322
+  },
+  "first_content_frame_ms": 1289,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

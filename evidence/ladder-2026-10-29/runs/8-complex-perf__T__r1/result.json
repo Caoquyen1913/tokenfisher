@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 78076,
+  "stop_reason": "end_turn",
+  "session_id": "8632a39e-c2da-490d-87d8-a6815c04c5ac",
+  "total_cost_usd": 0.28327,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 12844,
+    "cache_read_input_tokens": 87050,
+    "output_tokens": 8153,
+    "output_tokens_details": {
+      "thinking_tokens": 2275
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12844,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 906,
+        "cache_read_input_tokens": 20326,
+        "cache_creation_input_tokens": 1138,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1138
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 8153,
+      "cacheReadInputTokens": 87050,
+      "cacheCreationInputTokens": 12844,
+      "webSearchRequests": 0,
+      "costUSD": 0.28327,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2275,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now handles 200,000 orders in about 225 ms on this machine, down from minutes. Its output is the same, ordering included. `npm test` passes all 6 tests.\n\n**Why it was slow:** for every order, the old code did three expensive things:\n- It checked for duplicates with `seen.includes` (a scan of every order ID seen so far).\n- It found the customer with `groups.find` (a scan of every customer).\n- It re-sorted the whole leaderboard.\n\nOn a full day of orders that adds up to billions of operations.\n\n**What changed in `src/report.js`:**\n- Duplicate checks use a `Set` and customer lookups use a `Map`. These compare values the same way the old `includes` did, so the same orders count as duplicates.\n- The leaderboard is sorted once at the end instead of after every order. For normal data this gives exactly the same order. Customers are never fully tied, because the last tie-breaker is the customer ID, which is unique per customer, so there is only one correct order however you reach it.\n- **Fallback for malformed data:** with bad input, two customers can come out fully tied. Examples are a `NaN` customer ID, a mix of number and string IDs, missing timestamps, or non-numeric amounts. In those cases the old result depended on the history of all the repeated sorts. When the new code sees such data, it runs the original algorithm unchanged, so even malformed input gives the same result as before. Real data shouldn't trigger it.\n\n**Tests added:**\n- `test/fixtures/report-reference.js` is an untouched copy of the original `summarize()`, kept as the source of expected output.\n- `test/report-equivalence.test.js` compares the new code against that copy in four ways:\n  - 300 random batches built to produce lots of duplicates, ties in spend and first-order time, refunds, euro rounding, and different limits.\n  - One hand-written case covering each tie-break rule, duplicate IDs, a refunded order delivered again, euro rounding, and customers with no paid spend being left out.\n  - Malformed inputs: `NaN` and mixed-type IDs, missing fields, and `NaN` or `-0` order IDs.\n  - A timing test that requires 200,000 orders to finish in under 1 second.\n\n**Checks:**\n- To confirm the tests catch behavior changes, I temporarily broke the code twice: once by removing the customer-ID tie-break, once by removing duplicate detection. Both times three of the new tests failed. The two original tests passed both times, so they would not have caught it.\n- A separate run of 8,000 orders, printing the full leaderboard rather than the top 10, matched the original exactly.\n\nNothing is committed yet.",
+  "ttft_ms": 2191,
+  "type": "result",
+  "duration_ms": 101838,
+  "uuid": "5cb199d0-32d0-48e1-a7d3-2ecee5029ded",
+  "ttft_stream_ms": 1354,
+  "time_to_request_ms": 211,
+  "time_to_request_phases_ms": {
+    "other": 28,
+    "system_prompt": 121,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 12,
+    "input_hooks": 3,
+    "tool_pool_refresh": 1,
+    "init_message": 10,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 85,
+  "time_to_request_cpu_ms": 298,
+  "time_to_request_major_faults": 4732,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 8,
+    "cpu_ms": 16,
+    "major_faults": 350
+  },
+  "first_content_frame_ms": 1355,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

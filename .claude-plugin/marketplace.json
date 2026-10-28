@@ -7,6 +7,11 @@
       "name": "tokenfisher",
       "source": "./",
       "description": "Measure where Claude Code tokens go, audit startup context, and compress noisy shell output."
+    },
+    {
+      "name": "tokenfisher-max",
+      "source": "./profiles/max",
+      "description": "Opt-in max-diet profile: Sonnet main thread with only the core coding tools, escalation to an Opus subagent for hard work."
     }
   ]
 }

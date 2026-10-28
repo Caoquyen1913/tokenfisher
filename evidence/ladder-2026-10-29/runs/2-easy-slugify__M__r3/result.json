@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 25931,
+  "stop_reason": "end_turn",
+  "session_id": "5749cd2d-e9a9-4b3e-98a0-38aa76e4a9ea",
+  "total_cost_usd": 0.0554683,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7634,
+    "cache_read_input_tokens": 52963,
+    "output_tokens": 1962,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7634,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 288,
+        "cache_read_input_tokens": 15112,
+        "cache_creation_input_tokens": 2765,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2765
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1962,
+      "cacheReadInputTokens": 52963,
+      "cacheCreationInputTokens": 7634,
+      "webSearchRequests": 0,
+      "costUSD": 0.0554683,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`slugify` is implemented in `src/strings.js`, and `npm test` passes all 12 tests (the 2 existing ones plus 10 new).\n\nIt converts `đ`/`Đ` to `d` first, then strips accents and lowercases. Each run of characters outside a-z and 0-9 becomes one hyphen, and leading and trailing hyphens are removed. The result is cut to 50 characters, and any hyphen left at the end of the cut is removed. `null` or `undefined` input returns an empty string.\n\nI added the tests to `test/strings.test.js`. They cover:\n- hyphenation and digits\n- accents, Vietnamese text and `đ`/`Đ`\n- collapsing runs of symbols\n- trimming hyphens\n- empty and symbol-only input\n- the 50-character cut, both when it would leave a trailing hyphen and when it doesn't",
+  "ttft_ms": 4819,
+  "type": "result",
+  "duration_ms": 35637,
+  "uuid": "fb32e370-abe7-4118-bbdc-485039621983",
+  "ttft_stream_ms": 3954,
+  "time_to_request_ms": 186,
+  "time_to_request_phases_ms": {
+    "other": 26,
+    "system_prompt": 100,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 10,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 9,
+    "engine_pickup": 2,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 81,
+  "time_to_request_cpu_ms": 312,
+  "time_to_request_major_faults": 3941,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 16,
+    "major_faults": 156
+  },
+  "first_content_frame_ms": 3954,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

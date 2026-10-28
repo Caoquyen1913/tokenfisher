@@ -1,0 +1,53 @@
+diff --git a/src/strings.js b/src/strings.js
+index 107e994..e15b4a2 100644
+--- a/src/strings.js
++++ b/src/strings.js
+@@ -3,7 +3,15 @@ function capitalize(text) {
+ }
+ 
+ function slugify(text) {
+-  throw new Error('not implemented');
++  return String(text == null ? '' : text)
++    .replace(/[đĐ]/g, 'd')
++    .normalize('NFD')
++    .replace(/[̀-ͯ]/g, '')
++    .toLowerCase()
++    .replace(/[^a-z0-9]+/g, '-')
++    .replace(/^-+|-+$/g, '')
++    .slice(0, 50)
++    .replace(/-+$/, '');
+ }
+ 
+ module.exports = { capitalize, slugify };
+diff --git a/test/strings.test.js b/test/strings.test.js
+index a282d44..c8a435f 100644
+--- a/test/strings.test.js
++++ b/test/strings.test.js
+@@ -1,5 +1,26 @@
+ const assert = require('assert');
+-const { capitalize } = require('../src/strings');
++const { capitalize, slugify } = require('../src/strings');
+ 
+ test('capitalize first letter', () => assert.strictEqual(capitalize('hello'), 'Hello'));
+ test('capitalize empty string', () => assert.strictEqual(capitalize(''), ''));
++
++test('slugify lowercases and hyphenates', () => assert.strictEqual(slugify('Hello World'), 'hello-world'));
++test('slugify removes Vietnamese diacritics', () => assert.strictEqual(slugify('Xin chào Việt Nam'), 'xin-chao-viet-nam'));
++test('slugify maps đ/Đ to d', () => assert.strictEqual(slugify('Đường đi'), 'duong-di'));
++test('slugify strips accents from other Latin text', () => assert.strictEqual(slugify('Crème Brûlée'), 'creme-brulee'));
++test('slugify collapses runs of symbols', () => assert.strictEqual(slugify('a  --  b!!c'), 'a-b-c'));
++test('slugify trims leading and trailing hyphens', () => assert.strictEqual(slugify('  --Hi!--  '), 'hi'));
++test('slugify empty or symbol-only input', () => {
++  assert.strictEqual(slugify(''), '');
++  assert.strictEqual(slugify('!!!'), '');
++});
++test('slugify truncates to 50 chars', () => assert.strictEqual(slugify('a'.repeat(80)), 'a'.repeat(50)));
++test('slugify truncated slug does not end with hyphen', () => {
++  const s = slugify('a'.repeat(49) + ' bbb');
++  assert.strictEqual(s, 'a'.repeat(49));
++  assert.ok(s.length <= 50 && !s.endsWith('-'));
++});
++test('slugify keeps exactly 50 chars ending in a letter', () => {
++  const s = slugify('a'.repeat(48) + ' bb cc');
++  assert.strictEqual(s, 'a'.repeat(48) + '-b');
++});

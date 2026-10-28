@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 16656,
+  "stop_reason": "end_turn",
+  "session_id": "16511df7-5cd4-48c2-b37e-5a1139c89327",
+  "total_cost_usd": 0.0521605,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7011,
+    "cache_read_input_tokens": 45305,
+    "output_tokens": 1957,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7011,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 365,
+        "cache_read_input_tokens": 13104,
+        "cache_creation_input_tokens": 2527,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2527
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1957,
+      "cacheReadInputTokens": 45305,
+      "cacheCreationInputTokens": 7011,
+      "webSearchRequests": 0,
+      "costUSD": 0.0521605,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added 9 tests for it in `test/strings.test.js`. `npm test` passes: 11 tests in total, 0 failed.\n\n- **Diacritics:** `đ` and `Đ` are mapped to `d` first. The text is then decomposed and the combining marks are stripped, so Vietnamese and other Latin accents become plain ASCII.\n- **Separators:** the text is lowercased, and every run of characters outside a-z and 0-9 becomes one hyphen. Leading and trailing hyphens are removed.\n- **Length:** the slug is cut at 50 characters, and any hyphen left at the end of the cut is removed. For example, 49 `a`s followed by a space and `bbb` gives 49 `a`s.\n\nThe tests cover plain lowercasing, Vietnamese and other Latin accents, symbol runs, trimming, input with only symbols (returns an empty string), and the truncation cases.\n\nThe tool reported that `test/strings.test.js` changed on disk after I edited it. The contents match what I wrote, so I left it as is.",
+  "ttft_ms": 2838,
+  "type": "result",
+  "duration_ms": 26232,
+  "uuid": "79650a87-3a05-4039-8ccf-3f3181af7a3e",
+  "ttft_stream_ms": 1991,
+  "time_to_request_ms": 168,
+  "time_to_request_phases_ms": {
+    "other": 29,
+    "system_prompt": 80,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 2,
+    "model_config_wait": 2,
+    "autocompact": 3,
+    "query_setup": 1,
+    "model_gates": 1,
+    "tool_schema_build": 7,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 65,
+  "time_to_request_cpu_ms": 266,
+  "time_to_request_major_faults": 3990,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 30,
+    "major_faults": 297
+  },
+  "first_content_frame_ms": 1991,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

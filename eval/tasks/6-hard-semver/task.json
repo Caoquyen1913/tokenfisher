@@ -1,0 +1,4 @@
+{
+  "level": "hard",
+  "prompt": "Implement satisfies(version, range) in src/semver.js exactly as specified in docs/SPEC.md. Add tests for it; `npm test` must pass."
+}

@@ -1,0 +1,1 @@
+{ "name": "finance-report", "private": true, "scripts": { "test": "node test/run.js" } }

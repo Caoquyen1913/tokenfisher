@@ -1,0 +1,165 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..d4c1454 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -9,17 +9,20 @@ function byRank(a, b) {
+ }
+ 
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  const seen = new Set();
++  const groupsByCustomer = new Map();
+   const groups = [];
+   for (const order of orders) {
+-    // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    // Upstream retries can deliver the same order twice. The first delivery wins,
++    // even if it is refunded and a later copy is not.
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    let group = groupsByCustomer.get(order.customerId);
+     if (!group) {
+       group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groupsByCustomer.set(order.customerId, group);
+       groups.push(group);
+     }
+     group.orderCount++;
+@@ -27,9 +30,10 @@ function summarize(orders, limit = 10) {
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
+   }
++  // Sort once at the end. byRank is a total order over distinct customers, and
++  // Array.prototype.sort is stable, so this matches re-sorting after every order.
++  groups.sort(byRank);
+   return groups
+     .filter((g) => g.spendCents > 0)
+     .slice(0, limit)
+diff --git a/test/legacy-report.js b/test/legacy-report.js
+new file mode 100644
+index 0000000..15bb7d5
+--- /dev/null
++++ b/test/legacy-report.js
+@@ -0,0 +1,39 @@
++// Frozen copy of the original O(n^2) summarize(), kept as the behavioral oracle for report.test.js. Do not edit.
++// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
++const EUR_TO_USD = 1.08;
++
++function byRank(a, b) {
++  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++}
++
++function summarize(orders, limit = 10) {
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    // Keep the leaderboard sorted as we go.
++    groups.sort(byRank);
++  }
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++module.exports = { summarize };
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..fa36f0d 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,72 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++test('first delivery of a duplicated order id wins, even if refunded', () => {
++  const report = summarize([
++    order('o1', 'cus_a', 'refunded', 500, '2026-10-01T10:00:00Z'),
++    order('o1', 'cus_a', 'paid', 500, '2026-10-01T10:00:00Z'),
++    order('o2', 'cus_b', 'paid', 300, '2026-10-01T11:00:00Z'),
++    order('o2', 'cus_b', 'paid', 300, '2026-10-01T11:00:00Z'),
++  ]);
++  assert.deepStrictEqual(report, [{ rank: 1, customerId: 'cus_b', spendCents: 300, orderCount: 1, firstOrderAt: '2026-10-01T11:00:00Z' }]);
++});
++
++test('breaks spend ties by earliest order, then customer id', () => {
++  const report = summarize([
++    order('o1', 'cus_c', 'paid', 100, '2026-10-01T09:00:00Z'),
++    order('o2', 'cus_b', 'paid', 100, '2026-10-01T10:00:00Z'),
++    order('o3', 'cus_a', 'paid', 100, '2026-10-01T10:00:00Z'),
++    order('o4', 'cus_d', 'pending', 999, '2026-10-01T08:00:00Z'),
++    order('o5', 'cus_b', 'pending', 999, '2026-10-01T08:30:00Z'),
++  ]);
++  assert.deepStrictEqual(report.map((r) => [r.customerId, r.orderCount, r.firstOrderAt]), [
++    ['cus_b', 2, '2026-10-01T08:30:00Z'],
++    ['cus_c', 1, '2026-10-01T09:00:00Z'],
++    ['cus_a', 1, '2026-10-01T10:00:00Z'],
++  ]);
++});
++
++// Seeded PRNG so failures are reproducible.
++function rng(seed) {
++  return () => {
++    seed = (seed + 0x6d2b79f5) | 0;
++    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
++    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
++    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
++  };
++}
++
++function randomOrders(rand, n, { customers, ids, amounts, times }) {
++  const statuses = ['paid', 'paid', 'paid', 'refunded', 'pending'];
++  const pick = (k) => Math.floor(rand() * k);
++  return Array.from({ length: n }, () => order(
++    `o${pick(ids)}`, // collisions produce duplicate deliveries
++    `cus_${pick(customers)}`,
++    statuses[pick(statuses.length)],
++    pick(amounts) * 50, // coarse amounts produce spend ties
++    `2026-10-01T${String(pick(times)).padStart(2, '0')}:00:00Z`, // coarse times produce firstOrderAt ties
++    rand() < 0.3 ? 'EUR' : 'USD',
++  ));
++}
++
++test('matches the original implementation exactly on random input', () => {
++  const legacy = require('./legacy-report').summarize;
++  const rand = rng(42);
++  for (let round = 0; round < 300; round++) {
++    const shape = { customers: 1 + Math.floor(rand() * 40), ids: 1 + Math.floor(rand() * 150), amounts: 1 + Math.floor(rand() * 6), times: 1 + Math.floor(rand() * 24) };
++    const orders = randomOrders(rand, Math.floor(rand() * 200), shape);
++    for (const limit of [undefined, 1, 5, 1000]) {
++      assert.deepStrictEqual(summarize(orders, limit), legacy(orders, limit), `round ${round}, limit ${limit}`);
++    }
++  }
++});
++
++test('summarizes 200,000 orders in well under a second', () => {
++  const orders = randomOrders(rng(7), 200000, { customers: 50000, ids: 180000, amounts: 400, times: 24 });
++  const start = process.hrtime.bigint();
++  const report = summarize(orders);
++  const ms = Number(process.hrtime.bigint() - start) / 1e6;
++  assert.strictEqual(report.length, 10);
++  assert.ok(ms < 1000, `took ${ms.toFixed(0)} ms`);
++});

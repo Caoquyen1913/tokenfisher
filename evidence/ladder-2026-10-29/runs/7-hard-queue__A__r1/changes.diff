@@ -1,0 +1,132 @@
+diff --git a/src/queue.js b/src/queue.js
+index 0645d89..3984c02 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -15,19 +15,25 @@ function createQueue({ concurrency = 1 } = {}) {
+   let idleWaiters = [];
+ 
+   function next() {
+-    if (paused || running >= concurrency || pending.length === 0) return;
+-    const { fn, resolve, reject } = pending.shift();
+-    running++;
+-    fn().then((value) => {
+-      running--;
+-      resolve(value);
+-      next();
+-      checkIdle();
+-    }, reject);
++    while (!paused && running < concurrency && pending.length > 0) {
++      const { fn, resolve, reject } = pending.shift();
++      running++;
++      let result;
++      try {
++        result = Promise.resolve(fn());
++      } catch (err) {
++        result = Promise.reject(err);
++      }
++      result.then(resolve, reject).finally(() => {
++        running--;
++        next();
++        checkIdle();
++      });
++    }
+   }
+ 
+   function checkIdle() {
+-    if (pending.length === 0) {
++    if (pending.length === 0 && running === 0) {
+       idleWaiters.forEach((wake) => wake());
+       idleWaiters = [];
+     }
+diff --git a/test/queue.test.js b/test/queue.test.js
+index be49570..c345a7f 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -15,3 +15,87 @@ test('starts jobs in order with concurrency 1', async () => {
+   await Promise.all(['a', 'b', 'c'].map((x) => q.add(async () => { order.push(x); await sleep(1); })));
+   assert.deepStrictEqual(order, ['a', 'b', 'c']);
+ });
++
++test('a rejecting job rejects only its own promise and the queue keeps going', async () => {
++  const q = createQueue();
++  const failing = q.add(async () => { await sleep(1); throw new Error('boom'); });
++  const after = q.add(async () => 'ok');
++  await assert.rejects(failing, /boom/);
++  assert.strictEqual(await after, 'ok');
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('a job that throws synchronously or returns a plain value is handled', async () => {
++  const q = createQueue();
++  const thrown = q.add(() => { throw new Error('sync'); });
++  const plain = q.add(() => 42);
++  await assert.rejects(thrown, /sync/);
++  assert.strictEqual(await plain, 42);
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 0);
++});
++
++test('onIdle waits for running jobs, not just pending ones', async () => {
++  const q = createQueue({ concurrency: 2 });
++  let finished = 0;
++  q.add(async () => { await sleep(20); finished++; });
++  q.add(async () => { await sleep(20); finished++; });
++  await q.onIdle();
++  assert.strictEqual(finished, 2);
++  assert.strictEqual(q.running, 0);
++});
++
++test('onIdle resolves immediately when already idle', async () => {
++  const q = createQueue();
++  await q.onIdle();
++});
++
++test('onIdle resolves after a failing last job', async () => {
++  const q = createQueue();
++  q.add(async () => { throw new Error('x'); }).catch(() => {});
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('never runs more than concurrency jobs at once', async () => {
++  const q = createQueue({ concurrency: 3 });
++  let active = 0;
++  let max = 0;
++  await Promise.all(Array.from({ length: 10 }, () => q.add(async () => {
++    active++;
++    max = Math.max(max, active);
++    await sleep(2);
++    active--;
++  })));
++  assert.strictEqual(max, 3);
++});
++
++test('resume() fills every free slot', async () => {
++  const q = createQueue({ concurrency: 4 });
++  q.pause();
++  const jobs = Array.from({ length: 6 }, () => q.add(() => sleep(10)));
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 6);
++  q.resume();
++  assert.strictEqual(q.running, 4);
++  assert.strictEqual(q.pending, 2);
++  await Promise.all(jobs);
++  await q.onIdle();
++});
++
++test('pause() lets running jobs finish but starts no new ones', async () => {
++  const q = createQueue({ concurrency: 2 });
++  const started = [];
++  const jobs = [1, 2, 3, 4].map((n) => q.add(async () => { started.push(n); await sleep(5); }));
++  q.pause();
++  await Promise.all(jobs.slice(0, 2));
++  await sleep(10);
++  assert.deepStrictEqual(started, [1, 2]);
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 2);
++  q.resume();
++  await Promise.all(jobs);
++  assert.deepStrictEqual(started, [1, 2, 3, 4]);
++});

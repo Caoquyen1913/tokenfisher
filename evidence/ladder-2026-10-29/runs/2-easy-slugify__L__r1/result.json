@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 12112,
+  "stop_reason": "end_turn",
+  "session_id": "21c78ce2-5f4b-424f-bf5e-a963862eb765",
+  "total_cost_usd": 0.0373588,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 5094,
+    "cache_read_input_tokens": 45168,
+    "output_tokens": 1245,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5094,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 288,
+        "cache_read_input_tokens": 12815,
+        "cache_creation_input_tokens": 899,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 899
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1245,
+      "cacheReadInputTokens": 45168,
+      "cacheCreationInputTokens": 5094,
+      "webSearchRequests": 0,
+      "costUSD": 0.0373588,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added five tests for it in `test/strings.test.js`. `npm test` passes: 7 tests, 0 failed.\n\nIt handles `đ` and `Đ` first, since they don't decompose. It then strips diacritics and lowercases. Every run of characters outside a-z and 0-9 becomes one hyphen. Leading hyphens are removed, the result is cut to 50 characters, and any trailing hyphen left by the cut is removed.\n\nThe tests cover basic text, Vietnamese input, trimming and collapsing hyphens, input that reduces to an empty string, and the 50-character cut. For the cut, they check the result never ends with a hyphen.\n\nInput with no a-z or 0-9 characters, like `'!!!'`, returns an empty string. The rules don't say what should happen then, so say if you want a different result.",
+  "ttft_ms": 2173,
+  "type": "result",
+  "duration_ms": 22452,
+  "uuid": "496090a2-3d68-4146-b863-47849adfe052",
+  "ttft_stream_ms": 1349,
+  "time_to_request_ms": 120,
+  "time_to_request_phases_ms": {
+    "other": 18,
+    "system_prompt": 60,
+    "resume_other": 0,
+    "process_user_input": 2,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 19,
+  "time_to_request_cpu_ms": 172,
+  "time_to_request_major_faults": 3859,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 15,
+    "major_faults": 206
+  },
+  "first_content_frame_ms": 1350,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

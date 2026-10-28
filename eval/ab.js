@@ -126,7 +126,8 @@ async function main() {
       failed: g.checks.filter((c) => !c.ok).map((c) => c.name),
     };
     fs.appendFileSync(runsFile, JSON.stringify(rec) + '\n');
-    fs.rmSync(wd, { recursive: true, force: true });
+    // Windows can keep a lock on the temp dir for a moment; a leftover dir must not abort the run.
+    try { fs.rmSync(wd, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); } catch { /* left in %TEMP% */ }
     done++;
     console.log(`[${done}/${jobs.length}] ${name.padEnd(36)} score ${g.passed}/${g.total}  $${(rec.cost_usd ?? NaN).toFixed(3)}  turns ${rec.turns}  ${rec.ok ? '' : `ERROR ${rec.subtype || r.code}`}`);
   }

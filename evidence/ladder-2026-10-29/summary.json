@@ -1,0 +1,127 @@
+{
+  "config": {
+    "model": "opus",
+    "reps": 3,
+    "baseline": "A",
+    "margin": 0.05
+  },
+  "arms": {
+    "A": {
+      "n": 24,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.2816697166666667,
+      "totalCost": 6.760073200000001,
+      "tokens": 216045.29166666666,
+      "output": 4484.458333333333,
+      "turns": 5.875,
+      "errors": 0
+    },
+    "T": {
+      "n": 24,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.19327773333333328,
+      "totalCost": 4.638665599999999,
+      "tokens": 83408.33333333333,
+      "output": 5014.25,
+      "turns": 5.958333333333333,
+      "errors": 0
+    },
+    "S": {
+      "n": 24,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.0740156625,
+      "totalCost": 1.7763759,
+      "tokens": 65196.333333333336,
+      "output": 3277.3333333333335,
+      "turns": 5.958333333333333,
+      "errors": 0
+    },
+    "L": {
+      "n": 24,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.06620345833333333,
+      "totalCost": 1.5888829999999998,
+      "tokens": 63505.416666666664,
+      "output": 2837.6666666666665,
+      "turns": 5.625,
+      "errors": 0
+    },
+    "M": {
+      "n": 24,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.07426754999999999,
+      "totalCost": 1.7824211999999997,
+      "tokens": 81593.58333333333,
+      "output": 3179.625,
+      "turns": 8.041666666666666,
+      "errors": 0
+    }
+  },
+  "comparisons": {
+    "T": {
+      "pairs": 24,
+      "costCut": [
+        0.31381429420024654,
+        0.22024662000129824,
+        0.416042845318503
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "S": {
+      "pairs": 24,
+      "costCut": [
+        0.7372253454296915,
+        0.6905515321040241,
+        0.7870082372348008
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "L": {
+      "pairs": 24,
+      "costCut": [
+        0.7649606811949906,
+        0.7251657999815355,
+        0.8075337090638011
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "M": {
+      "pairs": 24,
+      "costCut": [
+        0.7363310799652288,
+        0.7075783370040619,
+        0.7635431945437524
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    }
+  }
+}

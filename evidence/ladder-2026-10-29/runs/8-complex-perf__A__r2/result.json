@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 60381,
+  "stop_reason": "end_turn",
+  "session_id": "31d679bc-df71-44e5-a00b-281b58857ca3",
+  "total_cost_usd": 0.28474979999999994,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 18916,
+    "cache_read_input_tokens": 159349,
+    "output_tokens": 5076,
+    "output_tokens_details": {
+      "thinking_tokens": 1149
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18916,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 767,
+        "cache_read_input_tokens": 46763,
+        "cache_creation_input_tokens": 689,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 689
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 5076,
+      "cacheReadInputTokens": 159349,
+      "cacheCreationInputTokens": 18916,
+      "webSearchRequests": 0,
+      "costUSD": 0.28474979999999994,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1149,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now handles 200,000 orders in about **170 ms**, down from minutes, and gives the same result. `npm test` passes (4/4).\n\n**Why it was slow.** For every order the old code did three things that get slower as the data grows:\n- `seen.includes(order.id)` searched every order already processed.\n- `groups.find(...)` searched every customer so far.\n- `groups.sort(byRank)` re-sorted the whole leaderboard.\n\n**What I changed in `src/report.js`:**\n- **Duplicate check:** `seen` is now a `Set`, so each check is instant. Duplicates are still recorded before the refund check, so a re-delivered refunded order is still skipped, as before.\n- **Customer lookup:** customers are now found through a `Map` keyed by `customerId`, instead of searching the list each time.\n- **Sorting:** the leaderboard is sorted once at the end instead of after every order. The ranking always puts two different customers in a definite order (by spend, then first order time, then ID), so sorting once gives the same order as re-sorting every time. The spend > 0 filter now runs before the sort, which doesn't affect the result.\n- **Everything else is unchanged:** the ranking function, the EUR rounding, and the output fields and their order.\n- **One edge case:** if a `customerId` were `NaN`, the old code gave every such order its own row (`NaN === NaN` is false), while a `Map` would merge them. I kept the old behavior for that case.\n\n**New tests in `test/report.test.js`:**\n- **Comparison with the old code:** the test file includes a copy of the original implementation. It runs both on 40 seeded random sets of orders with duplicates (some re-delivered with a different status or amount), refunds, pending orders, EUR orders, and many ties in spend and timestamp, at limits 1, 10 and 100. The results must match exactly, including ordering and field order. To check that the test works, I broke the code three ways on purpose (flipped the tie-break, changed how duplicates and refunds interact, and changed the spend filter). Each time this test failed.\n- **Speed:** a 200,000-order run must finish in under 1 second. A very slow machine running the tests could make this test fail even though the code is correct.",
+  "ttft_ms": 8292,
+  "type": "result",
+  "duration_ms": 80029,
+  "uuid": "f9d9a0d3-af9a-4af8-9fa1-7fe2d626de93",
+  "ttft_stream_ms": 6694,
+  "time_to_request_ms": 135,
+  "time_to_request_phases_ms": {
+    "other": 30,
+    "system_prompt": 19,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 24,
+    "input_hooks": 3,
+    "tool_pool_refresh": 9,
+    "init_message": 9,
+    "engine_pickup": 2,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 13,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 85,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 2318,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 16,
+    "cpu_ms": 63,
+    "major_faults": 286
+  },
+  "first_content_frame_ms": 6695,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

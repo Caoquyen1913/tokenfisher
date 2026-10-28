@@ -14,8 +14,8 @@ const banner = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 400" r
   <g font-family="Inter, 'Segoe UI', Helvetica, Arial, sans-serif">
     <text x="392" y="168" font-size="92" font-weight="800" fill="#FFFFFF" letter-spacing="-2">token<tspan fill="#3DD3F5">fisher</tspan></text>
     <text x="396" y="222" font-size="34" fill="#C9D6E6">Catch only the tokens you need.</text>
-    <text x="396" y="290" font-size="26" font-weight="600" fill="#FFC93C">−14.5% cost on the same model · −61.6% with Sonnet routing</text>
-    <text x="396" y="330" font-size="22" fill="#7F96B2">Same quality: 60/60 A/B runs pass hidden tests · token diet for Claude Code</text>
+    <text x="396" y="290" font-size="26" font-weight="600" fill="#FFC93C">−74% cost with tokenfisher-max · −31% on Opus with core tools</text>
+    <text x="396" y="330" font-size="22" fill="#7F96B2">Same quality: 120/120 A/B runs pass hidden tests · token diet for Claude Code</text>
   </g>
 </svg>
 `;

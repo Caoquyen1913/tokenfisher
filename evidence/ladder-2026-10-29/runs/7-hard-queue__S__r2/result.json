@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 18088,
+  "stop_reason": "end_turn",
+  "session_id": "0e2a9dce-f38d-4176-b5a3-c80692a673ed",
+  "total_cost_usd": 0.0559086,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7023,
+    "cache_read_input_tokens": 47006,
+    "output_tokens": 2310,
+    "output_tokens_details": {
+      "thinking_tokens": 233
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7023,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 437,
+        "cache_read_input_tokens": 13965,
+        "cache_creation_input_tokens": 1678,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1678
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2310,
+      "cacheReadInputTokens": 47006,
+      "cacheCreationInputTokens": 7023,
+      "webSearchRequests": 0,
+      "costUSD": 0.0559086,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 233,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js`, and `npm test` passes (7 of 7).\n\n- **Hang after a failure:** a rejected job never decremented `running` and never started the next job. Now success and failure both go through the same cleanup step, which frees the slot, starts the next job and checks for idle. A job that throws synchronously, or returns a plain value, is also handled now. Before, `fn().then` would throw on it and leave the counts wrong.\n- **`onIdle()` resolving early:** it only checked that nothing was pending. It now also requires `running === 0`.\n- **Only one job after `pause()`/`resume()`:** `next()` started at most one job per call. It now loops until the concurrency limit is reached or nothing is left to start, so `resume()` fills every free slot.\n\nI added five regression tests to `test/queue.test.js`:\n- a failing job rejects only itself and the queue keeps going;\n- synchronous throws and plain return values;\n- `onIdle()` waits for running jobs, and resolves immediately when idle;\n- `onIdle()` also resolves after a failing job;\n- `resume()` fills all four slots with concurrency 4.\n\nWhile the queue is paused with jobs still pending, `onIdle()` stays unresolved. The contract says idle means nothing pending and nothing running, so I kept that.",
+  "ttft_ms": 2142,
+  "type": "result",
+  "duration_ms": 28302,
+  "uuid": "04f39cc3-a505-4ad8-acba-dab21bf9b6d3",
+  "ttft_stream_ms": 1747,
+  "time_to_request_ms": 128,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 65,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 7,
+    "input_hooks": 2,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 5,
+    "request_build": 6
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 26,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 3870,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 0,
+    "major_faults": 209
+  },
+  "first_content_frame_ms": 1747,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

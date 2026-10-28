@@ -1,0 +1,67 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "never exceeds concurrency, uses all slots",
+      "ok": true
+    },
+    {
+      "name": "starts jobs in FIFO order",
+      "ok": true
+    },
+    {
+      "name": "a failed job rejects its own promise",
+      "ok": true
+    },
+    {
+      "name": "keeps going after a failure",
+      "ok": true
+    },
+    {
+      "name": "many failures do not leak slots",
+      "ok": true
+    },
+    {
+      "name": "synchronous throw and plain values",
+      "ok": true
+    },
+    {
+      "name": "onIdle waits for running jobs",
+      "ok": true
+    },
+    {
+      "name": "onIdle resolves at once when idle",
+      "ok": true
+    },
+    {
+      "name": "onIdle after failures",
+      "ok": true
+    },
+    {
+      "name": "pause holds new starts, resume fills every slot",
+      "ok": true
+    },
+    {
+      "name": "pause lets running jobs finish",
+      "ok": true
+    },
+    {
+      "name": "regression tests added",
+      "ok": true
+    }
+  ],
+  "passed": 15,
+  "total": 15,
+  "score": 1
+}

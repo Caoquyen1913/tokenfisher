@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 24913,
+  "stop_reason": "end_turn",
+  "session_id": "dbea354a-6d91-4c95-bd94-5b19fdcf7bec",
+  "total_cost_usd": 0.1104104,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 6334,
+    "cache_read_input_tokens": 45232,
+    "output_tokens": 2533,
+    "output_tokens_details": {
+      "thinking_tokens": 162
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6334,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 583,
+        "cache_read_input_tokens": 12863,
+        "cache_creation_input_tokens": 2091,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2091
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2533,
+      "cacheReadInputTokens": 45232,
+      "cacheCreationInputTokens": 6334,
+      "webSearchRequests": 0,
+      "costUSD": 0.1104104,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 162,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've implemented `slugify` in `src/strings.js` and added 11 tests to `test/strings.test.js`. `npm test` passes all 13 tests (the 2 existing ones plus the new 11).\n\nHow it works, in order:\n1. It lowercases the text.\n2. It strips accent marks, so Vietnamese and other accented Latin letters become plain ASCII (`Tiếng Việt` → `tieng-viet`).\n3. It maps `đ` to `d`. Step 2 doesn't handle `đ`, so it needs its own rule. `Đ` is covered too, because step 1 has already lowercased it.\n4. It turns each run of characters other than `a-z` and `0-9` into a single hyphen.\n5. It removes hyphens at the start and end.\n6. It cuts the slug to 50 characters, then removes any hyphen left at the end by the cut.\n\n**One addition you didn't ask for:** besides `đ`, I mapped a few other Latin letters that step 2 also misses: `ð→d`, `ł→l`, `ø→o`, `ß→ss`, `æ→ae`, `œ→oe`, `þ→th`, `ı→i`. Without this they would become hyphens. It's one lookup table in `src/strings.js` if you'd rather remove it.\n\nThe tests cover:\n- lowercasing and turning spaces into hyphens\n- Vietnamese text, including `đ`/`Đ`\n- French, Spanish and Swedish accents\n- collapsing runs of symbols into one hyphen\n- keeping digits\n- trimming hyphens at the start and end\n- empty and symbols-only input\n- the 50-character limit, including a cut that would otherwise end on a hyphen and one that lands mid-word\n\nI haven't committed anything.",
+  "ttft_ms": 2424,
+  "type": "result",
+  "duration_ms": 34333,
+  "uuid": "7a407d0a-f215-431d-9180-5e5250b741fb",
+  "ttft_stream_ms": 1396,
+  "time_to_request_ms": 102,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 25,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 11,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 9,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 52,
+  "time_to_request_cpu_ms": 140,
+  "time_to_request_major_faults": 3271,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 15,
+    "major_faults": 386
+  },
+  "first_content_frame_ms": 1397,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

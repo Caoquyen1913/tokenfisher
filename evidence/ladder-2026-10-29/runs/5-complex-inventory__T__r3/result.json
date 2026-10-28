@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 80047,
+  "stop_reason": "end_turn",
+  "session_id": "576f2eee-6bcb-46ad-851d-bdd84a6940cd",
+  "total_cost_usd": 0.36537099999999995,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 16887,
+    "cache_read_input_tokens": 94935,
+    "output_tokens": 10562,
+    "output_tokens_details": {
+      "thinking_tokens": 939
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16887,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 686,
+        "cache_read_input_tokens": 20647,
+        "cache_creation_input_tokens": 4860,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4860
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 10562,
+      "cacheReadInputTokens": 94935,
+      "cacheCreationInputTokens": 16887,
+      "webSearchRequests": 0,
+      "costUSD": 0.36537099999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 939,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added reservations with expiry to the store and the API, and `npm test` passes: 176 tests, 0 failed. That includes 11 new ones in `test/reservations.test.js`; the existing tests are unchanged and still pass.\n\n**Store (`src/store.js`)**\n- Reservations are kept in memory. Available stock is physical stock minus every unexpired reservation for that SKU. `removeItem` and `reserve` both check available stock, so physical stock can never be pushed below what is reserved.\n- Expiry is checked with the clock passed in when the store is created, and it is checked whenever a reservation is read rather than by a timer. A reservation expires at exactly creation time + `ttlMs`.\n- An expired reservation is kept, not deleted, so `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. It no longer reduces available stock. `confirm` and `release` both delete the reservation, so confirming it again gives `RESERVATION_NOT_FOUND`.\n- Ids look like `r1`, `r2`, and so on. They are unique only within one store instance.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- `POST /reservations` returns 201 with the id, 409 for not enough stock, and 400 for a bad quantity.\n- `POST /reservations/:id/confirm` returns 200, 404 or 410.\n- `DELETE /reservations/:id` always returns 204, with no body.\n\n**Two additions you didn't ask for**\n- **TTL check:** `reserve` throws `Error('INVALID_TTL')` (400 from the API) if `ttlMs` is missing, not a number, NaN or negative. Without this, a missing TTL would create a reservation that never expires. If you'd rather not have a new error code, I can remove it.\n- **Memory:** expired reservations stay in memory until someone confirms or releases them. That's fine at this scale, but a long-running service would eventually need to clean them up.\n\nThe changes aren't committed.",
+  "ttft_ms": 2322,
+  "type": "result",
+  "duration_ms": 90132,
+  "uuid": "7277ad5a-bf10-4e48-b7a2-df285e9cf084",
+  "ttft_stream_ms": 1260,
+  "time_to_request_ms": 135,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 69,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 2,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 35,
+  "time_to_request_cpu_ms": 203,
+  "time_to_request_major_faults": 4471,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 16,
+    "major_faults": 352
+  },
+  "first_content_frame_ms": 1261,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

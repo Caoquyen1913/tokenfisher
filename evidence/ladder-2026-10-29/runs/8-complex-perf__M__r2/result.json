@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 32550,
+  "stop_reason": "end_turn",
+  "session_id": "1d1087cd-4cd3-4517-8a08-e567b08daea1",
+  "total_cost_usd": 0.0783408,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 9322,
+    "cache_read_input_tokens": 74228,
+    "output_tokens": 3361,
+    "output_tokens_details": {
+      "thinking_tokens": 417
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9322,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 518,
+        "cache_read_input_tokens": 18177,
+        "cache_creation_input_tokens": 1388,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1388
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3361,
+      "cacheReadInputTokens": 74228,
+      "cacheCreationInputTokens": 9322,
+      "webSearchRequests": 0,
+      "costUSD": 0.0783408,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 417,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now handles 200,000 orders well inside the 1-second limit, and `npm test` passes (4 of 4).\n\n**Cause.** There were three quadratic costs in `src/report.js`:\n- The duplicate check scanned an array with `seen.includes` for every order.\n- The customer lookup used `groups.find`, which is another linear scan per order.\n- The whole leaderboard was re-sorted after every order.\n\n**Fix.**\n- The duplicate check now uses a `Set`, and the customer lookup uses a `Map`.\n- The sort runs once, after the loop. The sort order breaks ties on `customerId`, so the final order is the same as before.\n- Everything else is untouched: refunded orders still count as seen, EUR rounding, `firstOrderAt`, the `spendCents > 0` filter and the field order in the output.\n\n**Tests added in `test/report.test.js`.**\n- **Behavior check:** it runs 20 random datasets, with tied spends, tied first-order times, duplicate order IDs, refunds, pending orders and EUR orders. For limits of 1, 10 and 100, it compares `summarize` against a copy of the original implementation using `deepStrictEqual`. Any change in output or ordering should fail it.\n- **Speed check:** it runs 200,000 orders and fails if `summarize` takes 1 second or more. I didn't record the actual run time.\n\nOne edge case could differ from the old code. A customer ID of `NaN` would now be grouped together, where the old code made a separate group for each order. I assumed customer IDs are strings.",
+  "ttft_ms": 3740,
+  "type": "result",
+  "duration_ms": 43039,
+  "uuid": "7ffc768b-1f29-445f-8a36-f77db123b5c0",
+  "ttft_stream_ms": 3344,
+  "time_to_request_ms": 176,
+  "time_to_request_phases_ms": {
+    "other": 30,
+    "system_prompt": 76,
+    "resume_other": 1,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 12,
+    "engine_pickup": 2,
+    "message_prep": 2,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 1,
+    "model_gates": 1,
+    "tool_schema_build": 9,
+    "message_normalization": 4,
+    "client_creation": 6,
+    "request_build": 11
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 74,
+  "time_to_request_cpu_ms": 266,
+  "time_to_request_major_faults": 3993,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 0,
+    "major_faults": 158
+  },
+  "first_content_frame_ms": 3345,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

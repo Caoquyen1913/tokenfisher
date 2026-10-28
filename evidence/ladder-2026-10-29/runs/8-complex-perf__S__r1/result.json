@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 35585,
+  "stop_reason": "end_turn",
+  "session_id": "8b4b2427-5596-4f2e-ab83-65fac83049ae",
+  "total_cost_usd": 0.059443,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7298,
+    "cache_read_input_tokens": 47050,
+    "output_tokens": 2553,
+    "output_tokens_details": {
+      "thinking_tokens": 280
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7298,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 451,
+        "cache_read_input_tokens": 14068,
+        "cache_creation_input_tokens": 1850,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1850
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2553,
+      "cacheReadInputTokens": 47050,
+      "cacheCreationInputTokens": 7298,
+      "webSearchRequests": 0,
+      "costUSD": 0.059443,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 280,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` in `src/report.js` now handles 200,000 orders well inside the 1-second target. `npm test` passes, 4 of 4. I didn't time it separately, only through the new test, which asserts under 1 second.\n\n**Cause:** three things scaled with the order count:\n- The duplicate check scanned an array for every order.\n- Each customer lookup scanned the list of groups.\n- The leaderboard was re-sorted after every order.\n\n**Change:**\n- Duplicate checks use a `Set`.\n- Customer lookups use a `Map`.\n- The sort runs once at the end.\n\nThe output is the same because `byRank` ties break on `customerId`, and each group has a unique one. The order is therefore fully determined, and sorting once gives the same result as sorting after every order.\n\n**One edge case:** `Set` and `Map` treat `NaN` ids as equal, while the old `===` lookup never matched them. I didn't treat that as a realistic input.\n\n**Tests added in `test/report.test.js`:**\n- **Reference comparison:** a copy of the original slow algorithm runs against the new one on 3,000 seeded random orders. The data includes duplicate ids, ties, refunds, EUR amounts and several limits. The results must match exactly, including order. Any behavior change should fail this test.\n- **Speed check:** 200,000 orders must finish in under 1 second.",
+  "ttft_ms": 5149,
+  "type": "result",
+  "duration_ms": 48626,
+  "uuid": "a0280a05-2217-4a20-8ca6-2903566eacba",
+  "ttft_stream_ms": 4755,
+  "time_to_request_ms": 81,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 18,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 7,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 6,
+    "engine_pickup": 2,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 6
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 31,
+  "time_to_request_cpu_ms": 108,
+  "time_to_request_major_faults": 3363,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 0,
+    "major_faults": 380
+  },
+  "first_content_frame_ms": 4755,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

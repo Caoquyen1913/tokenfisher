@@ -1,0 +1,4 @@
+{
+  "level": "hard",
+  "prompt": "Users of our job queue (src/queue.js) report three problems: the queue sometimes hangs forever after a job fails, onIdle() sometimes resolves while jobs are still running, and after pause()/resume() it only runs one job at a time even with concurrency 4. Fix the queue so it honours the contract in the comment at the top of src/queue.js, and add regression tests. `npm test` must pass."
+}

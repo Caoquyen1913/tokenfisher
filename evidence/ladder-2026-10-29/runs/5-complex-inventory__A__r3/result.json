@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 59927,
+  "stop_reason": "end_turn",
+  "session_id": "ade7da7d-8717-4ac8-9069-d75161848e75",
+  "total_cost_usd": 0.36846779999999996,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 22357,
+    "cache_read_input_tokens": 203959,
+    "output_tokens": 7439,
+    "output_tokens_details": {
+      "thinking_tokens": 1067
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22357,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 759,
+        "cache_read_input_tokens": 47257,
+        "cache_creation_input_tokens": 3636,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3636
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 7439,
+      "cacheReadInputTokens": 203959,
+      "cacheCreationInputTokens": 22357,
+      "webSearchRequests": 0,
+      "costUSD": 0.36846779999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1067,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added stock reservations with expiry to the store and the API, and `npm test` passes: 182 tests, 0 failed. That includes 17 new tests in `test/reservations.test.js`, and all the existing tests pass unchanged.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2`, which are unique within a store.\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired; `getStock(sku)` still returns physical stock.\n- A reservation expires when `clock() >= creation time + ttlMs`. The store's `clock` is the only time source.\n- `confirm(id)` takes the stock off and deletes the reservation. It returns `{sku, stock}`, which the API uses directly.\n- Expired reservations stay in memory, so `confirm` can tell \"expired\" apart from \"not found\". They no longer count against availability. Nothing ever cleans them up, so a long-running process will slowly grow its memory use.\n- `release(id)` deletes the reservation. Repeating it or passing an unknown id does nothing, and confirming a released id gives `RESERVATION_NOT_FOUND`.\n- `removeItem` now checks the quantity against available stock instead of physical stock.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- `POST /reservations` returns 201, 409 or 400.\n- `POST /reservations/:id/confirm` returns 200, 404 or 410.\n- `DELETE /reservations/:id` returns 204 with no body.\n\n**Decisions for you:**\n- **Invalid `ttlMs`:** your spec didn't cover it, so I added a new error, `INVALID_TTL` (400). Without it, a missing `ttlMs` would make a reservation that never expires and holds stock for good. It's raised when `ttlMs` isn't a positive, finite number. If you'd rather allow `0` (expires immediately) or use a different error code, it's a one-line change.\n- **Unexpected errors:** on the reservation routes, any error other than the expected ones is thrown rather than turned into a 400. This only happens if there's a bug.\n\nI haven't committed anything.",
+  "ttft_ms": 2759,
+  "type": "result",
+  "duration_ms": 69020,
+  "uuid": "f35d7875-6310-4f28-a2f8-885ada8f7545",
+  "ttft_stream_ms": 1306,
+  "time_to_request_ms": 104,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 18,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 19,
+    "input_hooks": 3,
+    "tool_pool_refresh": 3,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 9,
+    "message_normalization": 3,
+    "client_creation": 6,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 54,
+  "time_to_request_cpu_ms": 172,
+  "time_to_request_major_faults": 3383,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 13,
+    "cpu_ms": 47,
+    "major_faults": 441
+  },
+  "first_content_frame_ms": 1306,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

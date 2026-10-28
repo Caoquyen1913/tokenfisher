@@ -47,9 +47,29 @@ run(task.testsFrozen ? 'original tests unchanged' : 'original tests still presen
   }
 });
 
-let hidden = {};
-run('hidden checks load', () => { hidden = require(path.join(taskDir, 'hidden', 'checks.js'))(workdir.replace(/\\/g, '/')); });
-for (const [name, fn] of Object.entries(hidden)) run(name, fn);
+// Hidden checks may be async (concurrency tasks); each gets CHECK_TIMEOUT_MS before it counts as hung.
+const CHECK_TIMEOUT_MS = 10000;
 
-const passed = checks.filter((c) => c.ok).length;
-process.stdout.write(JSON.stringify({ checks, passed, total: checks.length, score: passed / checks.length }));
+async function runAsync(name, fn) {
+  let timer;
+  try {
+    await Promise.race([
+      Promise.resolve().then(fn),
+      new Promise((_, reject) => { timer = setTimeout(() => reject(new Error(`timed out after ${CHECK_TIMEOUT_MS} ms`)), CHECK_TIMEOUT_MS); }),
+    ]);
+    checks.push({ name, ok: true });
+  } catch (e) {
+    checks.push({ name, ok: false, error: String(e && e.message || e).slice(0, 300) });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+(async () => {
+  let hidden = {};
+  run('hidden checks load', () => { hidden = require(path.join(taskDir, 'hidden', 'checks.js'))(workdir.replace(/\\/g, '/')); });
+  for (const [name, fn] of Object.entries(hidden)) await runAsync(name, fn);
+  const passed = checks.filter((c) => c.ok).length;
+  process.stdout.write(JSON.stringify({ checks, passed, total: checks.length, score: passed / checks.length }));
+  process.exit(0);
+})();

@@ -1,0 +1,43 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests unchanged",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "fixed discount before tax",
+      "ok": true
+    },
+    {
+      "name": "fixed discount never below zero",
+      "ok": true
+    },
+    {
+      "name": "fixed discount equal to subtotal",
+      "ok": true
+    },
+    {
+      "name": "percent discount with tax",
+      "ok": true
+    },
+    {
+      "name": "multiple items no discount",
+      "ok": true
+    },
+    {
+      "name": "unknown discount type still throws",
+      "ok": true
+    }
+  ],
+  "passed": 9,
+  "total": 9,
+  "score": 1
+}

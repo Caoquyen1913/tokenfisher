@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 22491,
+  "stop_reason": "end_turn",
+  "session_id": "deb5d1b4-6cea-4b76-b34d-13d0574d1d22",
+  "total_cost_usd": 0.0597762,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 7407,
+    "cache_read_input_tokens": 47222,
+    "output_tokens": 2541,
+    "output_tokens_details": {
+      "thinking_tokens": 239
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 7407,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 542,
+        "cache_read_input_tokens": 14240,
+        "cache_creation_input_tokens": 1787,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1787
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2541,
+      "cacheReadInputTokens": 47222,
+      "cacheCreationInputTokens": 7407,
+      "webSearchRequests": 0,
+      "costUSD": 0.0597762,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 239,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now handles 200,000 orders well under a second. `npm test` passes, with 4 of 4 tests green. I didn't record the exact timing. The timing test only asserts it finishes in under 1000 ms.\n\n**Cause:** there were three quadratic costs in the loop:\n- `seen.includes` scanned an array for every order.\n- `groups.find` scanned the customer list for every order.\n- `groups.sort` re-sorted the whole leaderboard after every order.\n\n**Fix in `src/report.js`:**\n- `seen` is now a `Set` and customers are looked up through a `Map`.\n- The sort runs once after the loop. The ranking uses spend, then first order time, then customer id, and customer ids are distinct, so the order is total. Sorting once gives the same final order as sorting every time.\n\nI haven't compared outputs against the old code on real data.\n\n**Tests added in `test/report.test.js`:**\n- **Equivalence test:** it runs the original implementation (saved as `test/reference-report.js`) and the new one on 3,000 pseudo-random orders. The data includes duplicate ids, refunds, pending orders, EUR amounts and tied spend. It checks the results match exactly, including order, at limits 1, 10 and 500. This is the one that would catch a behavior change.\n- **Speed test:** it runs 200,000 orders and fails if `summarize()` takes 1 second or more.\n\n**Edge case:** a `Set` and a `Map` treat `NaN` as equal to itself, while `===` and `includes` don't, so an order id or customer id of `NaN` would now behave differently. I assumed ids are strings.",
+  "ttft_ms": 1525,
+  "type": "result",
+  "duration_ms": 30693,
+  "uuid": "b2451e0d-856c-4986-bb26-0289a5951f32",
+  "ttft_stream_ms": 1129,
+  "time_to_request_ms": 153,
+  "time_to_request_phases_ms": {
+    "other": 24,
+    "system_prompt": 76,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 2,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 5,
+    "message_normalization": 4,
+    "client_creation": 5,
+    "request_build": 9
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 53,
+  "time_to_request_cpu_ms": 298,
+  "time_to_request_major_faults": 3940,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 15,
+    "major_faults": 138
+  },
+  "first_content_frame_ms": 1130,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

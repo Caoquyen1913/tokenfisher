@@ -10,32 +10,40 @@ Giống chim bói cá: đứng im quan sát, rồi lao xuống đúng một phá
 
 ## Kết quả: cùng prompt, chấm bằng test ẩn, chi phí thật
 
-60 lượt chạy Claude Code headless: 5 task từ dễ tới phức tạp × 4 cấu hình × 3 lần lặp. Chấm bằng bộ test ẩn mà agent không thấy.
+120 lượt chạy Claude Code headless: 8 task từ dễ tới phức tạp × 5 cấu hình × 3 lần lặp. Chấm bằng bộ test ẩn mà agent không thấy. Mỗi bậc thêm đúng một cách cắt so với bậc trước.
 
-| cấu hình | chất lượng (check ẩn đạt) | chi phí so với baseline (CI 95%) |
-|---|---|---|
-| **A** baseline: Claude Code mặc định, Opus | 100% (15/15 lượt) | – |
-| **B** tokenfisher, cùng model (Opus) | 100% (15/15) | **−14,5%** (−0,4% … −27,2%) |
-| **C** tokenfisher + chuyển sang Sonnet | 100% (15/15) | **−61,6%** (−57,0% … −65,7%) |
-| **D** tokenfisher + `--effort medium` | 100% (15/15) | −10,7% (+1,1% … −24,2%), chưa có ý nghĩa thống kê |
+| bậc | cấu hình | chất lượng (check ẩn đạt) | chi phí so với baseline (CI 95%) |
+|---|---|---|---|
+| **A** | baseline: Claude Code mặc định, Opus, đủ mọi tool | 100% (24/24 lượt) | – |
+| **T** | Opus + chỉ 7 tool lõi + bỏ MCP + prompt đọc gọn + hook nén | 100% (24/24) | **−31,4%** (−22,0% … −41,6%) |
+| **S** | T chạy Sonnet | 100% (24/24) | **−73,7%** (−69,1% … −78,7%) |
+| **L** | S với `--effort low` | 100% (24/24) | **−76,5%** (−72,5% … −80,8%) |
+| **M** | plugin `tokenfisher-max` (S + subagent Opus khi khó + scout Haiku), không cần cờ | 100% (24/24) | **−73,6%** (−70,8% … −76,4%) |
 
 Theo mức độ:
 
-| mức | task | B so với A | C so với A |
-|---|---|---|---|
-| easy | sửa off-by-one; viết `slugify` có dấu tiếng Việt | −30,0% | −65,7% |
-| medium | bộ test 243 dòng đang fail, 2 lỗi ở 2 file, cấm sửa test | −27,3% | −67,4% |
-| hard | tìm nguyên nhân lỗi 500 trong log ~5.000 dòng, sửa, thêm test hồi quy | −20,4% | −63,5% |
-| complex | giữ hàng có hết hạn: 10 yêu cầu, store + API | **+13,5%** | −52,5% |
+| mức | task | T so với A | S so với A | L so với A | M so với A |
+|---|---|---|---|---|---|
+| easy | sửa off-by-one; `slugify` có dấu tiếng Việt | −55,5% | −80,8% | −81,9% | −77,3% |
+| medium | bộ test 243 dòng đang fail, 2 lỗi ở 2 file, cấm sửa test | −55,9% | −81,7% | −82,3% | −79,7% |
+| hard | tìm lỗi trong log ~5.000 dòng; semver range theo spec; job queue bị treo và báo idle sớm | −31,7% | −71,3% | −70,8% | −69,6% |
+| complex | giữ hàng có hết hạn (10 yêu cầu); tăng tốc báo cáo O(n²) mà output giống từng byte | −13,7% | −71,8% | −80,3% | −76,0% |
 
 Đọc số liệu một cách thẳng thắn:
 
-- **Không lượt nào giảm chất lượng trong 60 lượt.** Mỗi nhánh có 15 lượt trên repo nhỏ: đây là bằng chứng không thấy suy giảm, chưa phải bảo đảm cho mọi codebase.
-- **Đòn bẩy lớn nhất là chọn model.** Sonnet kèm tokenfisher rẻ hơn 62% và đạt mọi check, từ dễ tới phức tạp.
-- **Giữ nguyên model, tokenfisher tiết kiệm 20–30% ở các task easy tới hard.** Ở task complex lại đắt hơn 13,5%, vì 2/3 lượt viết output gấp đôi. Với 3 lần lặp thì đây nằm trong mức nhiễu, nhưng vẫn ghi đúng như đo được.
-- **Hook nén output không kích hoạt lần nào trong các lượt này**, vì agent tự giới hạn output test. Khoản tiết kiệm của B đến từ prefix nhỏ hơn (bỏ MCP/connector) và prompt đọc gọn. Hook phát huy với log ồn và output test/build: một log 500 test có 1 lỗi giảm từ 14,2k xuống 1,9k ký tự, mà model vẫn trích đúng dòng assertion lỗi.
+- **Không lượt nào giảm chất lượng trong 120 lượt, từ dễ tới phức tạp.** Nhưng cấu hình nào cũng đạt 100%, nghĩa là bộ task vẫn chưa phân biệt được cấu hình mạnh với yếu. Nên hiểu là "không thấy suy giảm trên 8 task này", không phải "không suy giảm ở mọi nơi".
+- **Schema tool là chi phí ẩn.** Khoảng 70% mỗi request là schema của các tool tích hợp mà task code không bao giờ gọi. Chỉ giữ 7 tool lõi đã giảm 31% chi phí Opus, không cần đổi model.
+- **Đòn bẩy lớn nhất là chọn model.** Sonnet với 7 tool lõi rẻ hơn 74% và đạt mọi check ẩn, kể cả 3 task hard và 2 task complex.
+- **Nhánh leo thang lên Opus trong `tokenfisher-max` chưa được dùng lần nào.** Sonnet tự giải quyết mọi task, nên M tốn đúng bằng S. Lưới an toàn đã được nối và xác nhận nạp được, nhưng chưa được chứng minh là kích hoạt đúng lúc hay giúp được gì.
+- **`--effort low` tiết kiệm thêm một chút (−76,5%)**, không đo được ảnh hưởng chất lượng trên các task này.
 
-Mọi lượt chạy đều được công khai, kèm transcript, kết quả chấm và diff, trong [`evidence/ab-2026-10-28-opus/`](evidence/ab-2026-10-28-opus/REPORT.md). Tổng chi phí 60 lượt: $10,49 theo giá list. Các lượt chạy thực hiện trước khi đổi tên dự án, khi còn tên tạm `token-diet`.
+Bằng chứng cho từng lượt (transcript, kết quả chấm, diff): [`evidence/ladder-2026-10-29/`](evidence/ladder-2026-10-29/REPORT.md). Tổng chi phí: $16,55 theo giá list.
+
+Lần eval đầu (60 lượt, 5 task đầu, khi dự án còn tên tạm `token-diet`) nằm ở [`evidence/ab-2026-10-28-opus/`](evidence/ab-2026-10-28-opus/REPORT.md):
+
+- Plugin + bỏ MCP, vẫn đủ tool và vẫn Opus: −14,5%, nhưng riêng task complex lại đắt hơn 13,5%.
+- Chuyển sang Sonnet: −61,6%.
+- Ở lần đó hook nén output không kích hoạt lần nào, vì agent tự giới hạn output test. Hook vẫn có ích với log ồn: một log 500 test có 1 lỗi giảm từ 14,2k xuống 1,9k ký tự, mà model vẫn trích đúng dòng assertion lỗi.
 
 ## Gồm những gì
 
@@ -43,6 +51,7 @@ Mọi lượt chạy đều được công khai, kèm transcript, kết quả ch
 |---|---|
 | **`token-report`** | Đọc transcript Claude Code và cho biết token đi đâu: input, cache write, cache read, output; theo model, theo project, main hay subagent. Có thêm **rent** của từng tool result (chi phí nằm lại trong context), số lần cache bị build lại, các phiên quá dài, kèm gợi ý cụ thể. `--simulate` chạy lại bộ lọc trên output shell cũ để ước tính mức tiết kiệm cho *chính cách bạn làm việc*. |
 | **`token-audit`** | Tách những gì mỗi phiên nạp trước câu hỏi đầu tiên (system prompt, danh sách skill/agent, tên tool và hướng dẫn MCP, output hook, CLAUDE.md/memory). Truy từng mục về file hoặc plugin sinh ra nó, rồi xếp hạng những gì bạn bỏ được. |
+| **`tokenfisher-max`** (plugin bật riêng) | Biến cấu hình rẻ thành mặc định, không cần cờ nào. Luồng chính chạy Sonnet, chỉ có Bash, PowerShell, Read, Edit, Write, Glob, Grep. Subagent `opus-architect` nhận việc khó: thiết kế xuyên module, logic concurrency/bảo mật, spec rắc rối, bug sửa 2 lần chưa xong. `scout` chạy Haiku để đọc file/log lớn. Prefix mỗi request: 13,4k token so với 40,8k. Đánh đổi: phiên đó không có WebFetch/WebSearch, notebook và các tool tích hợp khác; tắt plugin cho những phiên cần chúng. |
 | **squash hook** | Hook `PostToolUse` cho `Bash` và `PowerShell`. Lệnh chạy nguyên vẹn (permission, cwd, exit code không đổi); chỉ phần Claude *đọc* được nén, còn bản đầy đủ được lưu ra file để Claude đọc lại khi cần. |
 | **A/B eval** | Bộ công cụ tạo ra các số liệu trên: prompt cố định, repo mới cho mỗi lượt, bộ chấm ẩn, selftest cho bộ chấm, CI bootstrap ghép cặp, bằng chứng cho từng lượt. Bạn có thể thêm task của mình. |
 
@@ -55,7 +64,19 @@ Trong Claude Code:
 /plugin install tokenfisher@tokenfisher
 ```
 
-Hoặc thử trong một phiên từ bản clone:
+Muốn cấu hình rẻ nhất đã đo, cài thêm profile max. Profile này chuyển mọi phiên sang Sonnet với 7 tool lõi, nên hãy tắt nó bằng `/plugin` khi cần tool web hoặc cần Opus làm model chính:
+
+```
+/plugin install tokenfisher-max@tokenfisher
+```
+
+Cấu hình tương tự cho một phiên mà không cần plugin:
+
+```bash
+claude --model sonnet --tools Bash,PowerShell,Read,Edit,Write,Glob,Grep --strict-mcp-config
+```
+
+Hoặc thử tokenfisher trong một phiên từ bản clone:
 
 ```bash
 git clone https://github.com/Caoquyen1913/tokenfisher.git
@@ -97,6 +118,7 @@ Mỗi lệnh được xếp vào 1 trong 3 nhóm (`lib/squash.js`):
 
 ## Những điều đáng biết (đã đo)
 
+- **Khoảng 70% mỗi request là schema tool.** Trong phiên headless chạy Sonnet, prefix có đủ tool tích hợp là 35,6k token; chỉ giữ 7 tool lõi (`--tools`) còn 11,2k.
 - **Cache ấm làm lệch phép so sánh.** Lần thử đầu, baseline trông rẻ hơn 3 lần chỉ vì prefix của nó trùng với các phiên hằng ngày đã nằm sẵn trong cache. Runner vì vậy warm-up mọi nhánh trước và xáo thứ tự nhánh.
 - **`--strict-mcp-config` thu nhỏ prefix khởi động từ 40,8k xuống 35,2k token** trong phiên headless có connector claude.ai.
 - **`--disable-slash-commands` lại *tăng* prefix lên 47,1k (+6,3k).** Đừng dùng cờ này để tiết kiệm.
@@ -110,7 +132,7 @@ node eval/selftest.js
 ```
 
 ```bash
-node eval/ab.js --arms A,B,C,D --tasks all --reps 3 --parallel 2 --budget 3
+node eval/ab.js --arms A,T,S,L,M --tasks all --reps 3 --parallel 3 --budget 5
 ```
 
 ```bash
@@ -131,7 +153,7 @@ Thêm task: tạo `eval/tasks/<n>-<level>-<name>/` gồm `task.json` (`level`, `
 
 Hoan nghênh issue và PR, nhất là:
 
-- task eval mới, đặc biệt là task lớn và lộn xộn hơn;
+- task eval đủ khó để Sonnet một mình đôi khi trượt, nhờ đó đo được tác dụng của việc leo thang lên Opus;
 - kết quả chạy trên macOS/Linux;
 - bộ lọc thông minh hơn cho các họ lệnh ồn.
 

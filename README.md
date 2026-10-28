@@ -16,32 +16,40 @@ Like a kingfisher, it waits, watches, and dives for the one fish worth catching.
 
 ## Results: same prompts, hidden tests, real cost
 
-60 headless Claude Code runs: 5 tasks from easy to complex × 4 configurations × 3 repetitions, graded by hidden tests the agent never sees.
+120 headless Claude Code runs: 8 tasks from easy to complex × 5 configurations × 3 repetitions, graded by hidden tests the agent never sees. Each step of the ladder adds one cut to the one before it.
 
-| configuration | quality (hidden checks passed) | cost vs baseline (95% CI) |
-|---|---|---|
-| **A** baseline: Claude Code defaults, Opus | 100% (15/15 runs) | – |
-| **B** tokenfisher, same model (Opus) | 100% (15/15) | **−14.5%** (−0.4% … −27.2%) |
-| **C** tokenfisher + Sonnet routing | 100% (15/15) | **−61.6%** (−57.0% … −65.7%) |
-| **D** tokenfisher + `--effort medium` | 100% (15/15) | −10.7% (+1.1% … −24.2%), not significant |
+| step | configuration | quality (hidden checks passed) | cost vs baseline (95% CI) |
+|---|---|---|---|
+| **A** | baseline: Claude Code defaults, Opus, all built-in tools | 100% (24/24 runs) | – |
+| **T** | Opus + only the 7 core coding tools + no MCP + lean prompt + output hook | 100% (24/24) | **−31.4%** (−22.0% … −41.6%) |
+| **S** | T on Sonnet | 100% (24/24) | **−73.7%** (−69.1% … −78.7%) |
+| **L** | S with `--effort low` | 100% (24/24) | **−76.5%** (−72.5% … −80.8%) |
+| **M** | the `tokenfisher-max` plugin (S + Opus escalation agent + Haiku scout), zero flags | 100% (24/24) | **−73.6%** (−70.8% … −76.4%) |
 
 By difficulty:
 
-| level | task | B vs A | C vs A |
-|---|---|---|---|
-| easy | fix an off-by-one; implement `slugify` with Vietnamese diacritics | −30.0% | −65.7% |
-| medium | 243-line failing suite, two bugs across two files, tests frozen | −27.3% | −67.4% |
-| hard | find a 500-error root cause in a ~5,000-line log, fix, add regression test | −20.4% | −63.5% |
-| complex | stock reservations with expiry: 10 requirements across store + API | **+13.5%** | −52.5% |
+| level | tasks | T vs A | S vs A | L vs A | M vs A |
+|---|---|---|---|---|---|
+| easy | off-by-one fix; `slugify` with Vietnamese diacritics | −55.5% | −80.8% | −81.9% | −77.3% |
+| medium | 243-line failing suite, two bugs in two files, tests frozen | −55.9% | −81.7% | −82.3% | −79.7% |
+| hard | root cause from a ~5,000-line log; semver ranges from a spec; a job queue that hangs and reports idle too early | −31.7% | −71.3% | −70.8% | −69.6% |
+| complex | reservations with expiry (10 requirements); make an O(n²) report fast with byte-identical output | −13.7% | −71.8% | −80.3% | −76.0% |
 
 What the numbers say, without spin:
 
-- **No quality loss in any of the 60 runs.** That is 15 runs per arm on small repos: evidence of no regression here, not proof for every codebase.
-- **Model routing is the big lever.** Sonnet with tokenfisher cost 62% less and passed every check, from easy to complex.
-- **On the same model, tokenfisher saved 20–30% on easy to hard tasks.** On the complex task it cost 13.5% more: two of its three runs wrote ~2× more output. With 3 reps that is within noise, but it is reported as measured.
-- **The output-compression hook never fired in these runs.** The agents piped and limited test output themselves, so B's savings came from a smaller prompt prefix (no MCP servers/connectors) and the lean-reading prompt. The hook earns its keep on noisy logs and test/build output: a 500-test failure log went from 14.2k to 1.9k characters, and the model still quoted the failing assertion exactly.
+- **No quality loss in any of the 120 runs, from easy to complex.** But every configuration scored 100%, so the tasks still don't separate a strong config from a weak one. Read it as "no regression found on these 8 tasks", not "no regression anywhere".
+- **Tool schemas were the hidden cost.** About 70% of every request was the schemas of built-in tools a coding task never calls. Keeping only the 7 core tools cut Opus spend by 31%, with no model change.
+- **Model routing is the big lever.** Sonnet with the core tools cost 74% less and passed every hidden check, including the three hard and two complex tasks.
+- **The Opus escalation in `tokenfisher-max` was never used.** Sonnet solved every task alone, so M cost the same as S. The safety net is wired and verified to load, but it has not yet been shown to trigger or to help.
+- **`--effort low` saved a little more (−76.5%) at no measured quality cost** on these tasks.
 
-Every run is published with its transcript, grade and diff in [`evidence/ab-2026-10-28-opus/`](evidence/ab-2026-10-28-opus/REPORT.md). Total spend for the 60 runs: $10.49 at list price. The runs were executed before the project was renamed, under the working name `token-diet`.
+Evidence (transcript, grade and diff for every run): [`evidence/ladder-2026-10-29/`](evidence/ladder-2026-10-29/REPORT.md). Total spend: $16.55 at list price.
+
+An earlier 60-run eval on the first 5 tasks is in [`evidence/ab-2026-10-28-opus/`](evidence/ab-2026-10-28-opus/REPORT.md). It was run under the working name `token-diet`.
+
+- With the plugin and no MCP, but all tools and Opus, cost was −14.5%. That configuration was +13.5% on the complex task.
+- With Sonnet it was −61.6%.
+- In that run the output-compression hook never fired, because the agents limited test output themselves. The hook still pays off on noisy logs: a 500-test log with one failure went from 14.2k to 1.9k characters, and the model still quoted the failing assertion.
 
 ## What's inside
 
@@ -49,6 +57,7 @@ Every run is published with its transcript, grade and diff in [`evidence/ab-2026
 |---|---|
 | **`token-report`** | Reads your Claude Code transcripts and shows where tokens went: input vs cache write vs cache read vs output, by model, by project, main vs subagents. It also shows the **rent** each tool result pays by staying in context, cache rebuilds, and long sessions, with concrete suggestions. `--simulate` replays the compression filter over your past shell output to estimate its savings for *your* workload. |
 | **`token-audit`** | Breaks down what every session loads before your first prompt (system prompt, skill and agent listings, MCP tool names and instructions, hook output, CLAUDE.md/memory). It traces each entry to the file or plugin it came from and ranks what you can remove. |
+| **`tokenfisher-max`** (opt-in plugin) | Makes the cheap configuration the default with zero flags. The main thread runs on Sonnet with only Bash, PowerShell, Read, Edit, Write, Glob and Grep. An `opus-architect` subagent takes cross-module design, concurrency/security logic, tricky specs, and bugs that survived two attempts; a Haiku `scout` digests big files and logs. Prefix per request: 13.4k tokens vs 40.8k. Trade-off: no WebFetch/WebSearch, notebooks or other built-in tools in that session. Disable the plugin for sessions that need them. |
 | **squash hook** | A `PostToolUse` hook for `Bash` and `PowerShell`. The command runs untouched (permissions, cwd and exit code unchanged); only what Claude *reads* is compressed, and the full output is saved to disk so Claude can read it back. |
 | **A/B eval** | The harness behind the numbers above: fixed prompts, fresh repos, hidden graders, a grader self-test, paired bootstrap CIs and per-run evidence. Bring your own tasks. |
 
@@ -61,7 +70,19 @@ In Claude Code:
 /plugin install tokenfisher@tokenfisher
 ```
 
-Or try it for one session from a clone:
+For the cheapest measured setup, also install the max profile. It switches every session to Sonnet with the core tools, so disable it with `/plugin` when you need web tools or Opus as the main model:
+
+```
+/plugin install tokenfisher-max@tokenfisher
+```
+
+The same setup without the plugin, for one session:
+
+```bash
+claude --model sonnet --tools Bash,PowerShell,Read,Edit,Write,Glob,Grep --strict-mcp-config
+```
+
+Or try tokenfisher for one session from a clone:
 
 ```bash
 git clone https://github.com/Caoquyen1913/tokenfisher.git
@@ -120,6 +141,7 @@ Each command is classified (`lib/squash.js`):
 
 These were measured while building the eval:
 
+- **About 70% of each request was tool schemas.** In a headless session, the prefix with all built-in tools was 35.6k tokens on Sonnet; with only the 7 core coding tools (`--tools`) it was 11.2k.
 - **A warm cache skews comparisons.** On the first try, the baseline looked 3× cheaper only because its prompt prefix matched everyday sessions already in cache. The runner now warms every arm first and shuffles arm order.
 - **`--strict-mcp-config` shrank the startup prefix from 40.8k to 35.2k tokens** in a headless session with claude.ai connectors.
 - **`--disable-slash-commands` *grew* it to 47.1k (+6.3k).** Don't use it to save tokens.
@@ -133,7 +155,7 @@ node eval/selftest.js
 ```
 
 ```bash
-node eval/ab.js --arms A,B,C,D --tasks all --reps 3 --parallel 2 --budget 3
+node eval/ab.js --arms A,T,S,L,M --tasks all --reps 3 --parallel 3 --budget 5
 ```
 
 ```bash
@@ -154,7 +176,7 @@ To add a task, create `eval/tasks/<n>-<level>-<name>/` with `task.json` (`level`
 
 Issues and PRs are welcome, especially:
 
-- new eval tasks, mainly bigger and messier ones;
+- new eval tasks hard enough that Sonnet alone sometimes fails, so the Opus escalation can be measured;
 - reports from macOS/Linux;
 - smarter filters for noisy command families.
 

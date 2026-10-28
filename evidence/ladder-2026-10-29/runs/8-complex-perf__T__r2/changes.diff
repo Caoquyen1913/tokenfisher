@@ -1,0 +1,174 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..de548e2 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -8,7 +8,17 @@ function byRank(a, b) {
+   return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
+ }
+ 
+-function summarize(orders, limit = 10) {
++function finish(groups, limit) {
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++// Original algorithm (re-sorts after every order). Only used for malformed input,
++// where byRank is not a strict total order and a single final sort could order ties
++// differently from the incremental sorts.
++function summarizeIncremental(orders, limit) {
+   const seen = [];
+   const groups = [];
+   for (const order of orders) {
+@@ -27,13 +37,50 @@ function summarize(orders, limit = 10) {
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+     groups.sort(byRank);
+   }
+-  return groups
+-    .filter((g) => g.spendCents > 0)
+-    .slice(0, limit)
+-    .map((g, i) => ({ rank: i + 1, ...g }));
++  return finish(groups, limit);
++}
++
++function summarize(orders, limit = 10) {
++  // Set#has and Array#includes both use SameValueZero, so dedup semantics are unchanged.
++  const seen = new Set();
++  const byCustomer = new Map();
++  const groups = [];
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
++    if (order.status === 'refunded') continue;
++
++    // With string ids/timestamps and finite numeric amounts, byRank is a strict total
++    // order, so sorting once at the end equals re-sorting after every order. Anything
++    // else falls back to the original algorithm to keep the output identical.
++    if (typeof order.customerId !== 'string' || typeof order.createdAt !== 'string') {
++      return summarizeIncremental(orders, limit);
++    }
++    if (order.status === 'paid' && !(typeof order.amountCents === 'number' && Number.isFinite(order.amountCents))) {
++      return summarizeIncremental(orders, limit);
++    }
++
++    let group = byCustomer.get(order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      byCustomer.set(order.customerId, group);
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++  }
++  // Sums of finite amounts can still overflow to Infinity, which breaks the comparator.
++  for (const g of groups) {
++    if (!Number.isFinite(g.spendCents)) return summarizeIncremental(orders, limit);
++  }
++  groups.sort(byRank);
++  return finish(groups, limit);
+ }
+ 
+ module.exports = { summarize };
+diff --git a/test/report-equivalence.test.js b/test/report-equivalence.test.js
+new file mode 100644
+index 0000000..61c5484
+--- /dev/null
++++ b/test/report-equivalence.test.js
+@@ -0,0 +1,89 @@
++const assert = require('assert');
++const { summarize } = require('../src/report');
++
++// Verbatim copy of the original summarize(), kept as the reference for exact output.
++function referenceSummarize(orders, limit = 10) {
++  const EUR_TO_USD = 1.08;
++  const byRank = (a, b) => {
++    if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++    if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++    return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++  };
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    groups.sort(byRank);
++  }
++  return groups.filter((g) => g.spendCents > 0).slice(0, limit).map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++// Deterministic PRNG so failures are reproducible.
++function rng(seed) {
++  return () => {
++    seed = (seed * 1664525 + 1013904223) >>> 0;
++    return seed / 2 ** 32;
++  };
++}
++
++function randomOrders(rand, n, customers) {
++  const statuses = ['paid', 'paid', 'paid', 'refunded', 'pending'];
++  const orders = [];
++  for (let i = 0; i < n; i++) {
++    // Reuse ids to exercise dedup (the duplicate may carry a different status).
++    const id = rand() < 0.1 && i > 0 ? orders[Math.floor(rand() * i)].id : `o${i}`;
++    orders.push({
++      id,
++      customerId: `cus_${Math.floor(rand() * customers)}`,
++      status: statuses[Math.floor(rand() * statuses.length)],
++      // Few distinct amounts and timestamps so spend and firstOrderAt ties are common.
++      amountCents: [100, 250, 333, 500][Math.floor(rand() * 4)],
++      currency: rand() < 0.3 ? 'EUR' : 'USD',
++      createdAt: `2026-10-01T${10 + Math.floor(rand() * 3)}:00:00Z`,
++    });
++  }
++  return orders;
++}
++
++test('matches the original implementation exactly on randomized input', () => {
++  const rand = rng(42);
++  for (let round = 0; round < 300; round++) {
++    const orders = randomOrders(rand, 1 + Math.floor(rand() * 120), 1 + Math.floor(rand() * 30));
++    for (const limit of [undefined, 0, 1, 3, 10, 1000]) {
++      assert.deepStrictEqual(summarize(orders, limit), referenceSummarize(orders, limit), `round ${round}, limit ${limit}`);
++    }
++  }
++});
++
++test('matches the original implementation on malformed input', () => {
++  const o = (id, customerId, amountCents, createdAt = 'x') => ({ id, customerId, status: 'paid', amountCents, currency: 'USD', createdAt });
++  const cases = [
++    [o(1, NaN, 5), o(2, NaN, 5)],
++    [o(1, 'a', '500'), o(2, 'b', 90)],
++    [o(1, 'a', undefined), o(2, 'b', 7)],
++    [o(NaN, 'a', 1), o(NaN, 'a', 1)],
++    [o(1, 'a', Infinity), o(2, 'b', Infinity), o(3, 'c', 4)],
++    [o(1, 'a', 3, 5), o(2, 'b', 3, 2)],
++  ];
++  for (const orders of cases) assert.deepStrictEqual(summarize(orders), referenceSummarize(orders));
++});
++
++test('handles 200,000 orders well under a second', () => {
++  const orders = randomOrders(rng(7), 200000, 50000);
++  const start = Date.now();
++  summarize(orders);
++  const ms = Date.now() - start;
++  assert.ok(ms < 1000, `took ${ms} ms`);
++});

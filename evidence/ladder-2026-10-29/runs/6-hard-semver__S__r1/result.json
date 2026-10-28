@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 73264,
+  "stop_reason": "end_turn",
+  "session_id": "d30fe743-11ce-4299-979d-26157f9daca8",
+  "total_cost_usd": 0.16514159999999997,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 15714,
+    "cache_read_input_tokens": 138836,
+    "output_tokens": 8837,
+    "output_tokens_details": {
+      "thinking_tokens": 2198
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15714,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 338,
+        "cache_read_input_tokens": 24067,
+        "cache_creation_input_tokens": 267,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 267
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 8837,
+      "cacheReadInputTokens": 138836,
+      "cacheCreationInputTokens": 15714,
+      "webSearchRequests": 0,
+      "costUSD": 0.16514159999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2198,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`satisfies(version, range)` is now implemented in `src/semver.js` following `docs/SPEC.md`, and `npm test` passes (5 tests, 0 failed).\n\nThe new tests are in `test/semver.test.js`. They cover:\n- every example row in the spec (X-ranges, tilde, caret, hyphen ranges, `||`);\n- the prerelease rule and prerelease ordering;\n- build metadata being ignored;\n- invalid versions, invalid ranges and non-string input, all of which return `false`.\n\nThe spec leaves a few cases open, so I chose these behaviors:\n- **Wildcards with an operator:** `>*` and `<*` match nothing, while `>=*`, `<=*` and `=*` match any non-prerelease version.\n- **Wildcard before a number:** a range like `1.x.3` is invalid and returns `false`.\n- **Empty `||` branch:** an empty branch such as `\"1.2.3 ||\"` counts as \"any version\", following the spec's \"`*` or empty\".",
+  "ttft_ms": 1625,
+  "type": "result",
+  "duration_ms": 91095,
+  "uuid": "7ca1431e-60db-4e37-9ce1-8097eb8ef2ca",
+  "ttft_stream_ms": 1223,
+  "time_to_request_ms": 136,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 64,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 4,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 9,
+    "message_normalization": 3,
+    "client_creation": 5,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 36,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 3793,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 15,
+    "major_faults": 223
+  },
+  "first_content_frame_ms": 1223,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

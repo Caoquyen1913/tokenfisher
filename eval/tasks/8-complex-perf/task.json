@@ -1,0 +1,4 @@
+{
+  "level": "complex",
+  "prompt": "The finance dashboard times out: summarize() in src/report.js takes minutes on a day's orders (about 200,000). Make it fast (well under 1 second for 200,000 orders on a laptop) without changing its output in any way: the dashboard and the finance exports depend on the exact result, including ordering. `npm test` must pass; add a test that would catch a behavior change."
+}

@@ -1,0 +1,131 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..bc4e0e9 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -1,39 +1,39 @@
+-// Top-customers report for the finance dashboard.
+-// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
+-const EUR_TO_USD = 1.08;
+-
+-function byRank(a, b) {
+-  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
+-  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
+-  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
+-}
+-
+-function summarize(orders, limit = 10) {
+-  const seen = [];
+-  const groups = [];
+-  for (const order of orders) {
+-    // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
+-    if (order.status === 'refunded') continue;
+-
+-    let group = groups.find((g) => g.customerId === order.customerId);
+-    if (!group) {
+-      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
+-      groups.push(group);
+-    }
+-    group.orderCount++;
+-    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+-    if (order.status === 'paid') {
+-      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+-    }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
+-  }
+-  return groups
+-    .filter((g) => g.spendCents > 0)
+-    .slice(0, limit)
+-    .map((g, i) => ({ rank: i + 1, ...g }));
+-}
+-
+-module.exports = { summarize };
++// Top-customers report for the finance dashboard.
++// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
++const EUR_TO_USD = 1.08;
++
++function byRank(a, b) {
++  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++}
++
++function summarize(orders, limit = 10) {
++  const seen = new Set();
++  const byCustomer = new Map();
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = byCustomer.get(order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      byCustomer.set(order.customerId, group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++  }
++  // byRank is a total order (customerId breaks ties), so sorting once is equivalent.
++  return [...byCustomer.values()]
++    .sort(byRank)
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++module.exports = { summarize };
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..bf0d183 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,43 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++// Reference: the original (slow) implementation, kept to pin down exact output.
++function referenceSummarize(orders, limit = 10) {
++  const byRank = (a, b) => {
++    if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++    if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++    return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++  };
++  const seen = [];
++  const groups = [];
++  for (const o of orders) {
++    if (seen.includes(o.id)) continue;
++    seen.push(o.id);
++    if (o.status === 'refunded') continue;
++    let g = groups.find((x) => x.customerId === o.customerId);
++    if (!g) { g = { customerId: o.customerId, spendCents: 0, orderCount: 0, firstOrderAt: o.createdAt }; groups.push(g); }
++    g.orderCount++;
++    if (o.createdAt < g.firstOrderAt) g.firstOrderAt = o.createdAt;
++    if (o.status === 'paid') g.spendCents += o.currency === 'EUR' ? Math.round(o.amountCents * 1.08) : o.amountCents;
++    groups.sort(byRank);
++  }
++  return groups.filter((g) => g.spendCents > 0).slice(0, limit).map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++test('matches reference output (duplicates, refunds, ties, EUR)', () => {
++  let seed = 12345;
++  const rnd = (n) => (seed = (seed * 1103515245 + 12345) % 2147483648) % n;
++  const statuses = ['paid', 'paid', 'pending', 'refunded'];
++  const orders = Array.from({ length: 3000 }, () => order(
++    `o${rnd(2500)}`, `cus_${rnd(60)}`, statuses[rnd(4)], rnd(5) * 100,
++    `2026-10-01T${String(rnd(24)).padStart(2, '0')}:00:00Z`, rnd(2) ? 'EUR' : 'USD'));
++  for (const limit of [1, 10, 100]) assert.deepStrictEqual(summarize(orders, limit), referenceSummarize(orders, limit));
++});
++
++test('handles 200,000 orders quickly', () => {
++  const orders = Array.from({ length: 200000 }, (_, i) => order(`o${i}`, `cus_${i % 50000}`, 'paid', 100 + (i % 97), '2026-10-01T10:00:00Z'));
++  const t = Date.now();
++  summarize(orders);
++  assert.ok(Date.now() - t < 1000);
++});

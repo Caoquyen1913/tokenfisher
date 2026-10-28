@@ -1,0 +1,10 @@
+{
+  "name": "tokenfisher-max",
+  "version": "0.1.0",
+  "description": "Opt-in max-diet profile for tokenfisher: the main thread runs on Sonnet with only the core coding tools, and escalates hard work to an Opus subagent.",
+  "author": { "name": "Kawin Tran" },
+  "homepage": "https://github.com/Caoquyen1913/tokenfisher",
+  "repository": "https://github.com/Caoquyen1913/tokenfisher",
+  "license": "MIT",
+  "keywords": ["claude-code", "tokens", "cost", "model-routing"]
+}

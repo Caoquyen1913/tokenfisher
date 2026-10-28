@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 110120,
+  "stop_reason": "end_turn",
+  "session_id": "71fa8c53-65ef-4562-b6a0-bb273577fabf",
+  "total_cost_usd": 0.4338318,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 18786,
+    "cache_read_input_tokens": 128939,
+    "output_tokens": 12885,
+    "output_tokens_details": {
+      "thinking_tokens": 3984
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18786,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 840,
+        "cache_read_input_tokens": 26513,
+        "cache_creation_input_tokens": 893,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 893
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 12885,
+      "cacheReadInputTokens": 128939,
+      "cacheCreationInputTokens": 18786,
+      "webSearchRequests": 0,
+      "costUSD": 0.4338318,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3984,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` following `docs/SPEC.md`, and added `test/semver.test.js`. `npm test` passes: 14 of 14 tests.\n\n**How it works:** each comparator set is turned into a list of plain comparators (`<`, `<=`, `>`, `>=`, `=`). X-ranges, partial versions with operators, tilde, caret and hyphen ranges are all rewritten into these. Matching then checks that a version passes every comparator in a set. A prerelease version must also have a comparator with a prerelease on the same `MAJOR.MINOR.PATCH`. The function catches all errors, so it never throws; bad input returns `false`. Version numbers are stored as BigInts, so very large versions still compare correctly.\n\n**Tests:** they cover every row of every table in the spec, checking the values just inside and just outside each bound. They also cover the prerelease ordering examples, the same-tuple prerelease rule, `||` unions, leading `v`, surrounding whitespace, build metadata, and a list of invalid versions and ranges.\n\nThe spec left some cases open, so I made these choices. Each is easy to change:\n- **Something after a wildcard:** `1.x.3` is treated as `1.x`, which is what node-semver does.\n- **Prerelease on a partial version:** `1.x-beta` and `1.2-beta` are invalid. A prerelease is only allowed on a full `X.Y.Z`.\n- **Operator with no version:** `>=` on its own is invalid.\n- **Wildcard with an operator:** `>*` and `<*` match nothing, while `>=*`, `<=*`, `~*` and `^*` match anything.\n- **Hyphen ranges:** an `A - B` range must be the whole comparator set. Anything else with a standalone `-` is invalid, and `1.2.3-2.3.4` is read as a version with a prerelease.\n- **Numeric prerelease identifiers with leading zeros:** these are accepted (e.g. `1.0.0-01`). The spec only lists the allowed characters; strict semver.org would reject them.\n- **Empty set after `||`:** in a range like `1.x ||`, the empty set matches any version, the same as an empty range.\n\nAt first one of my own tests expected `1.0.0-rc.1` to satisfy `<1.0.0`. The spec's prerelease rule says it doesn't, because that comparator has no prerelease, so I fixed the test.",
+  "ttft_ms": 2593,
+  "type": "result",
+  "duration_ms": 122416,
+  "uuid": "2fdf1282-2bad-463b-8062-4c7e00395842",
+  "ttft_stream_ms": 1355,
+  "time_to_request_ms": 144,
+  "time_to_request_phases_ms": {
+    "other": 21,
+    "system_prompt": 73,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 11,
+    "input_hooks": 3,
+    "tool_pool_refresh": 1,
+    "init_message": 9,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 5
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 42,
+  "time_to_request_cpu_ms": 204,
+  "time_to_request_major_faults": 3978,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 0,
+    "major_faults": 308
+  },
+  "first_content_frame_ms": 1355,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

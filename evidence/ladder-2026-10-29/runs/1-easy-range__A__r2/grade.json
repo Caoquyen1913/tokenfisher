@@ -1,0 +1,39 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "range(1, 5)",
+      "ok": true
+    },
+    {
+      "name": "single element range(0, 0)",
+      "ok": true
+    },
+    {
+      "name": "step lands on end range(2, 10, 2)",
+      "ok": true
+    },
+    {
+      "name": "step skips end range(1, 6, 2)",
+      "ok": true
+    },
+    {
+      "name": "negative numbers range(-2, 1)",
+      "ok": true
+    }
+  ],
+  "passed": 8,
+  "total": 8,
+  "score": 1
+}

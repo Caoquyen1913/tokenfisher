@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 18117,
+  "stop_reason": "end_turn",
+  "session_id": "1736a5ef-e3ba-4e96-b2e1-72e4bee72281",
+  "total_cost_usd": 0.04625749999999999,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 6311,
+    "cache_read_input_tokens": 60135,
+    "output_tokens": 1498,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6311,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 392,
+        "cache_read_input_tokens": 14183,
+        "cache_creation_input_tokens": 748,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 748
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 1498,
+      "cacheReadInputTokens": 60135,
+      "cacheCreationInputTokens": 6311,
+      "webSearchRequests": 0,
+      "costUSD": 0.04625749999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "**Root cause:** `parseAmount` in `src/money.js` rejected prices with thousands separators, such as `\"2,450.50\"` and `\"1,299.00\"`. Its regex failed to match, `match()` returned `null`, and the next line threw `TypeError: Cannot read properties of null (reading '1')`. That surfaced as a 500. I checked the log: all 37 of the `POST /checkout` 500s came from orders with comma-grouped prices.\n\n**Fix (`src/money.js`):**\n- It now accepts comma-grouped prices (`1,299.00` and the like).\n- Input that isn't an amount now throws the documented `Invalid amount: <input>` error instead of a `TypeError`.\n\n**Tests (`test/money.test.js`):** I added one regression test covering `2,450.50`, `1,299.00` and a full checkout with a comma-grouped price. I added a second test that invalid input throws the descriptive error. `npm test` passes (6 of 6).\n\nI didn't change how the server turns `Invalid amount` errors into responses. Genuinely bad input may still produce a 500 rather than a 400, depending on `src/server.js`. I didn't open that file.",
+  "ttft_ms": 2322,
+  "type": "result",
+  "duration_ms": 29505,
+  "uuid": "197cc28f-ee12-42d3-a9c1-5a34cee050b8",
+  "ttft_stream_ms": 1163,
+  "time_to_request_ms": 122,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 61,
+    "resume_other": 1,
+    "process_user_input": 2,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 5
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 21,
+  "time_to_request_cpu_ms": 219,
+  "time_to_request_major_faults": 3798,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 0,
+    "major_faults": 322
+  },
+  "first_content_frame_ms": 1164,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

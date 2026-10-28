@@ -1,0 +1,135 @@
+diff --git a/src/queue.js b/src/queue.js
+index 0645d89..929909c 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -14,20 +14,22 @@ function createQueue({ concurrency = 1 } = {}) {
+   let paused = false;
+   let idleWaiters = [];
+ 
++  // Start as many pending jobs as there are free slots.
+   function next() {
+-    if (paused || running >= concurrency || pending.length === 0) return;
+-    const { fn, resolve, reject } = pending.shift();
+-    running++;
+-    fn().then((value) => {
+-      running--;
+-      resolve(value);
+-      next();
+-      checkIdle();
+-    }, reject);
++    while (!paused && running < concurrency && pending.length > 0) {
++      const { fn, resolve, reject } = pending.shift();
++      running++;
++      // Wrapping in a promise constructor turns plain values and synchronous throws into a promise.
++      new Promise((r) => r(fn())).then(resolve, reject).finally(() => {
++        running--;
++        next();
++        checkIdle();
++      });
++    }
+   }
+ 
+   function checkIdle() {
+-    if (pending.length === 0) {
++    if (pending.length === 0 && running === 0) {
+       idleWaiters.forEach((wake) => wake());
+       idleWaiters = [];
+     }
+diff --git a/test/queue.test.js b/test/queue.test.js
+index be49570..9448a23 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -15,3 +15,93 @@ test('starts jobs in order with concurrency 1', async () => {
+   await Promise.all(['a', 'b', 'c'].map((x) => q.add(async () => { order.push(x); await sleep(1); })));
+   assert.deepStrictEqual(order, ['a', 'b', 'c']);
+ });
++
++test('a failing job rejects its own promise and the queue keeps going', async () => {
++  const q = createQueue({ concurrency: 1 });
++  const failing = q.add(async () => { await sleep(1); throw new Error('boom'); });
++  const after = q.add(async () => 'ok');
++  await assert.rejects(failing, /boom/);
++  assert.strictEqual(await after, 'ok');
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 0);
++});
++
++test('handles synchronous throws and plain return values', async () => {
++  const q = createQueue({ concurrency: 1 });
++  const thrower = q.add(() => { throw new Error('sync'); });
++  const plain = q.add(() => 42);
++  await assert.rejects(thrower, /sync/);
++  assert.strictEqual(await plain, 42);
++  await q.onIdle();
++});
++
++test('onIdle waits for running jobs to finish', async () => {
++  const q = createQueue({ concurrency: 2 });
++  let done = 0;
++  q.add(async () => { await sleep(20); done++; });
++  q.add(async () => { await sleep(5); done++; });
++  q.add(async () => { await sleep(5); done++; });
++  await q.onIdle();
++  assert.strictEqual(done, 3);
++  assert.strictEqual(q.running, 0);
++});
++
++test('onIdle waits for jobs that fail', async () => {
++  const q = createQueue({ concurrency: 2 });
++  q.add(async () => { await sleep(10); throw new Error('x'); }).catch(() => {});
++  q.add(async () => { await sleep(1); throw new Error('y'); }).catch(() => {});
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('onIdle resolves immediately when already idle', async () => {
++  const q = createQueue();
++  await q.onIdle();
++});
++
++test('never exceeds concurrency', async () => {
++  const q = createQueue({ concurrency: 3 });
++  let active = 0;
++  let peak = 0;
++  const jobs = Array.from({ length: 10 }, () => q.add(async () => {
++    active++; peak = Math.max(peak, active);
++    await sleep(5);
++    active--;
++  }));
++  await Promise.all(jobs);
++  assert.strictEqual(peak, 3);
++});
++
++test('resume() fills all free slots', async () => {
++  const q = createQueue({ concurrency: 4 });
++  q.pause();
++  let active = 0;
++  let peak = 0;
++  const jobs = Array.from({ length: 8 }, () => q.add(async () => {
++    active++; peak = Math.max(peak, active);
++    await sleep(10);
++    active--;
++  }));
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 8);
++  q.resume();
++  assert.strictEqual(q.running, 4);
++  await Promise.all(jobs);
++  assert.strictEqual(peak, 4);
++});
++
++test('pause() lets running jobs finish but starts no new ones', async () => {
++  const q = createQueue({ concurrency: 2 });
++  const started = [];
++  const jobs = [1, 2, 3, 4].map((n) => q.add(async () => { started.push(n); await sleep(5); }));
++  q.pause();
++  await Promise.all(jobs.slice(0, 2));
++  await sleep(10);
++  assert.deepStrictEqual(started, [1, 2]);
++  assert.strictEqual(q.pending, 2);
++  assert.strictEqual(q.running, 0);
++  q.resume();
++  await Promise.all(jobs);
++  assert.deepStrictEqual(started, [1, 2, 3, 4]);
++});

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 16481,
+  "stop_reason": "end_turn",
+  "session_id": "3296c19c-a113-45ca-b872-6961594347bb",
+  "total_cost_usd": 0.050098100000000007,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 6874,
+    "cache_read_input_tokens": 45561,
+    "output_tokens": 1803,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6874,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 262,
+        "cache_read_input_tokens": 13122,
+        "cache_creation_input_tokens": 2372,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2372
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1803,
+      "cacheReadInputTokens": 45561,
+      "cacheCreationInputTokens": 6874,
+      "webSearchRequests": 0,
+      "costUSD": 0.050098100000000007,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`slugify` is now implemented in `src/strings.js`, and `npm test` passes all 10 tests (the 2 existing ones plus 8 new ones).\n\nIt strips diacritics and turns `đ`/`Đ` into `d`. It lowercases, turns each run of characters outside a-z and 0-9 into one hyphen, and trims leading hyphens. It then cuts to 50 characters and removes any trailing hyphen, so a cut can't leave one at the end.\n\nThe new tests are in `test/strings.test.js`. They cover:\n- basic input\n- Vietnamese text including `đ`\n- other Latin accents\n- runs of symbols\n- trimming\n- input with no letters or digits, which gives an empty string\n- the 50-character cut, including the case where the cut lands on a hyphen",
+  "ttft_ms": 2284,
+  "type": "result",
+  "duration_ms": 24467,
+  "uuid": "32019c2f-9309-4986-b766-fe93111d1421",
+  "ttft_stream_ms": 1547,
+  "time_to_request_ms": 132,
+  "time_to_request_phases_ms": {
+    "other": 18,
+    "system_prompt": 71,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 32,
+  "time_to_request_cpu_ms": 203,
+  "time_to_request_major_faults": 3925,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 31,
+    "major_faults": 300
+  },
+  "first_content_frame_ms": 1548,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

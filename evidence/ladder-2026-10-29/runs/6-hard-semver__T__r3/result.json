@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 93159,
+  "stop_reason": "end_turn",
+  "session_id": "fdaf0e90-cea9-4f4c-b570-afe276075ac5",
+  "total_cost_usd": 0.36878679999999997,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 16493,
+    "cache_read_input_tokens": 79214,
+    "output_tokens": 11048,
+    "output_tokens_details": {
+      "thinking_tokens": 2890
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16493,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 728,
+        "cache_read_input_tokens": 24390,
+        "cache_creation_input_tokens": 723,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 723
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 11048,
+      "cacheReadInputTokens": 79214,
+      "cacheCreationInputTokens": 16493,
+      "webSearchRequests": 0,
+      "costUSD": 0.36878679999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2890,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` and added tests in `test/semver.test.js`. `npm test` passes: 65 passed, 0 failed.\n\n**What's covered:**\n- **Versions:** the strict `MAJOR.MINOR.PATCH` format with optional prerelease and build, a leading `v`, and surrounding whitespace. Version numbers are stored as BigInt, so very large numbers still compare correctly.\n- **Ordering:** follows the spec's rules for prereleases, including that numeric parts sort below text parts and that fewer parts sorts lower.\n- **Ranges:** all five operators (with or without a space before the version), wildcard and partial versions, tilde, caret, hyphen ranges, and `||`.\n- **Prerelease rule:** a prerelease version only matches if the same comparator set has a prerelease on the same `MAJOR.MINOR.PATCH`. Because of this, `1.3.0-beta` doesn't match `~1.2.3` and `1.2.4-beta` doesn't match `^1.2.3`.\n- **Invalid input:** any invalid version or range, including non-strings, returns `false`. The whole function is also wrapped in a try/catch so it can't throw.\n\n**Decisions where the spec is silent** (each has a test pinning it down):\n- `>*` and `<*` match nothing; `>=*`, `<=*` and `=*` match anything.\n- An empty set inside `||` (for example `1.x ||`) matches any version, the same as an empty range.\n- A number after a wildcard (`1.x.3`) is invalid, and so is a prerelease on a partial version (`1.2-beta`).\n- A space is allowed only after `<`, `<=`, `>`, `>=` and `=`, which the spec names explicitly. `~ 1.2.3` and `^ 1.2.3` are treated as invalid.\n- Numeric prerelease parts with leading zeros (like `alpha.01`) are accepted, because the spec doesn't forbid them.\n- A hyphen range (`A - B`) can appear alongside other comparators in the same set.",
+  "ttft_ms": 2338,
+  "type": "result",
+  "duration_ms": 102626,
+  "uuid": "37a0f2a5-9d9e-424d-8da8-d94b9326b434",
+  "ttft_stream_ms": 1105,
+  "time_to_request_ms": 134,
+  "time_to_request_phases_ms": {
+    "other": 21,
+    "system_prompt": 68,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 9,
+    "input_hooks": 2,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 3,
+    "message_normalization": 3,
+    "client_creation": 3,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 32,
+  "time_to_request_cpu_ms": 250,
+  "time_to_request_major_faults": 5048,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 0,
+    "major_faults": 456
+  },
+  "first_content_frame_ms": 1105,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 86989,
+  "stop_reason": "end_turn",
+  "session_id": "3f18f379-cc35-47f4-8a6c-b44606c0fa8a",
+  "total_cost_usd": 0.46760359999999995,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 25882,
+    "cache_read_input_tokens": 212738,
+    "output_tokens": 10898,
+    "output_tokens_details": {
+      "thinking_tokens": 931
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25882,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 728,
+        "cache_read_input_tokens": 49498,
+        "cache_creation_input_tokens": 4920,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4920
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 10898,
+      "cacheReadInputTokens": 212738,
+      "cacheCreationInputTokens": 25882,
+      "webSearchRequests": 0,
+      "costUSD": 0.46760359999999995,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 931,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry, and `npm test` passes: 178 tests, 0 failed. That's the 165 existing tests, unchanged, plus 13 new ones in `test/reservations.test.js`.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` gives back ids like `res-1`, `res-2`, counting up within each store. It checks the quantity first (`INVALID_QTY`), then whether enough is free (`INSUFFICIENT_STOCK`).\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired. All times come from the store's `clock` option.\n- Expired reservations are kept in memory, not deleted, so that `confirm` can still answer `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They are only removed by `confirm` or `release`.\n- `confirm(id)` takes the quantity off physical stock and returns `{sku, stock}`, which the API endpoint passes straight through.\n- `removeItem` now checks against available stock, so it can't take reserved units. Existing behaviour is otherwise the same.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now includes `available`.\n- `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` return the status codes you listed. `DELETE` returns `{status: 204, body: null}`.\n- Error codes are mapped to statuses in one table. An error that isn't in the table is re-thrown, not hidden behind a 400.\n\n**Decision for you:**\n- **`ttlMs` isn't validated.** The spec gives no error for a bad value, so I didn't make one up. As a result, if `ttlMs` is missing or not a number, the reservation never expires and holds the stock until it's confirmed or released. If you'd rather reject it, I can add something like `INVALID_TTL` with a 400 response.\n\n**Worth knowing:**\n- **Memory growth:** expired reservations that are never confirmed or released stay in memory. That's fine for this in-memory store, but a long-running service would need a cleanup step.",
+  "ttft_ms": 4541,
+  "type": "result",
+  "duration_ms": 96102,
+  "uuid": "06483eab-1070-4366-aa2f-b52c44eddf54",
+  "ttft_stream_ms": 3656,
+  "time_to_request_ms": 98,
+  "time_to_request_phases_ms": {
+    "other": 18,
+    "system_prompt": 21,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 15,
+    "input_hooks": 2,
+    "tool_pool_refresh": 4,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 3,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 8,
+    "message_normalization": 2,
+    "client_creation": 5,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 48,
+  "time_to_request_cpu_ms": 172,
+  "time_to_request_major_faults": 2929,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 10,
+    "cpu_ms": 15,
+    "major_faults": 272
+  },
+  "first_content_frame_ms": 3657,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

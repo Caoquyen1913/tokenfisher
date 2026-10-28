@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 50246,
+  "stop_reason": "end_turn",
+  "session_id": "7eae0a41-9a67-45b2-9a2b-9aab23f55c16",
+  "total_cost_usd": 0.1685915,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 15807,
+    "cache_read_input_tokens": 88995,
+    "output_tokens": 9644,
+    "output_tokens_details": {
+      "thinking_tokens": 320
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15807,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 440,
+        "cache_read_input_tokens": 19876,
+        "cache_creation_input_tokens": 4551,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4551
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 9644,
+      "cacheReadInputTokens": 88995,
+      "cacheCreationInputTokens": 15807,
+      "webSearchRequests": 0,
+      "costUSD": 0.1685915,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 320,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are in, and `npm test` passes (176 tests, 0 failed).\n\n- **Store (`src/store.js`)**:\n  - Added `reserve`, `getAvailable`, `confirm` and `release`.\n  - `removeItem` now fails with `INSUFFICIENT_STOCK` if the quantity is more than what is available.\n  - Expiry is checked on every read against the store's `clock`, so nothing runs in the background.\n  - Ids look like `res-1`, `res-2`, and so on.\n- **API (`src/api.js`)**: `GET /stock/:sku` now also returns `available`. I added `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` with the status codes you listed.\n- **Tests**: I added store and API tests for the new behavior.\n\nA few behaviors you didn't specify:\n- **`confirm` return value:** `store.confirm` returns the sku, which the API needs for its response.\n- **Expired reservations:** they stay in memory so that confirming one gives `RESERVATION_EXPIRED` rather than `RESERVATION_NOT_FOUND`. This means the reservations map grows over time.\n- **`ttlMs` is not validated:** a missing or non-numeric value gives a reservation that never counts as active.",
+  "ttft_ms": 1093,
+  "type": "result",
+  "duration_ms": 60502,
+  "uuid": "708e50d8-e8b8-4c80-b243-c9c1f674d4d9",
+  "ttft_stream_ms": 696,
+  "time_to_request_ms": 109,
+  "time_to_request_phases_ms": {
+    "other": 26,
+    "system_prompt": 30,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 10,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 6,
+    "message_normalization": 2,
+    "client_creation": 5,
+    "request_build": 7
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 59,
+  "time_to_request_cpu_ms": 187,
+  "time_to_request_major_faults": 3437,
+  "input_attachments_detail": {
+    "slowest_producer": "environment",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 31,
+    "major_faults": 416
+  },
+  "first_content_frame_ms": 696,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

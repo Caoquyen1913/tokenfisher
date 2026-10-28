@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 20272,
+  "stop_reason": "end_turn",
+  "session_id": "d68d49a1-06dc-403c-bbaf-a7d27f36eeba",
+  "total_cost_usd": 0.0429457,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 5757,
+    "cache_read_input_tokens": 45317,
+    "output_tokens": 1537,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 5757,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 267,
+        "cache_read_input_tokens": 13106,
+        "cache_creation_input_tokens": 1271,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1271
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1537,
+      "cacheReadInputTokens": 45317,
+      "cacheCreationInputTokens": 5757,
+      "webSearchRequests": 0,
+      "costUSD": 0.0429457,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added six tests in `test/strings.test.js`. `npm test` passes with all 8 tests, including the two existing `capitalize` ones.\n\nIt handles `đ`/`Đ` first, since Unicode decomposition doesn't touch them. It then strips diacritics, lowercases, and turns each run of characters outside a-z and 0-9 into one hyphen. A leading hyphen is removed, the result is cut to 50 characters, and any trailing hyphen is removed after the cut.\n\nThe tests cover basic text, Vietnamese input, trimming and collapsing, an input that reduces to an empty string, the 50-character limit, and a cut that would otherwise end in a hyphen.\n\nAn input with no a-z or 0-9 characters returns an empty string.",
+  "ttft_ms": 3185,
+  "type": "result",
+  "duration_ms": 29172,
+  "uuid": "84b6955a-5624-4904-b8b7-1ee57023a31b",
+  "ttft_stream_ms": 2294,
+  "time_to_request_ms": 146,
+  "time_to_request_phases_ms": {
+    "other": 22,
+    "system_prompt": 78,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 3,
+    "tool_pool_refresh": 1,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 6
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 44,
+  "time_to_request_cpu_ms": 235,
+  "time_to_request_major_faults": 4408,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 0,
+    "major_faults": 286
+  },
+  "first_content_frame_ms": 2295,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

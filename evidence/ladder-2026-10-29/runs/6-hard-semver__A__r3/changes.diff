@@ -1,0 +1,386 @@
+diff --git a/src/semver.js b/src/semver.js
+index 0ff5fc8..cdc65a1 100644
+--- a/src/semver.js
++++ b/src/semver.js
+@@ -1,6 +1,185 @@
+ // See docs/SPEC.md.
++// Numbers are kept as BigInt so arbitrarily large components compare and increment exactly.
++
++const NUM = '0|[1-9]\\d*';
++const PART = `${NUM}|[xX*]`;
++const IDENT = '[0-9A-Za-z-]+';
++const DOTTED = `${IDENT}(?:\\.${IDENT})*`;
++const VERSION_RE = new RegExp(`^v?(${NUM})\\.(${NUM})\\.(${NUM})(?:-(${DOTTED}))?(?:\\+${DOTTED})?$`);
++const PARTIAL_RE = new RegExp(`^v?(${PART})(?:\\.(${PART})(?:\\.(${PART})(?:-(${DOTTED}))?(?:\\+${DOTTED})?)?)?$`);
++const OP_RE = /^(<=|>=|<|>|=|~|\^)?(.*)$/;
++
++const ANY = { any: true };
++const NONE = { none: true };
++
++function parsePre(pre) {
++  return pre ? pre.split('.').map((id) => (/^\d+$/.test(id) ? BigInt(id) : id)) : [];
++}
++
++function parseVersion(str) {
++  const m = VERSION_RE.exec(str);
++  if (!m) return null;
++  return { major: BigInt(m[1]), minor: BigInt(m[2]), patch: BigInt(m[3]), pre: parsePre(m[4]) };
++}
++
++// Returns { parts: [BigInt...] (0-3 concrete leading components), pre } or null.
++function parsePartial(str) {
++  const m = PARTIAL_RE.exec(str);
++  if (!m) return null;
++  const parts = [];
++  let wild = false;
++  for (const p of [m[1], m[2], m[3]]) {
++    if (p === undefined || /^[xX*]$/.test(p)) {
++      wild = true;
++    } else if (wild) {
++      return null; // a number after a wildcard, e.g. `1.x.3`
++    } else {
++      parts.push(BigInt(p));
++    }
++  }
++  if (m[4] && parts.length < 3) return null; // prerelease on a partial version
++  return { parts, pre: parsePre(m[4]) };
++}
++
++function cmpPre(a, b) {
++  if (!a.length && !b.length) return 0;
++  if (!a.length) return 1;
++  if (!b.length) return -1;
++  for (let i = 0; i < Math.min(a.length, b.length); i++) {
++    const x = a[i];
++    const y = b[i];
++    if (x === y) continue;
++    const xn = typeof x === 'bigint';
++    const yn = typeof y === 'bigint';
++    if (xn && !yn) return -1;
++    if (!xn && yn) return 1;
++    return x < y ? -1 : 1;
++  }
++  return Math.sign(a.length - b.length);
++}
++
++function compare(a, b) {
++  for (const k of ['major', 'minor', 'patch']) {
++    if (a[k] !== b[k]) return a[k] < b[k] ? -1 : 1;
++  }
++  return cmpPre(a.pre, b.pre);
++}
++
++const v = (major, minor, patch, pre = []) => ({ major, minor, patch, pre });
++const c = (op, ver) => ({ op, ver });
++
++// Lower bound of a partial: missing positions filled with zeros.
++function floor({ parts: [M = 0n, m = 0n, p = 0n], pre }) {
++  return v(M, m, p, pre);
++}
++
++// Exclusive upper bound of a partial with 1 or 2 concrete parts: bump the last one.
++function bumpLast({ parts: [M, m] }, n) {
++  return n === 1 ? v(M + 1n, 0n, 0n) : v(M, m + 1n, 0n);
++}
++
++// Desugars one comparator token into primitive comparators (ANY / NONE are markers).
++function expand(op, partial) {
++  const n = partial.parts.length;
++  const [M, m, p] = partial.parts;
++  const lo = floor(partial);
++  switch (op) {
++    case '':
++    case '=':
++      if (n === 3) return [c('=', lo)];
++      if (n === 0) return [ANY];
++      return [c('>=', lo), c('<', bumpLast(partial, n))];
++    case '>':
++      if (n === 3) return [c('>', lo)];
++      if (n === 0) return [NONE];
++      return [c('>=', bumpLast(partial, n))];
++    case '>=':
++      return n === 0 ? [ANY] : [c('>=', lo)];
++    case '<':
++      return n === 0 ? [NONE] : [c('<', lo)];
++    case '<=':
++      if (n === 3) return [c('<=', lo)];
++      if (n === 0) return [ANY];
++      return [c('<', bumpLast(partial, n))];
++    case '~':
++      if (n === 0) return [ANY];
++      return [c('>=', lo), c('<', n === 1 ? v(M + 1n, 0n, 0n) : v(M, m + 1n, 0n))];
++    case '^': {
++      if (n === 0) return [ANY];
++      let hi;
++      if (M > 0n || n === 1) hi = v(M + 1n, 0n, 0n);
++      else if (m > 0n || n === 2) hi = v(0n, m + 1n, 0n);
++      else hi = v(0n, 0n, p + 1n);
++      return [c('>=', lo), c('<', hi)];
++    }
++    default:
++      return null;
++  }
++}
++
++// Parses a comparator set into a flat list of primitive comparators, or null if invalid.
++function parseSet(set) {
++  const hyphen = /^(\S+)\s+-\s+(\S+)$/.exec(set);
++  if (hyphen) {
++    const a = parsePartial(hyphen[1]);
++    const b = parsePartial(hyphen[2]);
++    if (!a || !b) return null;
++    const n = b.parts.length;
++    const upper = n === 3 ? c('<=', floor(b)) : n === 0 ? ANY : c('<', bumpLast(b, n));
++    return [c('>=', floor(a)), upper];
++  }
++  const tokens = set.split(/\s+/).filter(Boolean);
++  if (!tokens.length) return [ANY];
++  const out = [];
++  for (let i = 0; i < tokens.length; i++) {
++    let token = tokens[i];
++    if (/^(<=|>=|<|>|=|~|\^)$/.test(token)) {
++      if (i + 1 >= tokens.length) return null;
++      token += tokens[++i];
++    }
++    const [, op = '', rest] = OP_RE.exec(token);
++    const partial = parsePartial(rest);
++    if (!partial) return null;
++    out.push(...expand(op, partial));
++  }
++  return out;
++}
++
++function matches(ver, comp) {
++  if (comp.any) return true;
++  if (comp.none) return false;
++  const r = compare(ver, comp.ver);
++  switch (comp.op) {
++    case '=': return r === 0;
++    case '<': return r < 0;
++    case '<=': return r <= 0;
++    case '>': return r > 0;
++    case '>=': return r >= 0;
++    default: return false;
++  }
++}
++
++function sameTuple(a, b) {
++  return a.major === b.major && a.minor === b.minor && a.patch === b.patch;
++}
++
++function satisfiesSet(ver, comps) {
++  if (!comps.every((comp) => matches(ver, comp))) return false;
++  if (!ver.pre.length) return true;
++  return comps.some((comp) => comp.ver && comp.ver.pre.length && sameTuple(ver, comp.ver));
++}
++
+ function satisfies(version, range) {
+-  throw new Error('not implemented');
++  try {
++    if (typeof version !== 'string' || typeof range !== 'string') return false;
++    const ver = parseVersion(version.trim());
++    if (!ver) return false;
++    const sets = range.split('||').map((s) => parseSet(s.trim()));
++    if (sets.some((s) => s === null)) return false;
++    return sets.some((comps) => satisfiesSet(ver, comps));
++  } catch (e) {
++    return false;
++  }
+ }
+ 
+ module.exports = { satisfies };
+diff --git a/test/semver.test.js b/test/semver.test.js
+new file mode 100644
+index 0000000..8acf240
+--- /dev/null
++++ b/test/semver.test.js
+@@ -0,0 +1,189 @@
++const assert = require('assert');
++const { satisfies } = require('../src/semver');
++
++// Each case: [version, range, expected].
++function check(cases) {
++  for (const [version, range, expected] of cases) {
++    assert.strictEqual(satisfies(version, range), expected, `satisfies(${JSON.stringify(version)}, ${JSON.stringify(range)})`);
++  }
++}
++
++test('exact versions, v prefix, whitespace and build metadata', () => check([
++  ['1.2.3', '1.2.3', true],
++  ['1.2.3', '=1.2.3', true],
++  ['v1.2.3', '1.2.3', true],
++  ['  1.2.3  ', 'v1.2.3', true],
++  ['1.2.3+build.5', '1.2.3', true],
++  ['1.2.3', '=1.2.3+other', true],
++  ['1.2.4', '1.2.3', false],
++  ['1.2.3-rc.1', '1.2.3', false],
++  ['1.2.3-rc.1', '1.2.3-rc.1', true],
++]));
++
++test('invalid versions return false', () => check([
++  ['01.2.3', '*', false],
++  ['1.02.3', '*', false],
++  ['1.2', '*', false],
++  ['1.2.3.4', '*', false],
++  ['1.2.3-', '*', false],
++  ['1.2.3-a..b', '*', false],
++  ['1.2.3+', '*', false],
++  ['1.2.3-a_b', '*', false],
++  ['vv1.2.3', '*', false],
++  ['', '*', false],
++  [null, '*', false],
++  [123, '*', false],
++]));
++
++test('invalid ranges return false', () => check([
++  ['1.2.3', '>=', false],
++  ['1.2.3', '1.2.3 >', false],
++  ['1.2.3', 'abc', false],
++  ['1.2.3', '>=01.2.3', false],
++  ['1.2.3', '>>1.2.3', false],
++  ['1.2.3', '1.2.3 -', false],
++  ['1.2.3', '1.2.3 || garbage', false],
++  ['1.2.3', '1.x.3', false],
++  ['1.2.3', '1.2-beta', false],
++  ['1.2.3', undefined, false],
++]));
++
++test('primitive comparators, with optional whitespace after the operator', () => check([
++  ['1.2.3', '>1.2.2', true],
++  ['1.2.3', '>1.2.3', false],
++  ['1.2.3', '>=1.2.3', true],
++  ['1.2.3', '>= 1.2.3', true],
++  ['1.2.3', '<1.2.4', true],
++  ['1.2.3', '< 1.2.3', false],
++  ['1.2.3', '<=1.2.3', true],
++  ['1.2.3', '>=1.0.0 <2.0.0', true],
++  ['2.0.0', '>=1.0.0 <2.0.0', false],
++  ['10.0.0', '>9.0.0', true],
++  ['99999999999999999999.0.0', '>99999999999999999998.0.0', true],
++]));
++
++test('|| unions comparator sets', () => check([
++  ['1.2.3', '<1.0.0 || >=1.2.0', true],
++  ['1.1.0', '<1.0.0 || >=1.2.0', false],
++  ['0.5.0', '<1.0.0||>=1.2.0', true],
++]));
++
++test('x-ranges without an operator', () => check([
++  ['0.0.0', '*', true],
++  ['9.9.9', '', true],
++  ['9.9.9', '  ', true],
++  ['1.0.0', '1', true],
++  ['1.9.9', '1.x', true],
++  ['2.0.0', '1.X', false],
++  ['0.9.9', '1.*', false],
++  ['1.2.0', '1.2', true],
++  ['1.2.9', '1.2.x', true],
++  ['1.3.0', '1.2.x', false],
++  ['1.1.9', '1.2', false],
++  ['1.2.9', 'x.x.x', true],
++  ['1.2.9', '=1.2', true],
++  ['1.3.0', '=1', true],
++]));
++
++test('x-ranges with an operator', () => check([
++  ['1.9.9', '>1', false],
++  ['2.0.0', '>1', true],
++  ['1.2.9', '>1.2', false],
++  ['1.3.0', '>1.2', true],
++  ['1.0.0', '>=1', true],
++  ['0.9.9', '>=1', false],
++  ['1.2.0', '>=1.2', true],
++  ['1.1.9', '>=1.2.x', false],
++  ['0.9.9', '<1', true],
++  ['1.0.0', '<1', false],
++  ['1.1.9', '<1.2', true],
++  ['1.2.0', '<1.2', false],
++  ['1.9.9', '<=1', true],
++  ['2.0.0', '<=1', false],
++  ['1.2.9', '<=1.2', true],
++  ['1.3.0', '<=1.2', false],
++  ['1.0.0', '>*', false],
++  ['0.0.0', '<*', false],
++  ['1.0.0', '>=*', true],
++  ['1.0.0', '<=*', true],
++]));
++
++test('tilde ranges', () => check([
++  ['1.2.3', '~1.2.3', true],
++  ['1.2.9', '~1.2.3', true],
++  ['1.3.0', '~1.2.3', false],
++  ['1.2.2', '~1.2.3', false],
++  ['1.2.0', '~1.2', true],
++  ['1.3.0', '~1.2', false],
++  ['1.9.0', '~1', true],
++  ['2.0.0', '~1', false],
++  ['1.2.3-beta.2', '~1.2.3-beta.2', true],
++  ['1.2.3-beta.10', '~1.2.3-beta.2', true],
++  ['1.2.3-beta.1', '~1.2.3-beta.2', false],
++  ['1.2.3', '~1.2.3-beta.2', true],
++  ['1.2.4-beta.3', '~1.2.3-beta.2', false],
++]));
++
++test('caret ranges', () => check([
++  ['1.2.3', '^1.2.3', true],
++  ['1.9.9', '^1.2.3', true],
++  ['2.0.0', '^1.2.3', false],
++  ['1.2.2', '^1.2.3', false],
++  ['0.2.9', '^0.2.3', true],
++  ['0.3.0', '^0.2.3', false],
++  ['0.0.3', '^0.0.3', true],
++  ['0.0.4', '^0.0.3', false],
++  ['1.2.0', '^1.2', true],
++  ['1.1.9', '^1.2', false],
++  ['1.9.9', '^1', true],
++  ['2.0.0', '^1', false],
++  ['0.2.9', '^0.2', true],
++  ['0.3.0', '^0.2', false],
++  ['0.0.9', '^0.0', true],
++  ['0.1.0', '^0.0', false],
++  ['0.9.9', '^0', true],
++  ['1.0.0', '^0.x', false],
++  ['1.2.3-beta.4', '^1.2.3-beta.2', true],
++  ['1.5.0', '^1.2.3-beta.2', true],
++  ['1.2.3-beta.1', '^1.2.3-beta.2', false],
++  ['2.0.0', '^1.2.3-beta.2', false],
++]));
++
++test('hyphen ranges', () => check([
++  ['1.2.3', '1.2.3 - 2.3.4', true],
++  ['2.3.4', '1.2.3 - 2.3.4', true],
++  ['2.3.5', '1.2.3 - 2.3.4', false],
++  ['1.2.2', '1.2.3 - 2.3.4', false],
++  ['1.2.0', '1.2 - 2.3.4', true],
++  ['1.1.9', '1.2 - 2.3.4', false],
++  ['2.3.9', '1.2.3 - 2.3', true],
++  ['2.4.0', '1.2.3 - 2.3', false],
++  ['2.9.9', '1.2.3 - 2', true],
++  ['3.0.0', '1.2.3 - 2', false],
++  ['1.2.3', '1.2.3-2.3.4', false],
++]));
++
++test('prerelease ordering', () => check([
++  ['1.0.0-rc.1', '<1.0.0-rc.2', true],
++  ['1.0.0-alpha', '<1.0.0-alpha.1', true],
++  ['1.0.0-alpha.1', '<1.0.0-alpha.beta', true],
++  ['1.0.0-alpha.beta', '<1.0.0-beta', true],
++  ['1.0.0-beta.2', '<1.0.0-beta.11', true],
++  ['1.0.0-beta.11', '<1.0.0-rc.1', true],
++  ['1.0.0-Z', '<1.0.0-a', true],
++  ['1.0.0-rc.1', '>1.0.0-rc.1', false],
++  ['1.0.0', '>1.0.0-rc.1', true],
++]));
++
++test('prereleases only match comparators with a prerelease on the same tuple', () => check([
++  ['1.2.3-alpha.7', '>1.2.3-alpha.3', true],
++  ['3.4.5-alpha.9', '>1.2.3-alpha.3', false],
++  ['3.4.5', '>1.2.3-alpha.3', true],
++  ['1.2.4-beta', '^1.2.3', false],
++  ['1.2.3-beta', '*', false],
++  ['1.2.3-beta', '', false],
++  ['1.0.0-rc.1', '<1.0.0', false],
++  ['1.2.3-beta', '>=1.2.3-alpha <1.2.4', true],
++  ['1.2.3-beta', '>=1.0.0 <1.2.4 || =1.2.3-beta', true],
++  ['3.4.5-alpha.9', '>1.2.3-alpha.3 || >=3.4.5-alpha.1', true],
++]));

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 65731,
+  "stop_reason": "end_turn",
+  "session_id": "2855b300-ef14-4423-8cc7-053b668f0138",
+  "total_cost_usd": 0.2567688,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 11622,
+    "cache_read_input_tokens": 105584,
+    "output_tokens": 7131,
+    "output_tokens_details": {
+      "thinking_tokens": 1963
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11622,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 825,
+        "cache_read_input_tokens": 20008,
+        "cache_creation_input_tokens": 234,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 234
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 7131,
+      "cacheReadInputTokens": 105584,
+      "cacheCreationInputTokens": 11622,
+      "webSearchRequests": 0,
+      "costUSD": 0.2567688,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1963,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now runs in about 150 ms on 200,000 orders, down from minutes, and its output is unchanged. `npm test` passes (5 of 5).\n\n**Why it was slow:** for every order it did three things that get slower as the data grows:\n- `seen.includes(id)` scanned every order ID seen so far.\n- `groups.find(...)` scanned every customer so far.\n- `groups.sort(byRank)` re-sorted the whole leaderboard.\n\n**What changed (`src/report.js`):**\n- Duplicate IDs are now checked with a `Set` and customer lookups use a `Map`. Both match values the same way the old code did.\n- The leaderboard is sorted once at the end instead of after every order. For normal data this gives exactly the same order: customer IDs are unique strings, so the ranking comparator never sees a tie and there is only one possible sorted result.\n- These rules are unchanged:\n  - Duplicate detection still runs before the refund check, so a refunded order still blocks a later retry with the same ID.\n  - Each customer's amounts are added in the same order as before.\n  - Euro amounts are converted and rounded the same way.\n  - Output fields keep the same key order: `rank, customerId, spendCents, orderCount, firstOrderAt`.\n- **Fallback for malformed data:** with mixed-type or `NaN` customer IDs, a missing `createdAt`, or a non-numeric amount, the comparator can't give a single consistent order, so the old result depended on the order in which orders arrived. In those cases the code now falls back to the original sort-after-every-order algorithm, with the faster duplicate check, so even those results stay identical. Normal data never takes this path.\n\n**New tests (`test/report.test.js`):**\n- **Comparison test:** the original `summarize()` is copied word for word into the test file as a reference. Both versions run on 300 random seeded batches of orders built to produce tied spend and dates, duplicate IDs, refunds, pending orders and euro orders, with several `limit` values. Results must match exactly, including the JSON text and so the key order.\n- **Malformed input:** a case with mixed-type and `NaN` IDs and missing fields, compared against the original.\n- **Speed:** a test that fails if 200,000 orders take 1 second or more.\n\nTo make sure the comparison test catches real changes, I deliberately broke the tie-breaking in the sort and confirmed the test failed. I then restored the code and the full suite passed again.\n\nI haven't committed anything.",
+  "ttft_ms": 2227,
+  "type": "result",
+  "duration_ms": 87481,
+  "uuid": "c7bfeb29-1adf-4a8c-99a9-0c8bc4899eb7",
+  "ttft_stream_ms": 1094,
+  "time_to_request_ms": 130,
+  "time_to_request_phases_ms": {
+    "other": 19,
+    "system_prompt": 71,
+    "resume_other": 0,
+    "process_user_input": 2,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 6
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 28,
+  "time_to_request_cpu_ms": 203,
+  "time_to_request_major_faults": 4023,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 16,
+    "major_faults": 350
+  },
+  "first_content_frame_ms": 1095,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

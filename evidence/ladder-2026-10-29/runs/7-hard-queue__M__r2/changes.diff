@@ -1,0 +1,188 @@
+diff --git a/src/queue.js b/src/queue.js
+index 0645d89..d22c434 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -1,65 +1,72 @@
+-// Promise job queue.
+-//
+-// Contract:
+-// - add(fn) queues a job; fn may return a promise, a plain value, or throw.
+-//   add() returns a promise that settles with the job's outcome.
+-// - At most `concurrency` jobs run at the same time; jobs start in the order they were added.
+-// - A failing job rejects its own promise only; the queue keeps going.
+-// - onIdle() resolves once nothing is pending and nothing is running (immediately if already idle).
+-// - pause() stops starting new jobs (running ones finish); resume() starts as many as there are free slots.
+-// - `pending` and `running` report the current counts.
+-function createQueue({ concurrency = 1 } = {}) {
+-  const pending = [];
+-  let running = 0;
+-  let paused = false;
+-  let idleWaiters = [];
+-
+-  function next() {
+-    if (paused || running >= concurrency || pending.length === 0) return;
+-    const { fn, resolve, reject } = pending.shift();
+-    running++;
+-    fn().then((value) => {
+-      running--;
+-      resolve(value);
+-      next();
+-      checkIdle();
+-    }, reject);
+-  }
+-
+-  function checkIdle() {
+-    if (pending.length === 0) {
+-      idleWaiters.forEach((wake) => wake());
+-      idleWaiters = [];
+-    }
+-  }
+-
+-  return {
+-    add(fn) {
+-      return new Promise((resolve, reject) => {
+-        pending.push({ fn, resolve, reject });
+-        next();
+-      });
+-    },
+-    onIdle() {
+-      return new Promise((resolve) => {
+-        idleWaiters.push(resolve);
+-        checkIdle();
+-      });
+-    },
+-    pause() {
+-      paused = true;
+-    },
+-    resume() {
+-      paused = false;
+-      next();
+-    },
+-    get pending() {
+-      return pending.length;
+-    },
+-    get running() {
+-      return running;
+-    },
+-  };
+-}
+-
+-module.exports = { createQueue };
++// Promise job queue.
++//
++// Contract:
++// - add(fn) queues a job; fn may return a promise, a plain value, or throw.
++//   add() returns a promise that settles with the job's outcome.
++// - At most `concurrency` jobs run at the same time; jobs start in the order they were added.
++// - A failing job rejects its own promise only; the queue keeps going.
++// - onIdle() resolves once nothing is pending and nothing is running (immediately if already idle).
++// - pause() stops starting new jobs (running ones finish); resume() starts as many as there are free slots.
++// - `pending` and `running` report the current counts.
++function createQueue({ concurrency = 1 } = {}) {
++  const pending = [];
++  let running = 0;
++  let paused = false;
++  let idleWaiters = [];
++
++  function next() {
++    while (!paused && running < concurrency && pending.length > 0) {
++      const { fn, resolve, reject } = pending.shift();
++      running++;
++      let result;
++      try {
++        result = Promise.resolve(fn());
++      } catch (err) {
++        result = Promise.reject(err);
++      }
++      result.then(resolve, reject).then(() => {
++        running--;
++        next();
++        checkIdle();
++      });
++    }
++  }
++
++  function checkIdle() {
++    if (pending.length === 0 && running === 0) {
++      const waiters = idleWaiters;
++      idleWaiters = [];
++      waiters.forEach((wake) => wake());
++    }
++  }
++
++  return {
++    add(fn) {
++      return new Promise((resolve, reject) => {
++        pending.push({ fn, resolve, reject });
++        next();
++      });
++    },
++    onIdle() {
++      return new Promise((resolve) => {
++        idleWaiters.push(resolve);
++        checkIdle();
++      });
++    },
++    pause() {
++      paused = true;
++    },
++    resume() {
++      paused = false;
++      next();
++    },
++    get pending() {
++      return pending.length;
++    },
++    get running() {
++      return running;
++    },
++  };
++}
++
++module.exports = { createQueue };
+diff --git a/test/queue.test.js b/test/queue.test.js
+index be49570..e752bcb 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -15,3 +15,41 @@ test('starts jobs in order with concurrency 1', async () => {
+   await Promise.all(['a', 'b', 'c'].map((x) => q.add(async () => { order.push(x); await sleep(1); })));
+   assert.deepStrictEqual(order, ['a', 'b', 'c']);
+ });
++
++test('keeps going after a rejected job and a sync throw', async () => {
++  const q = createQueue();
++  const a = q.add(async () => { throw new Error('boom'); });
++  const b = q.add(() => { throw new Error('sync'); });
++  const c = q.add(() => 7);
++  await assert.rejects(a, /boom/);
++  await assert.rejects(b, /sync/);
++  assert.strictEqual(await c, 7);
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('onIdle waits for running jobs', async () => {
++  const q = createQueue({ concurrency: 2 });
++  let done = false;
++  q.add(async () => { await sleep(20); done = true; });
++  await q.onIdle();
++  assert.strictEqual(done, true);
++});
++
++test('onIdle resolves immediately when idle', async () => {
++  await createQueue().onIdle();
++});
++
++test('resume fills all free slots', async () => {
++  const q = createQueue({ concurrency: 4 });
++  q.pause();
++  let active = 0, max = 0;
++  const job = async () => { active++; max = Math.max(max, active); await sleep(10); active--; };
++  const ps = [1, 2, 3, 4, 5, 6].map(() => q.add(job));
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 6);
++  q.resume();
++  assert.strictEqual(q.running, 4);
++  await Promise.all(ps);
++  assert.strictEqual(max, 4);
++});

@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 25728,
+  "stop_reason": "end_turn",
+  "session_id": "252f25e7-6051-4b8b-83d6-e7ec9b833d79",
+  "total_cost_usd": 0.08684969999999997,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 9660,
+    "cache_read_input_tokens": 48737,
+    "output_tokens": 4332,
+    "output_tokens_details": {
+      "thinking_tokens": 184
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 9660,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 480,
+        "cache_read_input_tokens": 14635,
+        "cache_creation_input_tokens": 3645,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3645
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 4332,
+      "cacheReadInputTokens": 48737,
+      "cacheCreationInputTokens": 9660,
+      "webSearchRequests": 0,
+      "costUSD": 0.08684969999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 184,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are now in `src/store.js` and `src/api.js`, and `npm test` passes (173 tests, 0 failed). The new tests are in `test/reservations.test.js`.\n\n- **Store:** I added `reserve`, `confirm`, `release` and `getAvailable`. `removeItem` now checks against available stock rather than physical stock. All timing uses the store's `clock`, and a reservation counts as expired once `clock() >= creation time + ttlMs`.\n- **API:**\n  - `GET /stock/:sku` now returns `available`.\n  - The three reservation endpoints return the statuses you specified.\n  - Any error from `POST /reservations` other than `INSUFFICIENT_STOCK` (409) returns 400 with its message.\n- **Tests:** they cover your six store points, including expiry at exactly the TTL boundary, and the API flow with its status codes.\n\n- **Return value:** `confirm(id)` returns `{ sku, stock }` so the API can build its response.\n- **No ttlMs check:** `reserve` doesn't validate `ttlMs`, since you didn't specify what counts as valid. A missing or non-numeric value gives a reservation that never counts as active, so it won't hold any stock.\n- **Expired entries kept:** expired reservations stay in memory. That way `confirm` can return `RESERVATION_EXPIRED` rather than `RESERVATION_NOT_FOUND`.",
+  "ttft_ms": 1253,
+  "type": "result",
+  "duration_ms": 33634,
+  "uuid": "822ec8f4-778d-45dd-99a1-92e243f677a6",
+  "ttft_stream_ms": 862,
+  "time_to_request_ms": 135,
+  "time_to_request_phases_ms": {
+    "other": 20,
+    "system_prompt": 68,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 8,
+    "input_hooks": 3,
+    "tool_pool_refresh": 1,
+    "init_message": 6,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 6,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 34,
+  "time_to_request_cpu_ms": 203,
+  "time_to_request_major_faults": 3885,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 32,
+    "major_faults": 324
+  },
+  "first_content_frame_ms": 862,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

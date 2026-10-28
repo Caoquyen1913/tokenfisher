@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 63416,
+  "stop_reason": "end_turn",
+  "session_id": "35cc4b04-d235-44a1-a175-f156994b166f",
+  "total_cost_usd": 0.39409739999999993,
+  "usage": {
+    "input_tokens": 18,
+    "cache_creation_input_tokens": 22950,
+    "cache_read_input_tokens": 400727,
+    "output_tokens": 6514,
+    "output_tokens_details": {
+      "thinking_tokens": 2004
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22950,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 720,
+        "cache_read_input_tokens": 50379,
+        "cache_creation_input_tokens": 1107,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1107
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 18,
+      "outputTokens": 6514,
+      "cacheReadInputTokens": 400727,
+      "cacheCreationInputTokens": 22950,
+      "webSearchRequests": 0,
+      "costUSD": 0.39409739999999993,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2004,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` is now fast and its output is unchanged. A synthetic day of 200,000 orders took about 230 ms on this machine, and `npm test` passes (4 of 4).\n\n**Why it was slow:** for every order it did three things that get slower as the day goes on:\n- `seen.includes(order.id)` scanned every order seen so far.\n- `groups.find(...)` scanned every customer seen so far.\n- `groups.sort(byRank)` re-sorted the whole leaderboard after every single order.\n\n**What changed in `src/report.js`:**\n- `seen` is now a `Set`, and customers are looked up through a `Map`. The `groups` array is kept in the order customers first appear, as before.\n- The leaderboard is sorted once at the end instead of after every order. The result is the same because the ranking always puts two different customers in a definite order: spend, then first order time, then customer ID. A sort done once at the end therefore gives the same order as re-sorting after each order.\n- Duplicate handling, refunds (still counted as \"seen\"), EUR rounding per order, `orderCount`, `firstOrderAt`, the filter, `limit` and rank numbering are all untouched.\n\n**Tests added in `test/report.test.js`:**\n- **Same output as the old code:** I saved the original code unchanged as `test/fixtures/report-reference.js`. The test generates 30 random datasets that include repeated orders (some with different contents), refunds, pending orders, EUR orders, and lots of ties in spend and first order time. For each one it checks that the new and old code return exactly the same result, with the default limit, a limit of 3, and no limit (so the full ordering is compared). To confirm the test works, I flipped one comparison in the tie-break and it failed.\n- **Speed:** 200,000 orders must finish in under 1 second.\n\n**One edge case outside the documented input:** if a `customerId` were `NaN`, the old code would create a new customer group for every such order, while the new code merges them into one. With the documented string IDs nothing changes.\n\nNothing has been committed.",
+  "ttft_ms": 2520,
+  "type": "result",
+  "duration_ms": 94234,
+  "uuid": "f8634620-6eee-4615-8b90-003ab0d737a8",
+  "ttft_stream_ms": 957,
+  "time_to_request_ms": 161,
+  "time_to_request_phases_ms": {
+    "other": 26,
+    "system_prompt": 27,
+    "resume_other": 1,
+    "process_user_input": 5,
+    "input_attachments": 36,
+    "input_hooks": 5,
+    "tool_pool_refresh": 7,
+    "init_message": 9,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 3,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 13,
+    "message_normalization": 4,
+    "client_creation": 7,
+    "request_build": 13
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 110,
+  "time_to_request_cpu_ms": 250,
+  "time_to_request_major_faults": 3395,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 26,
+    "cpu_ms": 62,
+    "major_faults": 499
+  },
+  "first_content_frame_ms": 958,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

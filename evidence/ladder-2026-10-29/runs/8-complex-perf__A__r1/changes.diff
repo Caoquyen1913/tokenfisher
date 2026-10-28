@@ -1,0 +1,141 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..20b143c 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -9,27 +9,30 @@ function byRank(a, b) {
+ }
+ 
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  const seen = new Set();
+   const groups = [];
++  const groupsByCustomer = new Map();
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    let group = groupsByCustomer.get(order.customerId);
+     if (!group) {
+       group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
+       groups.push(group);
++      groupsByCustomer.set(order.customerId, group);
+     }
+     group.orderCount++;
+     if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
+   }
++  // byRank is a total order for distinct customerIds, so one sort at the end
++  // gives the same result as re-sorting after every order.
++  groups.sort(byRank);
+   return groups
+     .filter((g) => g.spendCents > 0)
+     .slice(0, limit)
+diff --git a/test/fixtures/report-reference.js b/test/fixtures/report-reference.js
+new file mode 100644
+index 0000000..37e0465
+--- /dev/null
++++ b/test/fixtures/report-reference.js
+@@ -0,0 +1,39 @@
++// Top-customers report for the finance dashboard.
++// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
++const EUR_TO_USD = 1.08;
++
++function byRank(a, b) {
++  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++}
++
++function summarize(orders, limit = 10) {
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    // Keep the leaderboard sorted as we go.
++    groups.sort(byRank);
++  }
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++module.exports = { summarize };
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..9d9170a 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,50 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++// Equivalence with the original (pre-optimization) implementation, kept verbatim in
++// test/fixtures/report-reference.js. The dashboard and finance exports depend on the
++// exact output, including ordering, so any behavior change must fail here.
++const reference = require('./fixtures/report-reference');
++
++function randomOrders(seed, count, customers) {
++  let s = seed >>> 0;
++  const rand = () => ((s = (Math.imul(s, 1664525) + 1013904223) >>> 0) / 2 ** 32);
++  const pick = (xs) => xs[Math.floor(rand() * xs.length)];
++  const orders = [];
++  for (let i = 0; i < count; i++) {
++    // Re-deliver an earlier order (sometimes with different contents) to exercise de-duplication.
++    if (orders.length && rand() < 0.1) {
++      const prev = pick(orders);
++      orders.push(rand() < 0.5 ? prev : { ...prev, status: pick(['paid', 'refunded']), amountCents: 999 });
++      continue;
++    }
++    orders.push(order(
++      `o${i}`,
++      `cus_${Math.floor(rand() * customers)}`,
++      pick(['paid', 'paid', 'paid', 'pending', 'refunded']),
++      pick([100, 200, 250, 500, 1000, 1001, 1234]), // few distinct amounts => many spend ties
++      `2026-10-01T${String(Math.floor(rand() * 4) + 10)}:00:00Z`, // few distinct times => firstOrderAt ties
++      rand() < 0.3 ? 'EUR' : 'USD',
++    ));
++  }
++  return orders;
++}
++
++test('matches the reference implementation exactly on randomized data', () => {
++  for (let seed = 1; seed <= 30; seed++) {
++    const orders = randomOrders(seed, 1000, 1 + (seed * 7) % 300);
++    for (const limit of [undefined, 3, Infinity]) {
++      assert.deepStrictEqual(summarize(orders, limit), reference.summarize(orders, limit), `seed ${seed}, limit ${limit}`);
++    }
++  }
++});
++
++test('handles 200,000 orders in well under a second', () => {
++  const orders = randomOrders(42, 200000, 50000);
++  const start = process.hrtime.bigint();
++  const report = summarize(orders);
++  const ms = Number(process.hrtime.bigint() - start) / 1e6;
++  assert.strictEqual(report.length, 10);
++  assert.ok(ms < 1000, `took ${ms.toFixed(0)} ms`);
++});

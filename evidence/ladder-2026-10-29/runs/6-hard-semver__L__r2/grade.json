@@ -1,0 +1,71 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "plain comparators",
+      "ok": true
+    },
+    {
+      "name": "AND within a set, OR across sets",
+      "ok": true
+    },
+    {
+      "name": "x-ranges and wildcards",
+      "ok": true
+    },
+    {
+      "name": "operators with partial versions",
+      "ok": true
+    },
+    {
+      "name": "tilde",
+      "ok": true
+    },
+    {
+      "name": "caret above zero",
+      "ok": true
+    },
+    {
+      "name": "caret at zero",
+      "ok": true
+    },
+    {
+      "name": "hyphen ranges",
+      "ok": true
+    },
+    {
+      "name": "prerelease ordering",
+      "ok": true
+    },
+    {
+      "name": "prerelease needs a comparator on the same tuple",
+      "ok": true
+    },
+    {
+      "name": "build metadata ignored",
+      "ok": true
+    },
+    {
+      "name": "invalid input returns false",
+      "ok": true
+    },
+    {
+      "name": "tests were added",
+      "ok": true
+    }
+  ],
+  "passed": 16,
+  "total": 16,
+  "score": 1
+}

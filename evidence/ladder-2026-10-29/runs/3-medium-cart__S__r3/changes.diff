@@ -1,0 +1,56 @@
+diff --git a/src/cart.js b/src/cart.js
+index 980a45a..38db807 100644
+--- a/src/cart.js
++++ b/src/cart.js
+@@ -1,14 +1,14 @@
+-const { applyDiscount } = require('./discount');
+-const { applyTax } = require('./tax');
+-
+-const round2 = (n) => Math.round(n * 100) / 100;
+-
+-// Discounts apply to the pre-tax subtotal; tax applies to what is left. A discount
+-// can bring the subtotal down to zero but never below.
+-function total(items, { discount, taxRate = 0 } = {}) {
+-  const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+-  const taxed = applyTax(subtotal, taxRate);
+-  return round2(applyDiscount(taxed, discount));
+-}
+-
+-module.exports = { total };
++const { applyDiscount } = require('./discount');
++const { applyTax } = require('./tax');
++
++const round2 = (n) => Math.round(n * 100) / 100;
++
++// Discounts apply to the pre-tax subtotal; tax applies to what is left. A discount
++// can bring the subtotal down to zero but never below.
++function total(items, { discount, taxRate = 0 } = {}) {
++  const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
++  const discounted = applyDiscount(subtotal, discount);
++  return round2(applyTax(discounted, taxRate));
++}
++
++module.exports = { total };
+diff --git a/src/discount.js b/src/discount.js
+index 5efd8f8..69d206e 100644
+--- a/src/discount.js
++++ b/src/discount.js
+@@ -1,9 +1,9 @@
+-// discount: { type: 'percent', value: 0..100 } | { type: 'fixed', value: amount } | undefined
+-function applyDiscount(amount, discount) {
+-  if (!discount) return amount;
+-  if (discount.type === 'percent') return amount * (1 - discount.value / 100);
+-  if (discount.type === 'fixed') return amount - discount.value;
+-  throw new Error(`Unknown discount type: ${discount.type}`);
+-}
+-
+-module.exports = { applyDiscount };
++// discount: { type: 'percent', value: 0..100 } | { type: 'fixed', value: amount } | undefined
++function applyDiscount(amount, discount) {
++  if (!discount) return amount;
++  if (discount.type === 'percent') return amount * (1 - discount.value / 100);
++  if (discount.type === 'fixed') return Math.max(0, amount - discount.value);
++  throw new Error(`Unknown discount type: ${discount.type}`);
++}
++
++module.exports = { applyDiscount };

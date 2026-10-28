@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 15882,
+  "stop_reason": "end_turn",
+  "session_id": "b721a77f-221c-4f8d-bd60-9909e696d883",
+  "total_cost_usd": 0.047008100000000004,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 6353,
+    "cache_read_input_tokens": 46801,
+    "output_tokens": 1690,
+    "output_tokens_details": {
+      "thinking_tokens": 137
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 6353,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 326,
+        "cache_read_input_tokens": 13743,
+        "cache_creation_input_tokens": 1230,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1230
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1690,
+      "cacheReadInputTokens": 46801,
+      "cacheCreationInputTokens": 6353,
+      "webSearchRequests": 0,
+      "costUSD": 0.047008100000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 137,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js`, and `npm test` now passes with all 5 tests green.\n\n- **Hang after a failure:** a job that rejected or threw synchronously never decremented `running`, so its slot stayed taken forever. Both cases now free the slot, reject only that job's promise, and let the queue carry on.\n- **`onIdle()` resolving early:** it only checked that nothing was pending, so it fired while jobs were still running. It now also requires `running === 0`.\n- **One job at a time after `resume()`:** `resume()` started only one job. The scheduler now loops until every free slot is filled or the pending list is empty.\n\nI added three regression tests to `test/queue.test.js`:\n- A failing job, async or sync, rejects only itself and the queue continues.\n- `onIdle()` waits for jobs that are still running.\n- With concurrency 4, `resume()` starts four jobs at once.\n\nI haven't run the new tests against the old code to confirm they fail there.",
+  "ttft_ms": 2340,
+  "type": "result",
+  "duration_ms": 26276,
+  "uuid": "322733ec-8613-462e-9ce8-8deaab248f58",
+  "ttft_stream_ms": 1947,
+  "time_to_request_ms": 147,
+  "time_to_request_phases_ms": {
+    "other": 23,
+    "system_prompt": 73,
+    "resume_other": 0,
+    "process_user_input": 3,
+    "input_attachments": 10,
+    "input_hooks": 3,
+    "tool_pool_refresh": 2,
+    "init_message": 7,
+    "engine_pickup": 1,
+    "message_prep": 1,
+    "model_config_wait": 2,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 4,
+    "message_normalization": 3,
+    "client_creation": 4,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 47,
+  "time_to_request_cpu_ms": 250,
+  "time_to_request_major_faults": 3726,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 16,
+    "major_faults": 149
+  },
+  "first_content_frame_ms": 1947,
+  "queued_turn_count": 0,
+  "result_index": 0
+}

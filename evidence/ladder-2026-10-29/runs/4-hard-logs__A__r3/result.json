@@ -1,0 +1,130 @@
+{
+  "duration_api_ms": 35612,
+  "stop_reason": "end_turn",
+  "session_id": "533405b1-1490-4da0-95f9-50af05aa4f3d",
+  "total_cost_usd": 0.2693094,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 20458,
+    "cache_read_input_tokens": 205427,
+    "output_tokens": 3226,
+    "output_tokens_details": {
+      "thinking_tokens": 609
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20458,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 757,
+        "cache_read_input_tokens": 47142,
+        "cache_creation_input_tokens": 1852,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1852
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3226,
+      "cacheReadInputTokens": 205427,
+      "cacheCreationInputTokens": 20458,
+      "webSearchRequests": 0,
+      "costUSD": 0.2693094,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 609,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed the bug and added a regression test; `npm test` passes (7 of 7). I also ran the new tests against the old code, and all 3 fail there.\n\n**Root cause:** `parseAmount` in `src/money.js` couldn't handle prices with thousands separators, like `\"1,299.00\"`, `\"2,450.50\"` and `\"1,005.99\"`. Its pattern only accepts plain digits like `12.50`, so the match came back `null`. The code never checked for that, so reading the matched digits threw `TypeError: Cannot read properties of null (reading '1')`, and the server turned that into a 500.\n\n**Evidence from `logs/app.log`:** there are 37 errors, all on `POST /checkout` and all the same TypeError from `parseAmount`. In every case, the checkout payload logged just before the error has a price with a comma. No checkout with a comma in the price ever succeeded. That's why it looked intermittent: only orders with an item priced at 1,000 or more failed.\n\n**Fix (`src/money.js`):**\n- The pattern now accepts properly grouped thousands separators (`1,299.00`, `1,234,567`) and removes the commas before converting.\n- If an amount still doesn't match, it throws `Error('Invalid amount: …')`, which is what the comment above the function already says it should do. Before, it crashed instead.\n- Badly grouped values like `1,29.00` or `12,34` are rejected, not guessed at.\n\n**Regression test (`test/checkout-thousands.test.js`):**\n- It parses the comma-formatted prices that failed in production.\n- It checks that malformed amounts throw the \"Invalid amount\" error.\n- It sends a full `POST /checkout` request with `\"1,299.00\"` × 2 and expects a 200 with a total of 259800 cents.\n\n**Two things to know:**\n- An invalid amount is now a clear error, but `server.js` still answers it with a 500 rather than a 400. If you want bad input reported as a client error, the server needs a small extra change; I didn't make it.\n- The `total=` values on successful checkouts in the log don't match their payloads. For example, a `7` × 1 order is logged with `total=11315`. The log looks synthetic, so I didn't treat this as a second bug, but it's worth a look if this is real production data.",
+  "ttft_ms": 4923,
+  "type": "result",
+  "duration_ms": 53561,
+  "uuid": "3bc79b52-2645-47b1-9f57-78665bdb7667",
+  "ttft_stream_ms": 3305,
+  "time_to_request_ms": 160,
+  "time_to_request_phases_ms": {
+    "other": 26,
+    "system_prompt": 31,
+    "resume_other": 1,
+    "process_user_input": 8,
+    "input_attachments": 32,
+    "input_hooks": 4,
+    "tool_pool_refresh": 5,
+    "init_message": 8,
+    "engine_pickup": 2,
+    "message_prep": 2,
+    "model_config_wait": 1,
+    "autocompact": 4,
+    "query_setup": 0,
+    "model_gates": 1,
+    "tool_schema_build": 11,
+    "message_normalization": 4,
+    "client_creation": 9,
+    "request_build": 11
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 110,
+  "time_to_request_cpu_ms": 218,
+  "time_to_request_major_faults": 3216,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 22,
+    "cpu_ms": 31,
+    "major_faults": 390
+  },
+  "first_content_frame_ms": 3306,
+  "queued_turn_count": 0,
+  "result_index": 0
+}
