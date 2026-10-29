@@ -7,7 +7,7 @@
   "author": "Kawin Tran",
   "repository": { "type": "git", "url": "https://github.com/Caoquyen1913/tokenfisher.git" },
   "scripts": {
-    "test": "node --test test/squash.test.js test/audit.test.js",
+    "test": "node --test test/squash.test.js test/audit.test.js test/session-warn.test.js",
     "report": "node bin/token-report.js",
     "audit": "node bin/token-audit.js",
     "eval:selftest": "node eval/selftest.js",

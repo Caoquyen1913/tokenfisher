@@ -321,4 +321,6 @@ async function main() {
   console.log(out.join('\n'));
 }
 
-main().catch((e) => { console.error(e.stack || String(e)); process.exitCode = 1; });
+module.exports = { normUsage };
+
+if (require.main === module) main().catch((e) => { console.error(e.stack || String(e)); process.exitCode = 1; });
