@@ -1,0 +1,4 @@
+{
+  "level": "hard",
+  "prompt": "Customers in Japan and Korea are being charged 100 times their invoice total by the payment gateway: a ¥1,500 invoice shows ¥1,500 on the PDF, but the card is charged ¥150,000. US and EU customers are fine. Find the root cause in this billing service, fix it, and add a regression test. `npm test` must pass."
+}
