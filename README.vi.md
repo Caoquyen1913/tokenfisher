@@ -125,6 +125,7 @@ Mỗi lệnh được xếp vào 1 trong 3 nhóm (`lib/squash.js`):
 - **`--disable-slash-commands` lại *tăng* prefix lên 47,1k (+6,3k).** Đừng dùng cờ này để tiết kiệm.
 - **Context khởi động phần lớn là cố định.** Trong một phiên desktop app, ~75% của 75k token khởi động là schema tool; phần bạn kiểm soát được chỉ ~10%.
 - **Trên lịch sử 30 ngày thực tế, cache read chiếm 61% chi phí quy đổi**, cache write 30%, output 9%. Phiên dài và các khoảng nghỉ (cache bị build lại chiếm 18,6%) quan trọng hơn việc câu trả lời dài hay ngắn.
+- **Giao việc khám phá codebase cho scout Haiku không đáng.** Task 9 là một repo khoảng 108 file, prompt chỉ mô tả triệu chứng. Khi bật chính sách "khám phá qua scout trước", M gọi scout ở mọi lượt và cache write của luồng chính giảm 45%. Nhưng tiền trả cho các lượt Haiku còn nhiều hơn phần tiết kiệm đó: $0,065 so với $0,060 mỗi lượt của S (5 lượt mỗi bên, đều đạt 11/11). Sonnet chỉ cần khoảng 2 lượt để khám phá, vì nó gộp `git ls-files` và `grep -rn` vào một lệnh Bash, nên chính sách này đã bị bỏ. Bảng ladder ở trên chỉ gồm task 1–8; task 9 được thêm sau.
 
 ## Chạy lại hoặc mở rộng eval
 
