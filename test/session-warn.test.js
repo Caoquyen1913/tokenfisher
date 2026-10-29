@@ -54,6 +54,8 @@ test('idle warning follows the cache TTL and skips small contexts', () => {
   assert.equal(check(req(60000, 30, 60), 0, now, 80000).msgs.length, 0);
   assert.match(check(req(60000, 90, 60), 0, now, 80000).msgs[0], /1h prompt-cache TTL/);
   assert.equal(check(req(20000, 90, 5), 0, now, 80000).msgs.length, 0);
+  assert.match(check(req(60000, 300, 60), 0, now, 80000).msgs[0], /^5 h since/);
+  assert.match(check(req(60000, 73339, 60), 0, now, 80000).msgs[0], /^51 days since/);
 });
 
 test('lastRequest reads the last real request, its TTL, and stops at a compaction', () => {

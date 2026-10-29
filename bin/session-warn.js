@@ -63,6 +63,12 @@ function k(n) {
   return `${Math.round(n / 1000)}k`;
 }
 
+function ago(min) {
+  if (min < 120) return `${Math.round(min)} min`;
+  if (min < 48 * 60) return `${Math.round(min / 60)} h`;
+  return `${Math.round(min / 1440)} days`;
+}
+
 // Pure decision: which warnings to give and the level to remember for the session.
 function check({ size, ts, ttlMin }, prevLevel, now, limit) {
   const msgs = [];
@@ -73,7 +79,7 @@ function check({ size, ts, ttlMin }, prevLevel, now, limit) {
   const idleMin = (now - ts) / 60e3;
   // Rebuilding a small prefix is cheap; only warn when the context is at least half the limit.
   if (limit > 0 && size >= limit / 2 && idleMin > ttlMin) {
-    msgs.push(`${Math.round(idleMin)} min since the last request, past the ${ttlMin === 60 ? '1h' : '5 min'} prompt-cache TTL: this turn rewrites the whole ${k(size)}-token prefix to cache. Next time, /clear or /compact before coming back to a stale session.`);
+    msgs.push(`${ago(idleMin)} since the last request, past the ${ttlMin === 60 ? '1h' : '5 min'} prompt-cache TTL: this turn rewrites the whole ${k(size)}-token prefix to cache. Next time, /clear or /compact before coming back to a stale session.`);
   }
   return { level, msgs };
 }
