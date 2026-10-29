@@ -148,6 +148,7 @@ These were measured while building the eval:
 - **`--disable-slash-commands` *grew* it to 47.1k (+6.3k).** Don't use it to save tokens.
 - **Startup context is mostly fixed.** In a desktop-app session about 75% of the 75k startup tokens were tool schemas; the part you control was ~10%.
 - **On one real 30-day history, cache reads were 61% of weighted cost**, cache writes 30% and output 9%. Long sessions and idle gaps (cache rebuilds were 18.6%) matter more than verbose answers.
+- **Sending codebase exploration to the Haiku scout did not pay off.** Task 9 is a ~108-file repo whose prompt gives only the symptom. With an "explore via scout first" policy, M called scout in every run and its main-thread cache writes fell 45%, but the Haiku turns cost more than that saved: $0.065 vs $0.060 per run for S, 5 runs each, all 11/11. Sonnet explores in about 2 turns by batching `git ls-files` and `grep -rn` into one Bash call, so the policy was dropped. The ladder above covers tasks 1–8; task 9 was added later.
 
 ## Reproduce or extend the eval
 
