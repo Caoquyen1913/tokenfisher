@@ -1,6 +1,6 @@
 {
   "name": "tokenfisher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Claude Code plugin: measure where tokens go, audit startup context, compress noisy shell output. Proven with A/B evals.",
   "license": "MIT",

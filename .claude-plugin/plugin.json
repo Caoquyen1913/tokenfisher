@@ -1,6 +1,6 @@
 {
   "name": "tokenfisher",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Catch only the tokens you need: measure where Claude Code tokens go, audit startup context, and compress noisy shell output (raw kept on disk). Savings proven with A/B evals.",
   "author": { "name": "Kawin Tran" },
   "homepage": "https://github.com/Caoquyen1913/tokenfisher",
