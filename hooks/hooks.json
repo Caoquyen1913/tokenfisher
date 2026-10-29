@@ -1,5 +1,5 @@
 {
-  "description": "tokenfisher: compress noisy Bash/PowerShell output before Claude reads it; the full output is saved under ~/.claude/tokenfisher/raw.",
+  "description": "tokenfisher: compress noisy Bash/PowerShell output before Claude reads it (full output saved under ~/.claude/tokenfisher/raw), and warn when a session gets big or comes back after the prompt cache expired.",
   "hooks": {
     "PostToolUse": [
       {
@@ -9,6 +9,17 @@
             "type": "command",
             "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/squash-hook.js\"",
             "timeout": 15
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/session-warn.js\"",
+            "timeout": 5
           }
         ]
       }

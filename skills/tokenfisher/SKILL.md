@@ -39,3 +39,7 @@ The tokenfisher hook rewrites long output of noisy commands (tests, builds, inst
 - The kept lines include every error/warning line with context, the head and the tail. Usually that is enough.
 - If the omitted part matters, `Read` the saved file with `offset`/`limit` rather than re-running the command.
 - To get one command unfiltered, add `# no-squash` at the end of it. File views (`cat`, `sed -n`, `head`, `Get-Content`…), `git diff`/`git show` and JSON output are never touched.
+
+## When a session warning appears
+
+A `tokenfisher: session is at …k tokens` or `… min since the last request, past the … prompt-cache TTL` line comes from the `UserPromptSubmit` hook; the user sees it too. Don't repeat it. If the new prompt starts an unrelated task, suggest `/clear` in one line; otherwise carry on. You can't run `/compact` or `/clear` yourself. Threshold: `TOKENFISHER_WARN_TOKENS` (default 80000, `0` = off).
