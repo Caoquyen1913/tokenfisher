@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 31690,
+  "stop_reason": "end_turn",
+  "session_id": "46558a32-2ef0-4319-a5d2-bba85030552c",
+  "total_cost_usd": 0.2164988,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 14644,
+    "cache_read_input_tokens": 135074,
+    "output_tokens": 3615,
+    "output_tokens_details": {
+      "thinking_tokens": 517
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14644,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 619,
+        "cache_read_input_tokens": 39407,
+        "cache_creation_input_tokens": 1348,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1348
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3615,
+      "cacheReadInputTokens": 135074,
+      "cacheCreationInputTokens": 14644,
+      "webSearchRequests": 0,
+      "costUSD": 0.2164988,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 517,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14644,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js` and added 10 regression tests to `test/queue.test.js`. `npm test` passes: 12 of 12. When I ran the new tests against the old queue code, 6 of them failed, so they do catch the bugs.\n\n**What was wrong and how I fixed it:**\n\n1. **The queue hung after a failed job.** When a job failed, the queue passed the error to the job's promise but never freed the job's slot or started the next job. With concurrency 1, nothing ever ran again. A job that threw immediately, or returned a plain value instead of a promise, crashed the code that starts jobs. Now every job's result is wrapped in a promise, whatever it returns or throws. Success and failure go through the same steps: free the slot, settle the job's promise, start the next job.\n2. **`onIdle()` resolved while jobs were still running.** It only checked whether any jobs were waiting to start, so it resolved as soon as the last job had started. It now also requires that no jobs are running. It's also checked after each job finishes, so waiters are notified when the last job (successful or failed) is done.\n3. **`resume()` only ran one job at a time.** It started a single job. It now keeps starting jobs until every free slot is filled or nothing is waiting.\n\nI made one extra change: a job's slot is now freed before its promise settles, as the old code did on success. That way, code waiting on `add()` sees the correct `pending` and `running` counts as soon as it continues. One of the new tests checks this.\n\n**The new tests cover:**\n- an async failure, an immediate throw, and plain return values\n- `onIdle()` waiting for running jobs, resolving immediately when the queue is already idle, and resolving after a failed last job\n- the concurrency limit\n- `resume()` filling all 4 slots\n- `pause()` letting running jobs finish without starting new ones\n\nI haven't committed anything.",
+  "ttft_ms": 2813,
+  "type": "result",
+  "duration_ms": 47140,
+  "uuid": "761d27d1-b868-4998-ae3c-c38b3e697eef",
+  "ttft_stream_ms": 1629,
+  "time_to_request_ms": 656,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 46,
+    "resume_other": 9,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 0,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 568,
+    "tool_schema_build": 7,
+    "message_normalization": 2,
+    "client_creation": 4,
+    "request_build": 5
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 497,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1629,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3615,
+      "cacheReadInputTokens": 135074,
+      "cacheCreationInputTokens": 14644,
+      "webSearchRequests": 0,
+      "costUSD": 0.2164988,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 517,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14644,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

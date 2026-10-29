@@ -1,0 +1,53 @@
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..289b0f2 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,23 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Callers may hold gateway-style lower-case codes ("jpy"); look up by the stored upper-case form.
++function lookup(code) {
++  return CURRENCIES[String(code).trim().toUpperCase()];
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return lookup(code) !== undefined;
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..a468b9f 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,17 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++test('zero-decimal currencies are charged in whole units, not x100', () => {
++  const jp = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(jp.amount, 1500);
++  assert.strictEqual(jp.currency, 'jpy');
++  const kr = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 12000 }, customer);
++  assert.strictEqual(kr.amount, 12000);
++});
++
++test('currency exponent lookup is case-insensitive', () => {
++  const { toMinor } = require('../src/lib/money/minor');
++  assert.strictEqual(toMinor(1500, 'jpy'), 1500);
++  assert.strictEqual(toMinor(1.234, 'kwd'), 1234);
++});

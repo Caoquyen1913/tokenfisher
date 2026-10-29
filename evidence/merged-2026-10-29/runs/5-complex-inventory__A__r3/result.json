@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 50079,
+  "stop_reason": "end_turn",
+  "session_id": "11cffb01-79a1-4976-b7d3-a55ec6c1bfaf",
+  "total_cost_usd": 0.3011324,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17550,
+    "cache_read_input_tokens": 174362,
+    "output_tokens": 6291,
+    "output_tokens_details": {
+      "thinking_tokens": 786
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17550,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 683,
+        "cache_read_input_tokens": 40537,
+        "cache_creation_input_tokens": 3124,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3124
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 6291,
+      "cacheReadInputTokens": 174362,
+      "cacheCreationInputTokens": 17550,
+      "webSearchRequests": 0,
+      "costUSD": 0.3011324,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 786,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17550,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I added reservations with expiry to the store and the API, plus 14 new tests. `npm test` passes: 179 tests, none failing. I haven't committed anything.\n\n**Store (`src/store.js`)**\n- `reserve`, `getAvailable`, `confirm` and `release` work as you specified.\n- Available stock is physical stock minus reservations that haven't expired.\n- `removeItem` now refuses to take reserved stock.\n- Every time check uses the injected `clock`.\n- Ids are strings like `res-1`, `res-2`, counted up within each store.\n- An expired reservation stays stored until it is released, so confirming it throws `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. It no longer counts against availability. Expired entries are never cleaned up on their own, so they build up in memory over time.\n- `confirm` also returns `{ sku, stock }`, which the API passes straight through as the 200 response.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now includes `available`.\n- The three reservation routes return the status codes you listed.\n- `DELETE` returns 204 with `body: null`, since the router always returns a body field. It returns 204 even for unknown ids.\n- Errors other than the four listed ones are thrown rather than turned into a response.\n\n**Tests (`test/reservations.test.js`)** use a controllable clock and cover:\n- unique ids\n- qty and stock validation\n- expiry happening exactly at creation time + `ttlMs`\n- confirm of unknown, released, already-confirmed and expired ids\n- `release` being safe to call twice\n- `removeItem` refusing reserved stock\n- reservations on one SKU not affecting another\n- every API status code\n\n**Decision for you:** the spec doesn't say what to do with a bad `ttlMs`, so it isn't checked. A missing or non-numeric `ttlMs` creates a reservation that never expires. Rejecting it would need a new error code, such as `INVALID_TTL` with a 400; tell me if you want that.",
+  "ttft_ms": 2528,
+  "type": "result",
+  "duration_ms": 54988,
+  "uuid": "7358940f-90ce-4d1b-a2f7-dc713528a531",
+  "ttft_stream_ms": 1315,
+  "time_to_request_ms": 336,
+  "time_to_request_phases_ms": {
+    "other": 4,
+    "system_prompt": 52,
+    "resume_other": 7,
+    "process_user_input": 1,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 251,
+    "tool_schema_build": 5,
+    "message_normalization": 2,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 24,
+  "time_to_request_cpu_ms": 369,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 8,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1315,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 6291,
+      "cacheReadInputTokens": 174362,
+      "cacheCreationInputTokens": 17550,
+      "webSearchRequests": 0,
+      "costUSD": 0.3011324,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 786,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17550,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

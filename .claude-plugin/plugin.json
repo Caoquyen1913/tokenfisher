@@ -1,7 +1,7 @@
 {
   "name": "tokenfisher",
-  "version": "0.2.0",
-  "description": "Catch only the tokens you need: measure where Claude Code tokens go, audit startup context, and compress noisy shell output (raw kept on disk). Savings proven with A/B evals.",
+  "version": "0.3.0",
+  "description": "Catch only the tokens you need: Sonnet main thread with Opus escalation and a Haiku scout, compressed shell output (raw kept on disk), session-size warnings, and reports on where Claude Code tokens go. Savings proven with A/B evals.",
   "author": { "name": "Kawin Tran" },
   "homepage": "https://github.com/Caoquyen1913/tokenfisher",
   "repository": "https://github.com/Caoquyen1913/tokenfisher",

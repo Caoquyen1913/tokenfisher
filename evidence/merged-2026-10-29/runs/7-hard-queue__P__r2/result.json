@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 15471,
+  "stop_reason": "end_turn",
+  "session_id": "a7e1af75-df23-4b76-ba5f-6467ec79d7b0",
+  "total_cost_usd": 0.0878906,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 13367,
+    "cache_read_input_tokens": 134466,
+    "output_tokens": 2096,
+    "output_tokens_details": {
+      "thinking_tokens": 203
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13367,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 347,
+        "cache_read_input_tokens": 38014,
+        "cache_creation_input_tokens": 1464,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1464
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2096,
+      "cacheReadInputTokens": 134466,
+      "cacheCreationInputTokens": 13367,
+      "webSearchRequests": 0,
+      "costUSD": 0.0878906,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 203,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13367,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js`, and `npm test` now passes with 6 tests (4 are new).\n\n- **Hang after a failed job:** a rejected job never decremented `running` or started the next job. A job that threw synchronously also broke the queue, and a plain return value crashed it because `.then` was called on a non-promise. Every job's outcome is now normalised to a promise, and `running` is decremented in every case.\n- **`onIdle()` resolving too early:** it only checked that nothing was pending. It now also requires nothing running.\n- **One job at a time after `pause()`/`resume()`:** `next()` started at most one job per call. It now loops until `concurrency` slots are full.\n\nThe new tests in `test/queue.test.js` cover:\n- Async and sync failures not stopping the queue.\n- `onIdle()` waiting for running jobs.\n- `onIdle()` resolving immediately when the queue is already idle.\n- `resume()` filling all four slots with concurrency 4.\n\nI didn't check that the new tests fail on the old code.",
+  "ttft_ms": 1828,
+  "type": "result",
+  "duration_ms": 18971,
+  "uuid": "ae5dea22-47ce-421a-ba43-feff6587143d",
+  "ttft_stream_ms": 1197,
+  "time_to_request_ms": 409,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 30,
+    "resume_other": 11,
+    "process_user_input": 1,
+    "input_attachments": 6,
+    "input_hooks": 69,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 273,
+    "tool_schema_build": 3,
+    "message_normalization": 0,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 6,
+  "time_to_request_cpu_ms": 433,
+  "time_to_request_major_faults": 4,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 10,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 1197,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2096,
+      "cacheReadInputTokens": 134466,
+      "cacheCreationInputTokens": 13367,
+      "webSearchRequests": 0,
+      "costUSD": 0.0878906,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 203,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13367,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

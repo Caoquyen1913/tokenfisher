@@ -1,0 +1,49 @@
+{
+  "config": {
+    "model": "opus",
+    "reps": 3,
+    "baseline": "A",
+    "margin": 0.05
+  },
+  "arms": {
+    "A": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.25264715555555556,
+      "totalCost": 6.8214732,
+      "tokens": 191027.7037037037,
+      "output": 4623.888888888889,
+      "turns": 6,
+      "errors": 0
+    },
+    "P": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.11083945555555558,
+      "totalCost": 2.9926653000000005,
+      "tokens": 184320.62962962964,
+      "output": 3333.074074074074,
+      "turns": 7.666666666666667,
+      "errors": 0
+    }
+  },
+  "comparisons": {
+    "P": {
+      "pairs": 27,
+      "costCut": [
+        0.5612875382989116,
+        0.5182714048499258,
+        0.6006886351883168
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    }
+  }
+}

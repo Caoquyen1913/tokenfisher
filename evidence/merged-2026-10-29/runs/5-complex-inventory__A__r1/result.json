@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 57965,
+  "stop_reason": "end_turn",
+  "session_id": "52b0a2d3-5f8b-482b-8fef-3b5ba90df816",
+  "total_cost_usd": 0.3275462,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 18405,
+    "cache_read_input_tokens": 174631,
+    "output_tokens": 7267,
+    "output_tokens_details": {
+      "thinking_tokens": 1170
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18405,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 964,
+        "cache_read_input_tokens": 40807,
+        "cache_creation_input_tokens": 3709,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3709
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 7267,
+      "cacheReadInputTokens": 174631,
+      "cacheCreationInputTokens": 18405,
+      "webSearchRequests": 0,
+      "costUSD": 0.3275462,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1170,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18405,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are in, and `npm test` passes: 180 tests, 0 failed. That's the 165 existing tests plus 15 new ones in `test/reservations.test.js`.\n\n**Store (`src/store.js`)**\n- Reservations are kept per id with their sku, qty and expiry time (creation time + `ttlMs`). Time comes only from the `clock` option; one test makes `Date.now` throw to prove nothing else is used.\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired. A reservation counts as expired once `clock() >= expiry`. `getStock` is unchanged.\n- `reserve` checks qty the same way `addItem` does, compares it against available stock, and returns ids like `res-1`, `res-2`, which are unique within a store.\n- Expired reservations stay stored but stop counting toward availability. That way `confirm` can still report `RESERVATION_EXPIRED` for them rather than `RESERVATION_NOT_FOUND`.\n- `confirm` removes the reservation and lowers physical stock. `release` just deletes the reservation, so calling it again or with an unknown id does nothing.\n- `removeItem` now checks against available stock instead of physical stock, so it can't take reserved units.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now includes `available`.\n- `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` return the status codes you specified. Any unexpected error is re-thrown rather than hidden behind one of those codes.\n- `DELETE` returns `{ status: 204 }` with no body.\n\n**Tests** cover: the exact expiry boundary (still active at ttl − 1, expired at ttl), confirming an unknown, released or already-confirmed id, confirming an expired reservation (stock is left untouched), calling `release` twice, `removeItem` with reserved and expired stock, and every API route and status code.\n\n**Decisions for you:**\n- **`ttlMs` isn't validated**, because the spec only defines `INVALID_QTY`. A missing or non-numeric `ttlMs` gives an expiry that is never reached, so the reservation never expires and holds that stock until it's confirmed or released. I'd suggest rejecting invalid values with a 400 (e.g. a new `INVALID_TTL` error), but that adds an error code the spec doesn't list.\n- **Expired reservations are never deleted** unless they're confirmed or released, so a long-running process will slowly build them up. Deleting them after a grace period would fix that, but `confirm` would then return `RESERVATION_NOT_FOUND` for them instead of `RESERVATION_EXPIRED`.",
+  "ttft_ms": 2215,
+  "type": "result",
+  "duration_ms": 64706,
+  "uuid": "587acf45-1814-4d9b-b805-68ee9e5061c9",
+  "ttft_stream_ms": 1033,
+  "time_to_request_ms": 317,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 45,
+    "resume_other": 7,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 1,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 241,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 19,
+  "time_to_request_cpu_ms": 351,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1033,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 7267,
+      "cacheReadInputTokens": 174631,
+      "cacheCreationInputTokens": 18405,
+      "webSearchRequests": 0,
+      "costUSD": 0.3275462,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 1170,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18405,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

@@ -1,0 +1,79 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "1 reserve returns unique string ids",
+      "ok": true
+    },
+    {
+      "name": "1 reserve validates qty",
+      "ok": true
+    },
+    {
+      "name": "1 reserve beyond available",
+      "ok": true
+    },
+    {
+      "name": "2 available vs physical stock",
+      "ok": true
+    },
+    {
+      "name": "3 expiry boundary is inclusive",
+      "ok": true
+    },
+    {
+      "name": "4 confirm sells stock",
+      "ok": true
+    },
+    {
+      "name": "4 confirm expired",
+      "ok": true
+    },
+    {
+      "name": "5 release is idempotent",
+      "ok": true
+    },
+    {
+      "name": "6 removeItem respects reservations",
+      "ok": true
+    },
+    {
+      "name": "7 GET /stock shows available",
+      "ok": true
+    },
+    {
+      "name": "8 POST /reservations statuses",
+      "ok": true
+    },
+    {
+      "name": "9 POST confirm statuses",
+      "ok": true
+    },
+    {
+      "name": "10 DELETE /reservations/:id",
+      "ok": true
+    },
+    {
+      "name": "existing behavior kept",
+      "ok": true
+    },
+    {
+      "name": "tests added for reservations",
+      "ok": true
+    }
+  ],
+  "passed": 18,
+  "total": 18,
+  "score": 1
+}

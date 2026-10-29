@@ -1,0 +1,117 @@
+{
+  "started": "2026-10-29T05:12:49.440Z",
+  "arms": {
+    "A": {
+      "label": "baseline",
+      "describe": "Claude Code defaults (opus): all built-in tools, built-in skills and agents, your MCP servers and claude.ai connectors",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Agent",
+        "Task",
+        "--max-budget-usd",
+        "5",
+        "--model",
+        "opus"
+      ]
+    },
+    "P": {
+      "label": "tokenfisher plugin",
+      "describe": "tokenfisher plugin, zero flags: Sonnet main thread with every tool, Opus escalation agent, Haiku scout, policy, output hook",
+      "args": [
+        "-p",
+        "--output-format",
+        "stream-json",
+        "--verbose",
+        "--no-session-persistence",
+        "--setting-sources",
+        "project,local",
+        "--permission-mode",
+        "acceptEdits",
+        "--allowedTools",
+        "Bash",
+        "PowerShell",
+        "Read",
+        "Edit",
+        "Write",
+        "Glob",
+        "Grep",
+        "Agent",
+        "Task",
+        "--max-budget-usd",
+        "5",
+        "--plugin-dir",
+        "~/data/dev/tokenfisher"
+      ]
+    }
+  },
+  "tasks": [
+    {
+      "id": "1-easy-range",
+      "level": "easy",
+      "prompt": "range(1, 5) in src/range.js should return [1, 2, 3, 4, 5] (both ends inclusive, as its comment says) but it misses the last number. Fix it. `npm test` runs the tests."
+    },
+    {
+      "id": "2-easy-slugify",
+      "level": "easy",
+      "prompt": "Implement slugify(text) in src/strings.js. Rules: lowercase; remove diacritics so Vietnamese and other Latin text becomes plain ASCII (đ/Đ becomes d); every run of characters that are not a-z or 0-9 becomes a single hyphen; no leading or trailing hyphens; at most 50 characters, and a slug cut at 50 must not end with a hyphen. Add tests for it next to the existing ones; `npm test` runs them."
+    },
+    {
+      "id": "3-medium-cart",
+      "level": "medium",
+      "prompt": "`npm test` is failing in this cart-pricing library. Find and fix the bug(s) in src/. Do not change the tests."
+    },
+    {
+      "id": "4-hard-logs",
+      "level": "hard",
+      "prompt": "Users report intermittent HTTP 500 errors on POST /checkout. The production log is in logs/app.log (large). Find the root cause, fix it in src/, and add a regression test under test/ that would have caught it. `npm test` must pass."
+    },
+    {
+      "id": "5-complex-inventory",
+      "level": "complex",
+      "prompt": "Add stock reservations with expiry to this inventory service. Keep all existing behavior.\n\nStore (src/store.js), using the store's clock option as the only time source:\n1. reserve(sku, qty, ttlMs) returns a unique string id. Throws Error('INVALID_QTY') unless qty is a positive integer, and Error('INSUFFICIENT_STOCK') if qty is more than what is available.\n2. getAvailable(sku) = physical stock minus active reservations. getStock(sku) keeps returning physical stock.\n3. A reservation expires when clock() >= creation time + ttlMs; expired reservations no longer count against availability.\n4. confirm(id) turns a reservation into a sale: physical stock goes down by its qty and the reservation is gone. Throws Error('RESERVATION_NOT_FOUND') for unknown, released or already confirmed ids, and Error('RESERVATION_EXPIRED') for expired ones.\n5. release(id) cancels a reservation; calling it again, or with an unknown id, does nothing.\n6. removeItem(sku, qty) must not remove reserved stock: it throws INSUFFICIENT_STOCK if qty is more than what is available.\n\nAPI (src/api.js):\n7. GET /stock/:sku also returns `available`.\n8. POST /reservations with body {sku, qty, ttlMs} returns 201 {id}; 409 {error: 'INSUFFICIENT_STOCK'}; 400 {error: 'INVALID_QTY'}.\n9. POST /reservations/:id/confirm returns 200 {sku, stock}; 404 {error: 'RESERVATION_NOT_FOUND'}; 410 {error: 'RESERVATION_EXPIRED'}.\n10. DELETE /reservations/:id returns 204.\n\nAdd tests for the new behavior. `npm test` must pass."
+    },
+    {
+      "id": "6-hard-semver",
+      "level": "hard",
+      "prompt": "Implement satisfies(version, range) in src/semver.js exactly as specified in docs/SPEC.md. Add tests for it; `npm test` must pass."
+    },
+    {
+      "id": "7-hard-queue",
+      "level": "hard",
+      "prompt": "Users of our job queue (src/queue.js) report three problems: the queue sometimes hangs forever after a job fails, onIdle() sometimes resolves while jobs are still running, and after pause()/resume() it only runs one job at a time even with concurrency 4. Fix the queue so it honours the contract in the comment at the top of src/queue.js, and add regression tests. `npm test` must pass."
+    },
+    {
+      "id": "8-complex-perf",
+      "level": "complex",
+      "prompt": "The finance dashboard times out: summarize() in src/report.js takes minutes on a day's orders (about 200,000). Make it fast (well under 1 second for 200,000 orders on a laptop) without changing its output in any way: the dashboard and the finance exports depend on the exact result, including ordering. `npm test` must pass; add a test that would catch a behavior change."
+    },
+    {
+      "id": "9-hard-billing",
+      "level": "hard",
+      "prompt": "Customers in Japan and Korea are being charged 100 times their invoice total by the payment gateway: a ¥1,500 invoice shows ¥1,500 on the PDF, but the card is charged ¥150,000. US and EU customers are fine. Find the root cause in this billing service, fix it, and add a regression test. `npm test` must pass."
+    }
+  ],
+  "reps": 3,
+  "model": "opus",
+  "parallel": 3,
+  "budget": 5,
+  "out": "eval/results/merged-2026-10-29",
+  "claude": "claude",
+  "timeoutMin": 20
+}

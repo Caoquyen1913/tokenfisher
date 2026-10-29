@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 23524,
+  "stop_reason": "end_turn",
+  "session_id": "37058eac-b702-436c-810c-4376a161e0b6",
+  "total_cost_usd": 0.1745796,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 12244,
+    "cache_read_input_tokens": 130878,
+    "output_tokens": 2521,
+    "output_tokens_details": {
+      "thinking_tokens": 217
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 12244,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 484,
+        "cache_read_input_tokens": 36386,
+        "cache_creation_input_tokens": 1969,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1969
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2521,
+      "cacheReadInputTokens": 130878,
+      "cacheCreationInputTokens": 12244,
+      "webSearchRequests": 0,
+      "costUSD": 0.1745796,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 217,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 12244,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `slugify` in `src/strings.js` and added 13 tests to `test/strings.test.js`. `npm test` passes all 15 tests (the 2 existing ones plus the new 13).\n\n**How it works:**\n1. It splits accented letters into the base letter plus separate accent marks, then removes the marks. This turns \"Tiếng Việt\" into \"tieng-viet\", \"Crème Brûlée\" into \"creme-brulee\", and so on.\n2. `đ`/`Đ` become `d` by a direct replacement, because they don't split into a letter plus an accent.\n3. It lowercases the text, turns every run of characters other than a–z and 0–9 into a single hyphen, and trims hyphens from both ends.\n4. It cuts the result to 50 characters, then removes any hyphen the cut left at the end.\n\nThe tests cover each rule, plus three edge cases: input where accents are typed as separate characters, input made only of separators (which gives an empty string), and a Vietnamese title long enough to need the 50-character cut.\n\n**Limitation:** a few Latin letters that aren't \"letter plus accent\", such as `ø`, `ł`, `ß` and `æ`, are not converted. They are treated as separators, so \"Søren\" becomes `s-ren`. You only named `đ`, so I didn't add others. If you want those transliterated, add them to the same replacement step as `đ`.",
+  "ttft_ms": 2583,
+  "type": "result",
+  "duration_ms": 26905,
+  "uuid": "fb28efb9-f7f3-4dbc-bf6a-f3767880e361",
+  "ttft_stream_ms": 1195,
+  "time_to_request_ms": 285,
+  "time_to_request_phases_ms": {
+    "other": 8,
+    "system_prompt": 57,
+    "resume_other": 15,
+    "process_user_input": 2,
+    "input_attachments": 8,
+    "input_hooks": 2,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 176,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 11,
+  "time_to_request_cpu_ms": 448,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 14,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1195,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2521,
+      "cacheReadInputTokens": 130878,
+      "cacheCreationInputTokens": 12244,
+      "webSearchRequests": 0,
+      "costUSD": 0.1745796,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 217,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 12244,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

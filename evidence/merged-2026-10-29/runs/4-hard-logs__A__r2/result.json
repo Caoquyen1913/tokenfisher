@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 23716,
+  "stop_reason": "end_turn",
+  "session_id": "091f0614-a920-4115-8730-ef3c7196a15b",
+  "total_cost_usd": 0.1904252,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 13398,
+    "cache_read_input_tokens": 170506,
+    "output_tokens": 2455,
+    "output_tokens_details": {
+      "thinking_tokens": 215
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13398,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 676,
+        "cache_read_input_tokens": 38140,
+        "cache_creation_input_tokens": 1369,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1369
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2455,
+      "cacheReadInputTokens": 170506,
+      "cacheCreationInputTokens": 13398,
+      "webSearchRequests": 0,
+      "costUSD": 0.1904252,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 215,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13398,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found the cause of the 500s and fixed it, and `npm test` passes (7/7). The new tests fail against the old code (3 failures), so they would have caught this.\n\n**Root cause:** All 37 of the `POST /checkout 500` errors in `logs/app.log` are the same error: `TypeError: Cannot read properties of null (reading '1')`. The debug line logged just before each one shows the order had a price with a thousands separator: `\"1,299.00\"` (15 times), `\"2,450.50\"` (12) or `\"1,005.99\"` (10). No successful checkout had a price like that, which is why the errors look intermittent: only orders containing an item priced at 1,000 or more fail.\n\n`parseAmount` in `src/money.js` only accepted amounts written as digits with an optional decimal part. A comma made the match fail and return `null`, and the code then read from that `null` without checking. The comment above the function also says bad input should throw `Error('Invalid amount: <input>')`, which it never did.\n\n**Fix (`src/money.js`):**\n- Prices with correctly placed thousands separators, like `1,299.00` or `1,234,567.8`, now parse correctly. The commas are removed before converting.\n- Input that still isn't a valid amount (`abc`, `1,29.00`, `12,34`) now throws `Invalid amount: …` as the comment says, instead of crashing with a `TypeError`.\n\n**Regression test (`test/checkout-thousands.test.js`):**\n- Checks that amounts with commas parse to the right number of cents.\n- Checks that badly formed amounts throw the documented error.\n- Replays the exact payload from the logged failure for `ord_10135` through the request handler and expects a 200 with a total of 245050 cents.\n\nOne thing I left alone: a truly invalid amount still returns a 500 from `/checkout`, now with a clear error message. A 400 would be the better response for bad client input; I can add that if you want it.",
+  "ttft_ms": 2803,
+  "type": "result",
+  "duration_ms": 29773,
+  "uuid": "dc8b92eb-bce8-4287-b3f0-8ca64621fc42",
+  "ttft_stream_ms": 1370,
+  "time_to_request_ms": 533,
+  "time_to_request_phases_ms": {
+    "other": 4,
+    "system_prompt": 47,
+    "resume_other": 7,
+    "process_user_input": 1,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 458,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 414,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 8,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1370,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2455,
+      "cacheReadInputTokens": 170506,
+      "cacheCreationInputTokens": 13398,
+      "webSearchRequests": 0,
+      "costUSD": 0.1904252,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 215,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13398,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}
