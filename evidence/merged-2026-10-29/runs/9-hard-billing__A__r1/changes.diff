@@ -1,0 +1,63 @@
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..860fd1d 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,8 +19,10 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Lookups tolerate lower-case codes ("jpy") so they never silently fall back
++// to DEFAULT_EXPONENT for a currency we do know.
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = CURRENCIES[String(code).toUpperCase()];
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+diff --git a/src/payments/gateway/payload.js b/src/payments/gateway/payload.js
+index 31fa0dc..20210bb 100644
+--- a/src/payments/gateway/payload.js
++++ b/src/payments/gateway/payload.js
+@@ -5,10 +5,12 @@ const { toGatewayCurrency } = require('../../lib/currency/normalize');
+ 
+ // Body of POST /v1/charges on the card gateway.
+ function buildChargePayload(invoice, customer) {
+-  const currency = toGatewayCurrency(invoice.currency);
++  // Convert using the invoice's ISO code: the registry is keyed by upper-case
++  // codes, so passing the lower-cased gateway code would miss JPY/KRW and fall
++  // back to 2 decimals (charging 100x).
+   return {
+-    amount: toMinor(invoice.total, currency),
+-    currency,
++    amount: toMinor(invoice.total, invoice.currency),
++    currency: toGatewayCurrency(invoice.currency),
+     customer: customer.gatewayId,
+     description: `Invoice ${invoice.number}`,
+     metadata: { invoice_id: invoice.id },
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..e81a7c1 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,22 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++// Regression: zero-decimal currencies were charged 100x because the lower-cased
++// gateway code missed the registry and fell back to 2 decimals.
++test('JPY invoice is charged in whole yen, not x100', () => {
++  const p = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(p.amount, 1500);
++  assert.strictEqual(p.currency, 'jpy');
++});
++
++test('KRW invoice is charged in whole won, not x100', () => {
++  const p = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 25000 }, customer);
++  assert.strictEqual(p.amount, 25000);
++  assert.strictEqual(p.currency, 'krw');
++});
++
++test('BHD invoice is charged in fils (3 decimals)', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'BHD', total: 1.234 }, customer);
++  assert.strictEqual(p.amount, 1234);
++});

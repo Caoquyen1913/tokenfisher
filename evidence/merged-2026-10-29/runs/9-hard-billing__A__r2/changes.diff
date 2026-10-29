@@ -1,0 +1,76 @@
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..fe6580d 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,25 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Lookups accept any case ("jpy" from the gateway is still JPY), so a lower-cased
++// code never silently falls back to DEFAULT_EXPONENT.
++function lookup(code) {
++  const key = String(code).trim().toUpperCase();
++  return Object.prototype.hasOwnProperty.call(CURRENCIES, key) ? CURRENCIES[key] : undefined;
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return lookup(code) !== undefined;
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/src/payments/gateway/payload.js b/src/payments/gateway/payload.js
+index 31fa0dc..55d62df 100644
+--- a/src/payments/gateway/payload.js
++++ b/src/payments/gateway/payload.js
+@@ -5,9 +5,10 @@ const { toGatewayCurrency } = require('../../lib/currency/normalize');
+ 
+ // Body of POST /v1/charges on the card gateway.
+ function buildChargePayload(invoice, customer) {
++  // Convert with the invoice's own code: the registry is keyed by upper-case ISO codes.
+   const currency = toGatewayCurrency(invoice.currency);
+   return {
+-    amount: toMinor(invoice.total, currency),
++    amount: toMinor(invoice.total, invoice.currency),
+     currency,
+     customer: customer.gatewayId,
+     description: `Invoice ${invoice.number}`,
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..798dac1 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,22 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++// Regression: the payload lower-cases the currency for the gateway; converting with
++// that code missed the registry and used 2 decimals, charging 100x for JPY/KRW.
++test('JPY invoice is charged in whole yen', () => {
++  const p = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(p.amount, 1500);
++  assert.strictEqual(p.currency, 'jpy');
++});
++
++test('KRW invoice is charged in whole won', () => {
++  const p = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 25000 }, customer);
++  assert.strictEqual(p.amount, 25000);
++  assert.strictEqual(p.currency, 'krw');
++});
++
++test('BHD invoice is charged in fils (3 decimals)', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'BHD', total: 1.234 }, customer);
++  assert.strictEqual(p.amount, 1234);
++});

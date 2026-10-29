@@ -3,7 +3,6 @@
 const path = require('path');
 
 const PLUGIN_ROOT = path.join(__dirname, '..');
-const MAX_PROFILE = path.join(PLUGIN_ROOT, 'profiles', 'max');
 const CORE_TOOLS = 'Bash,PowerShell,Read,Edit,Write,Glob,Grep';
 
 // Behavioural layer of tokenfisher: ~90 tokens, aimed at reads and re-reads, not at answer quality.
@@ -41,10 +40,12 @@ function arms({ model }) {
     T: { label: 'core tools', describe: `${model} + B + only the 7 core tools (${CORE_TOOLS})`, args: ['--model', model, ...core] },
     S: { label: 'core tools + sonnet', describe: 'T with the model routed to Sonnet', args: ['--model', 'sonnet', ...core] },
     L: { label: 'core tools + sonnet + low effort', describe: 'S with --effort low', args: ['--model', 'sonnet', ...core, '--effort', 'low'] },
-    M: {
-      label: 'max profile',
-      describe: 'tokenfisher-max plugin: Sonnet main thread with the 7 core tools, escalation to an Opus subagent, Haiku scout, output hook, no MCP',
-      args: ['--plugin-dir', PLUGIN_ROOT, '--plugin-dir', MAX_PROFILE, '--strict-mcp-config'],
+    // The plugin as users install it. Since 0.3.0 the plugin itself runs the main thread on Sonnet
+    // (agents/main.md), so arms that pass --plugin-dir also get its SessionStart policy; --model still wins.
+    P: {
+      label: 'tokenfisher plugin',
+      describe: 'tokenfisher plugin, zero flags: Sonnet main thread with every tool, Opus escalation agent, Haiku scout, policy, output hook',
+      args: ['--plugin-dir', PLUGIN_ROOT],
     },
     C: { label: 'tokenfisher + sonnet', describe: 'B with model routed to Sonnet', args: ['--model', 'sonnet', ...diet] },
     D: { label: 'tokenfisher + effort medium', describe: `B (${model}) with --effort medium`, args: ['--model', model, ...diet, '--effort', 'medium'] },

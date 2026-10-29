@@ -10,7 +10,19 @@ Giống chim bói cá: đứng im quan sát, rồi lao xuống đúng một phá
 
 ## Kết quả: cùng prompt, chấm bằng test ẩn, chi phí thật
 
-120 lượt chạy Claude Code headless: 8 task từ dễ tới phức tạp × 5 cấu hình × 3 lần lặp. Chấm bằng bộ test ẩn mà agent không thấy. Mỗi bậc thêm đúng một cách cắt so với bậc trước.
+**Cài plugin (bản 0.3.0, không cần cờ) rẻ hơn Claude Code mặc định trên Opus 56,1% mà không giảm chất lượng:** 9 task × 3 lần cho mỗi bên, lượt nào cũng qua hết check ẩn.
+
+| mức | mặc định (Opus) | plugin tokenfisher | thay đổi |
+|---|---|---|---|
+| easy | $0,141 | $0,075 | −46,9% |
+| medium | $0,146 | $0,081 | −44,4% |
+| hard | $0,286 | $0,128 | −55,2% |
+| complex | $0,351 | $0,127 | −63,8% |
+| **tất cả** | **$0,253** | **$0,111** | **−56,1%** (95% CI −60,1% … −51,8%) |
+
+Plugin giữ mọi tool và MCP server của bạn. Sonnet tự giải hết các task; agent Opus chưa được gọi lần nào. Bằng chứng: [`evidence/merged-2026-10-29/`](evidence/merged-2026-10-29/REPORT.md), tổng $9,81.
+
+Bảng bậc thang dưới đây cho thấy phần tiết kiệm đến từ đâu. 120 lượt chạy Claude Code headless: 8 task từ dễ tới phức tạp × 5 cấu hình × 3 lần lặp. Chấm bằng bộ test ẩn mà agent không thấy. Mỗi bậc thêm đúng một cách cắt so với bậc trước.
 
 | bậc | cấu hình | chất lượng (check ẩn đạt) | chi phí so với baseline (CI 95%) |
 |---|---|---|---|
@@ -18,7 +30,7 @@ Giống chim bói cá: đứng im quan sát, rồi lao xuống đúng một phá
 | **T** | Opus + chỉ 7 tool lõi + bỏ MCP + prompt đọc gọn + hook nén | 100% (24/24) | **−31,4%** (−22,0% … −41,6%) |
 | **S** | T chạy Sonnet | 100% (24/24) | **−73,7%** (−69,1% … −78,7%) |
 | **L** | S với `--effort low` | 100% (24/24) | **−76,5%** (−72,5% … −80,8%) |
-| **M** | plugin `tokenfisher-max` (S + subagent Opus khi khó + scout Haiku), không cần cờ | 100% (24/24) | **−73,6%** (−70,8% … −76,4%) |
+| **M** | profile `tokenfisher-max` cũ (S + subagent Opus khi khó + scout Haiku), không cần cờ | 100% (24/24) | **−73,6%** (−70,8% … −76,4%) |
 
 Theo mức độ:
 
@@ -34,8 +46,9 @@ Theo mức độ:
 - **Không lượt nào giảm chất lượng trong 120 lượt, từ dễ tới phức tạp.** Nhưng cấu hình nào cũng đạt 100%, nghĩa là bộ task vẫn chưa phân biệt được cấu hình mạnh với yếu. Nên hiểu là "không thấy suy giảm trên 8 task này", không phải "không suy giảm ở mọi nơi".
 - **Schema tool là chi phí ẩn.** Khoảng 70% mỗi request là schema của các tool tích hợp mà task code không bao giờ gọi. Chỉ giữ 7 tool lõi đã giảm 31% chi phí Opus, không cần đổi model.
 - **Đòn bẩy lớn nhất là chọn model.** Sonnet với 7 tool lõi rẻ hơn 74% và đạt mọi check ẩn, kể cả 3 task hard và 2 task complex.
-- **Nhánh leo thang lên Opus trong `tokenfisher-max` chưa được dùng lần nào.** Sonnet tự giải quyết mọi task, nên M tốn đúng bằng S. Lưới an toàn đã được nối và xác nhận nạp được, nhưng chưa được chứng minh là kích hoạt đúng lúc hay giúp được gì.
+- **Nhánh leo thang lên Opus trong M chưa được dùng lần nào.** Sonnet tự giải quyết mọi task, nên M tốn đúng bằng S. Lưới an toàn đã được nối và xác nhận nạp được, nhưng chưa được chứng minh là kích hoạt đúng lúc hay giúp được gì.
 - **`--effort low` tiết kiệm thêm một chút (−76,5%)**, không đo được ảnh hưởng chất lượng trên các task này.
+- **Mặc định của plugin từ bản 0.3.0 nằm giữa A và S.** Nó chạy Sonnet nhưng giữ mọi tool và MCP server của bạn: −56,1% thay vì −73,7% của S. Khoảng chênh là cái giá để không mất tool nào.
 
 Bằng chứng cho từng lượt (transcript, kết quả chấm, diff): [`evidence/ladder-2026-10-29/`](evidence/ladder-2026-10-29/REPORT.md). Tổng chi phí: $16,55 theo giá list.
 
@@ -49,9 +62,9 @@ Lần eval đầu (60 lượt, 5 task đầu, khi dự án còn tên tạm `toke
 
 | công cụ | làm gì |
 |---|---|
+| **Luồng chính chạy Sonnet** | Plugin chạy hội thoại chính trên Sonnet (`agents/main.md`) và giữ mọi tool, nên MCP server và tool web vẫn được nạp khi bạn cần. Việc khó (thiết kế xuyên module, logic concurrency/bảo mật, spec rắc rối, bug sửa 2 lần chưa xong) chuyển cho subagent `opus-architect`; `scout` chạy Haiku để đọc file/log lớn. Một policy ~120 token lúc mở phiên nhắc tìm trước rồi mới đọc và gộp tool call. Muốn Opus làm model chính thì mở phiên bằng `claude --model opus`. |
 | **`token-report`** | Đọc transcript Claude Code và cho biết token đi đâu: input, cache write, cache read, output; theo model, theo project, main hay subagent. Có thêm **rent** của từng tool result (chi phí nằm lại trong context), số lần cache bị build lại, các phiên quá dài, kèm gợi ý cụ thể. `--simulate` chạy lại bộ lọc trên output shell cũ để ước tính mức tiết kiệm cho *chính cách bạn làm việc*. |
 | **`token-audit`** | Tách những gì mỗi phiên nạp trước câu hỏi đầu tiên (system prompt, danh sách skill/agent, tên tool và hướng dẫn MCP, output hook, CLAUDE.md/memory). Truy từng mục về file hoặc plugin sinh ra nó, rồi xếp hạng những gì bạn bỏ được. |
-| **`tokenfisher-max`** (plugin bật riêng) | Biến cấu hình rẻ thành mặc định, không cần cờ nào. Luồng chính chạy Sonnet, chỉ có Bash, PowerShell, Read, Edit, Write, Glob, Grep. Subagent `opus-architect` nhận việc khó: thiết kế xuyên module, logic concurrency/bảo mật, spec rắc rối, bug sửa 2 lần chưa xong. `scout` chạy Haiku để đọc file/log lớn. Prefix mỗi request: 13,4k token so với 40,8k. Đánh đổi: phiên đó không có WebFetch/WebSearch, notebook và các tool tích hợp khác; tắt plugin cho những phiên cần chúng. |
 | **squash hook** | Hook `PostToolUse` cho `Bash` và `PowerShell`. Lệnh chạy nguyên vẹn (permission, cwd, exit code không đổi); chỉ phần Claude *đọc* được nén, còn bản đầy đủ được lưu ra file để Claude đọc lại khi cần. |
 | **cảnh báo phiên** | Hook `UserPromptSubmit`. Khi context vượt 80k token (rồi mỗi +40k), hoặc khi bạn quay lại sau lúc prompt cache đã hết hạn (5 phút, hoặc 1 giờ nếu phiên dùng TTL 1h), hook báo một lần cho cả bạn lẫn Claude: mọi tool result bị tính tiền lại ở mỗi lượt sau, nên `/compact`, hoặc `/clear` khi chuyển việc. Hook chỉ đọc phần đuôi transcript. Đổi ngưỡng bằng `TOKENFISHER_WARN_TOKENS` (`0` để tắt). |
 | **A/B eval** | Bộ công cụ tạo ra các số liệu trên: prompt cố định, repo mới cho mỗi lượt, bộ chấm ẩn, selftest cho bộ chấm, CI bootstrap ghép cặp, bằng chứng cho từng lượt. Bạn có thể thêm task của mình. |
@@ -65,13 +78,23 @@ Trong Claude Code:
 /plugin install tokenfisher@tokenfisher
 ```
 
-Muốn cấu hình rẻ nhất đã đo, cài thêm profile max. Profile này chuyển mọi phiên sang Sonnet với 7 tool lõi, nên hãy tắt nó bằng `/plugin` khi cần tool web hoặc cần Opus làm model chính:
+Marketplace bên thứ ba mặc định không tự cập nhật. Bật trong `/plugin` → Marketplaces → `tokenfisher`, hoặc cập nhật tay:
 
 ```
-/plugin install tokenfisher-max@tokenfisher
+/plugin marketplace update tokenfisher
 ```
 
-Cấu hình tương tự cho một phiên mà không cần plugin:
+Mỗi ngày một lần, lúc mở phiên, plugin cũng kiểm tra version trên GitHub và báo khi có bản mới. Tắt bằng `TOKENFISHER_NO_UPDATE_CHECK=1`.
+
+Sau khi cài, phiên mới chạy Sonnet với đủ tool. Muốn một phiên chạy Opus:
+
+```bash
+claude --model opus
+```
+
+Đặt `"model"` trong `settings.json` không thắng được agent chính của plugin; cờ `--model` thì có.
+
+Cấu hình rẻ nhất đã đo (arm S) còn bỏ mọi tool trừ 7 tool lõi, đổi lại phiên đó không có MCP và tool web:
 
 ```bash
 claude --model sonnet --tools Bash,PowerShell,Read,Edit,Write,Glob,Grep --strict-mcp-config

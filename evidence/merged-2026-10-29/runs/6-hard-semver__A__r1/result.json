@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 103936,
+  "stop_reason": "end_turn",
+  "session_id": "64961192-01a6-40eb-8419-559a4d81ff9a",
+  "total_cost_usd": 0.49646219999999996,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 24539,
+    "cache_read_input_tokens": 233111,
+    "output_tokens": 12674,
+    "output_tokens_details": {
+      "thinking_tokens": 2965
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24539,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 780,
+        "cache_read_input_tokens": 48941,
+        "cache_creation_input_tokens": 1709,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1709
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12674,
+      "cacheReadInputTokens": 233111,
+      "cacheCreationInputTokens": 24539,
+      "webSearchRequests": 0,
+      "costUSD": 0.49646219999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2965,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24539,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've implemented `satisfies(version, range)` in `src/semver.js` and added tests in `test/semver.test.js`. `npm test` passes: 14 tests, 0 failures.\n\n**How it works:** each range is first rewritten into simple comparisons (`>=`, `<`, and so on) against full versions. Tilde, caret, hyphen ranges and partial versions like `1.2` or `1.x` all get rewritten this way, following the spec's tables. The version is then checked against each `||`-separated part of the range. A version with a prerelease (like `1.2.3-beta`) only matches if one of the comparisons in that part also has a prerelease on the same `MAJOR.MINOR.PATCH`. Bad input of any kind, including non-strings, returns `false` and never throws. Version numbers are stored as BigInt, so very large numbers compare correctly.\n\n**What the tests cover:** every row of every table in the spec, checked just inside and just outside each limit. They also cover the full prerelease ordering example from semver.org, the prerelease rules from the spec, `||` and space-separated combinations, the `v` prefix, surrounding whitespace, build metadata, and invalid versions and ranges.\n\n**Where the spec is silent, I chose:**\n- **Number after a wildcard** (`1.x.3`, `>=x.1`): treated as an invalid range, so the result is `false`.\n- **Prerelease on a partial version** (`1.x-beta`): also invalid.\n- **Space after an operator:** allowed only for `<`, `<=`, `>`, `>=` and `=`, as the spec lists. So `~ 1.2.3` and `^ 1.2.3` are invalid, unlike in npm's `semver` package, which allows them.\n- **`>*` and `<*`:** match nothing. `>=*` and `<=*` match any version.\n- **Leading zeros in prerelease parts** (`1.0.0-01`): allowed, and all-digit parts compare as numbers. The spec forbids leading zeros only in `MAJOR.MINOR.PATCH`.\n- **Upper limits like `<2.0.0`:** used exactly as the spec writes them. This doesn't let prereleases such as `2.0.0-alpha` match by accident, because of the prerelease rule above.\n\nAny of these is a one-line change if you'd rather do it differently.",
+  "ttft_ms": 2352,
+  "type": "result",
+  "duration_ms": 108532,
+  "uuid": "beb649bb-2d60-4b6b-9185-ad5d383472b8",
+  "ttft_stream_ms": 1216,
+  "time_to_request_ms": 299,
+  "time_to_request_phases_ms": {
+    "other": 4,
+    "system_prompt": 49,
+    "resume_other": 7,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 0,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 222,
+    "tool_schema_build": 3,
+    "message_normalization": 0,
+    "client_creation": 2,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 23,
+  "time_to_request_cpu_ms": 355,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1217,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12674,
+      "cacheReadInputTokens": 233111,
+      "cacheCreationInputTokens": 24539,
+      "webSearchRequests": 0,
+      "costUSD": 0.49646219999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2965,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24539,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

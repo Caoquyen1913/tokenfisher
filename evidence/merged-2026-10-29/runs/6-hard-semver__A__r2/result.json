@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 96769,
+  "stop_reason": "end_turn",
+  "session_id": "d427e16b-a5d8-41f8-9f74-5121eedb6c63",
+  "total_cost_usd": 0.47381860000000003,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 23711,
+    "cache_read_input_tokens": 232113,
+    "output_tokens": 11883,
+    "output_tokens_details": {
+      "thinking_tokens": 2798
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23711,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 720,
+        "cache_read_input_tokens": 48687,
+        "cache_creation_input_tokens": 1135,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1135
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 11883,
+      "cacheReadInputTokens": 232113,
+      "cacheCreationInputTokens": 23711,
+      "webSearchRequests": 0,
+      "costUSD": 0.47381860000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2798,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 23711,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've implemented `satisfies(version, range)` in `src/semver.js` and added tests in `test/semver.test.js`. `npm test` passes: 14 tests, 0 failed. I haven't committed anything.\n\n**How it works:** it reads the version, then splits the range on `||` into comparator sets. Each comparator (tilde, caret, X-range or hyphen range) is rewritten as plain `<`, `<=`, `>`, `>=` and `=` checks against full versions. The version must pass every check in at least one set, and the prerelease rule is checked on those plain comparators. Version numbers are compared as big integers, so very large numbers still compare correctly. Any bad input, including a non-string, returns `false` and never throws.\n\n**Tests:** every row of every table in `docs/SPEC.md`, with values on both sides of each boundary. They also cover the prerelease ordering rules and the spec's three prerelease examples, plus invalid versions and ranges, `||` and multi-comparator sets, whitespace after operators, build metadata and very large numbers.\n\nOne test failed on the first run, and it was a mistake in the test, not the code. It expected `1.0.0-rc.1` to satisfy `<1.0.0`, but the spec's prerelease rule says it doesn't, because `<1.0.0` has no prerelease. I fixed the test.\n\n**Choices where the spec says nothing:**\n- **Wildcards in the middle:** once a position is a wildcard, the ones after it are too, so `1.x.3` means `1.x`.\n- **Wildcard plus prerelease:** something like `1.x-beta` is treated as an invalid range.\n- **Wildcard with an operator:** `<*` and `>*` match nothing, and `>=*`, `<=*`, `~*` and `^*` match any version.\n- **Empty side of `||`:** treated as \"any version\", the same as an empty range.\n- **`v` prefix in ranges:** allowed, as in `>=v1.2.3`.\n- **Leading zeros in numeric prerelease identifiers:** accepted, so `1.0.0-01` is valid.",
+  "ttft_ms": 2708,
+  "type": "result",
+  "duration_ms": 100419,
+  "uuid": "ef253346-560a-4774-a328-8fe5f4857769",
+  "ttft_stream_ms": 1327,
+  "time_to_request_ms": 355,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 66,
+    "resume_other": 6,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 246,
+    "tool_schema_build": 6,
+    "message_normalization": 2,
+    "client_creation": 9,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 2,
+  "time_to_request_cpu_ms": 361,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 10,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1327,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 11883,
+      "cacheReadInputTokens": 232113,
+      "cacheCreationInputTokens": 23711,
+      "webSearchRequests": 0,
+      "costUSD": 0.47381860000000003,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2798,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 23711,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

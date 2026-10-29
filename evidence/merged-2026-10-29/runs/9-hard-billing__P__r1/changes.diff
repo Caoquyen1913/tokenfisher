@@ -1,0 +1,38 @@
+diff --git a/src/payments/gateway/payload.js b/src/payments/gateway/payload.js
+index 31fa0dc..95730c0 100644
+--- a/src/payments/gateway/payload.js
++++ b/src/payments/gateway/payload.js
+@@ -7,7 +7,8 @@ const { toGatewayCurrency } = require('../../lib/currency/normalize');
+ function buildChargePayload(invoice, customer) {
+   const currency = toGatewayCurrency(invoice.currency);
+   return {
+-    amount: toMinor(invoice.total, currency),
++    // toMinor needs the stored upper-case ISO code; the gateway code is lower-case.
++    amount: toMinor(invoice.total, invoice.currency),
+     currency,
+     customer: customer.gatewayId,
+     description: `Invoice ${invoice.number}`,
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..bdaf277 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -9,6 +9,19 @@ test('USD invoice is charged in cents', () => {
+   assert.strictEqual(p.currency, 'usd');
+ });
+ 
++test('zero-decimal currencies (JPY, KRW) are charged in whole units', () => {
++  const jpy = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(jpy.amount, 1500);
++  assert.strictEqual(jpy.currency, 'jpy');
++  const krw = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 20000 }, customer);
++  assert.strictEqual(krw.amount, 20000);
++});
++
++test('three-decimal currency (KWD) is charged in fils', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'KWD', total: 1.5 }, customer);
++  assert.strictEqual(p.amount, 1500);
++});
++
+ test('EUR invoice is charged in cents', () => {
+   const p = buildChargePayload({ id: 'i2', number: 'INV-2', currency: 'EUR', total: 99.99 }, customer);
+   assert.strictEqual(p.amount, 9999);

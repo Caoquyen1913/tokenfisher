@@ -1,13 +1,13 @@
 {
   "name": "tokenfisher",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Claude Code plugin: measure where tokens go, audit startup context, compress noisy shell output. Proven with A/B evals.",
   "license": "MIT",
   "author": "Kawin Tran",
   "repository": { "type": "git", "url": "https://github.com/Caoquyen1913/tokenfisher.git" },
   "scripts": {
-    "test": "node --test test/squash.test.js test/audit.test.js test/session-warn.test.js",
+    "test": "node --test test/squash.test.js test/audit.test.js test/session-warn.test.js test/update-check.test.js",
     "report": "node bin/token-report.js",
     "audit": "node bin/token-audit.js",
     "eval:selftest": "node eval/selftest.js",

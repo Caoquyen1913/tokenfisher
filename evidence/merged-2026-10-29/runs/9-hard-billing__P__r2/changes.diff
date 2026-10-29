@@ -1,0 +1,49 @@
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..040fe54 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,23 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Callers may hold the gateway's lower-case form ("jpy"); look up by the stored upper-case code.
++function lookup(code) {
++  return CURRENCIES[String(code).trim().toUpperCase()];
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return Object.prototype.hasOwnProperty.call(CURRENCIES, String(code).trim().toUpperCase());
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..4bffd9b 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,13 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++test('zero-decimal currencies are not scaled by 100 in the charge payload', () => {
++  const jpy = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(jpy.amount, 1500);
++  assert.strictEqual(jpy.currency, 'jpy');
++  const krw = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 20000 }, customer);
++  assert.strictEqual(krw.amount, 20000);
++  const kwd = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'KWD', total: 1.234 }, customer);
++  assert.strictEqual(kwd.amount, 1234);
++});

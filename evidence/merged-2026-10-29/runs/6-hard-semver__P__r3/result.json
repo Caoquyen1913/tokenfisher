@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 64062,
+  "stop_reason": "end_turn",
+  "session_id": "49c3430a-b1b8-472a-8f32-e26bf63e1ed4",
+  "total_cost_usd": 0.218322,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 23174,
+    "cache_read_input_tokens": 233220,
+    "output_tokens": 10228,
+    "output_tokens_details": {
+      "thinking_tokens": 2894
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 23174,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 346,
+        "cache_read_input_tokens": 48548,
+        "cache_creation_input_tokens": 737,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 737
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 10228,
+      "cacheReadInputTokens": 233220,
+      "cacheCreationInputTokens": 23174,
+      "webSearchRequests": 0,
+      "costUSD": 0.218322,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2894,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 23174,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 13,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`satisfies(version, range)` is implemented in `src/semver.js` and `npm test` passes: 113 tests, 0 failed. The new tests are in `test/satisfies.test.js` and cover every table in `docs/SPEC.md`, plus invalid inputs and prerelease edge cases. The suite passes only after I corrected two test cases of my own that had wrong expectations.\n\nFor cases the spec doesn't cover, I made these choices:\n- **Wildcards:** a wildcard in one position makes every later position a wildcard too, so `1.x.3` is treated as `1.x`.\n- **`>*` and `<*`:** these match nothing.\n- **Operators on `~` and `^`:** whitespace after them is allowed, e.g. `~ 1.2.3`.\n- **Prerelease identifiers:** numeric ones with leading zeros are accepted. The spec only bans leading zeros in major/minor/patch.\n- **Very large numbers:** these compare exactly, since versions are kept as digit strings rather than JS numbers.",
+  "ttft_ms": 1572,
+  "type": "result",
+  "duration_ms": 67435,
+  "uuid": "211f6a2a-5dd6-42cd-a442-a27152567920",
+  "ttft_stream_ms": 902,
+  "time_to_request_ms": 256,
+  "time_to_request_phases_ms": {
+    "other": 13,
+    "system_prompt": 12,
+    "resume_other": 0,
+    "process_user_input": 0,
+    "input_attachments": 4,
+    "input_hooks": 33,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 3,
+    "model_config_wait": 0,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 175,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 20,
+  "time_to_request_cpu_ms": 272,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 902,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 10228,
+      "cacheReadInputTokens": 233220,
+      "cacheCreationInputTokens": 23174,
+      "webSearchRequests": 0,
+      "costUSD": 0.218322,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2894,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 23174,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

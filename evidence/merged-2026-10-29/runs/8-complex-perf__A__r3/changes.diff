@@ -1,0 +1,205 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..34ebcf7 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -9,12 +9,63 @@ function byRank(a, b) {
+ }
+ 
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  // May need a second pass below, so don't consume a one-shot iterable twice.
++  if (!Array.isArray(orders)) orders = Array.from(orders);
++  const seen = new Set();
+   const groups = [];
++  const groupsByCustomer = new Map();
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groupsByCustomer.get(order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++      groupsByCustomer.set(order.customerId, group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++  }
++
++  // byRank is a strict total order for well-formed groups, so one final sort gives
++  // the same leaderboard as re-sorting after every order. For malformed data the
++  // comparator can be inconsistent and the result depends on the sort history,
++  // so replay the incremental sort to reproduce it exactly.
++  if (!groups.every(isWellFormed) || !hasComparableCustomerIds(groups)) {
++    return summarizeIncremental(orders, limit);
++  }
++  groups.sort(byRank);
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++function isWellFormed(g) {
++  return typeof g.spendCents === 'number' && Number.isFinite(g.spendCents) && typeof g.firstOrderAt === 'string';
++}
++
++function hasComparableCustomerIds(groups) {
++  if (groups.length === 0) return true;
++  const type = typeof groups[0].customerId;
++  if (type === 'string') return groups.every((g) => typeof g.customerId === 'string');
++  if (type === 'number') return groups.every((g) => typeof g.customerId === 'number' && !Number.isNaN(g.customerId));
++  return false;
++}
++
++// The original algorithm (quadratic); only used for malformed input.
++function summarizeIncremental(orders, limit) {
++  const seen = new Set();
++  const groups = [];
++  for (const order of orders) {
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+     let group = groups.find((g) => g.customerId === order.customerId);
+@@ -27,7 +78,6 @@ function summarize(orders, limit = 10) {
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+     groups.sort(byRank);
+   }
+   return groups
+diff --git a/test/reference-summarize.js b/test/reference-summarize.js
+new file mode 100644
+index 0000000..3c6890f
+--- /dev/null
++++ b/test/reference-summarize.js
+@@ -0,0 +1,41 @@
++// Verbatim copy of the original (quadratic) summarize(), kept as the behavioral reference.
++// Do not optimize: tests compare src/report.js against this.
++// Top-customers report for the finance dashboard.
++// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
++const EUR_TO_USD = 1.08;
++
++function byRank(a, b) {
++  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++}
++
++function summarize(orders, limit = 10) {
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    // Keep the leaderboard sorted as we go.
++    groups.sort(byRank);
++  }
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++module.exports = { summarize };
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..bbf0e45 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,74 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++// Deterministic PRNG so failures are reproducible.
++function rng(seed) {
++  return () => {
++    seed = (seed * 1103515245 + 12345) % 2147483648;
++    return seed / 2147483648;
++  };
++}
++
++// Small pools force collisions: duplicate ids, spend ties, firstOrderAt ties, refunds, EUR rounding.
++function randomOrders(seed, n, customers) {
++  const r = rng(seed);
++  const pick = (xs) => xs[Math.floor(r() * xs.length)];
++  const orders = [];
++  for (let i = 0; i < n; i++) {
++    if (orders.length && r() < 0.1) {
++      // Upstream retry: same id, possibly different payload.
++      orders.push({ ...pick(orders), status: pick(['paid', 'refunded', 'pending']) });
++      continue;
++    }
++    orders.push(order(
++      `o${Math.floor(r() * n)}`,
++      `cus_${Math.floor(r() * customers)}`,
++      pick(['paid', 'paid', 'paid', 'refunded', 'pending']),
++      pick([0, 100, 250, 999, 1000, 1234]),
++      `2026-10-0${1 + Math.floor(r() * 3)}T1${Math.floor(r() * 3)}:00:00Z`,
++      pick(['USD', 'EUR']),
++    ));
++  }
++  return orders;
++}
++
++test('matches the reference implementation exactly, including order and tie-breaks', () => {
++  const reference = require('./reference-summarize').summarize;
++  for (let seed = 1; seed <= 200; seed++) {
++    const orders = randomOrders(seed, 1 + (seed % 300), 1 + (seed % 40));
++    for (const limit of [undefined, 1, 3, 10, 1000]) {
++      assert.deepStrictEqual(summarize(orders, limit), reference(orders, limit), `seed ${seed}, limit ${limit}`);
++    }
++  }
++});
++
++test('matches the reference implementation on malformed data', () => {
++  const reference = require('./reference-summarize').summarize;
++  const orders = [
++    order('a', 'cus_a', 'paid', NaN, '2026-10-01T10:00:00Z'),
++    order('b', 'cus_b', 'paid', 500, undefined),
++    order('c', NaN, 'paid', 300, '2026-10-01T10:00:00Z'),
++    order('d', NaN, 'paid', 300, '2026-10-01T10:00:00Z'),
++    order('e', 7, 'paid', 300, '2026-10-01T10:00:00Z'),
++    order('f', 'cus_f', 'paid', '200', '2026-10-01T10:00:00Z'),
++    order('g', 'cus_g', 'paid', 500, '2026-10-01T09:00:00Z'),
++  ];
++  for (let i = 0; i < orders.length; i++) {
++    const rotated = orders.slice(i).concat(orders.slice(0, i));
++    assert.deepStrictEqual(summarize(rotated), reference(rotated));
++  }
++});
++
++test('accepts a one-shot iterable', () => {
++  const orders = randomOrders(7, 200, 20);
++  assert.deepStrictEqual(summarize(orders.values()), summarize(orders));
++});
++
++test('summarizes a day of orders (200,000) quickly', () => {
++  const orders = randomOrders(42, 200000, 50000);
++  const start = process.hrtime.bigint();
++  summarize(orders);
++  const ms = Number(process.hrtime.bigint() - start) / 1e6;
++  assert.ok(ms < 1000, `took ${ms.toFixed(0)} ms`);
++});

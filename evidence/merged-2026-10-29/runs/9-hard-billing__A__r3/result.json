@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 36376,
+  "stop_reason": "end_turn",
+  "session_id": "54480657-7ed7-42b4-860f-379a7d3bfc56",
+  "total_cost_usd": 0.270922,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 18720,
+    "cache_read_input_tokens": 221170,
+    "output_tokens": 3844,
+    "output_tokens_details": {
+      "thinking_tokens": 577
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18720,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 870,
+        "cache_read_input_tokens": 44252,
+        "cache_creation_input_tokens": 579,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 579
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3844,
+      "cacheReadInputTokens": 221170,
+      "cacheCreationInputTokens": 18720,
+      "webSearchRequests": 0,
+      "costUSD": 0.270922,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 577,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18720,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found and fixed the bug, and `npm test` now passes (10 of 10). Against the old code the new tests fail with exactly the reported symptom: a ¥1,500 invoice charged as `150000`.\n\n## Root cause\nIn `src/payments/gateway/payload.js`, the code turned the invoice currency into the gateway's lower-case form (`'JPY'` becomes `'jpy'`) before working out the amount to charge:\n\n```js\nconst currency = toGatewayCurrency(invoice.currency);   // 'jpy'\namount: toMinor(invoice.total, currency),               // looks up 'jpy'\n```\n\nTo convert an amount to the gateway's smallest unit (cents, yen), `toMinor` looks up how many decimal places the currency uses. That lookup table in `src/lib/currency/registry.js` only has upper-case codes. `'jpy'` wasn't found, so it silently used the default of 2 decimals and multiplied by 100. Yen and won have no decimals, so ¥1,500 became 150,000.\n\nThe PDF was correct because the invoice code uses the upper-case `'JPY'`. US and EU customers were unaffected because USD and EUR really do use 2 decimals, so the wrong default happened to give the right answer.\n\nIt's also wrong in the other direction for currencies with 3 decimals: a BHD 12.345 invoice was charged as 1235 fils instead of 12345, about 10× too little. VND and CLP were overcharged 100× like yen and won.\n\n## Fix\n- **`src/payments/gateway/payload.js`**: the amount is now calculated from the invoice's own upper-case code. Only the `currency` field sent to the gateway is lower-cased.\n- **`src/lib/currency/registry.js`**: the lookups now ignore case, so a lower-case code from any caller finds the right currency instead of falling back to the 2-decimal default.\n\n## Regression tests (`test/charge.test.js`)\n- JPY ¥1,500 is charged as `1500`, with currency `'jpy'`.\n- KRW ₩25,000 is charged as `25000`.\n- BHD 12.345 is charged as `12345` (the 3-decimal case).\n- `toMinor(1500, 'jpy')` and `toMinor(1500, 'JPY')` both return `1500`.\n\nSeparately, JPY, KRW, VND and CLP customers charged since this bug went in were overcharged and probably need refunds. BHD and KWD customers were undercharged. You can find the affected charges in the `invoice.charged` audit events, whose `amount` field holds the inflated value. I haven't committed anything.",
+  "ttft_ms": 2590,
+  "type": "result",
+  "duration_ms": 41133,
+  "uuid": "549a6371-8939-4a24-baa8-376f6b6fbda3",
+  "ttft_stream_ms": 1472,
+  "time_to_request_ms": 333,
+  "time_to_request_phases_ms": {
+    "other": 4,
+    "system_prompt": 50,
+    "resume_other": 6,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 0,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 251,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 360,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1473,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3844,
+      "cacheReadInputTokens": 221170,
+      "cacheCreationInputTokens": 18720,
+      "webSearchRequests": 0,
+      "costUSD": 0.270922,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 577,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18720,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

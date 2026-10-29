@@ -1,6 +1,22 @@
 {
-  "description": "tokenfisher: compress noisy Bash/PowerShell output before Claude reads it (full output saved under ~/.claude/tokenfisher/raw), and warn when a session gets big or comes back after the prompt cache expired.",
+  "description": "tokenfisher: add a short working policy at session start, compress noisy Bash/PowerShell output before Claude reads it (full output saved under ~/.claude/tokenfisher/raw), and warn when a session gets big or comes back after the prompt cache expired.",
   "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/session-policy.js\"",
+            "timeout": 10
+          },
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/bin/update-check.js\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Bash|PowerShell",

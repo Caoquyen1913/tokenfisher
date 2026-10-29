@@ -16,7 +16,19 @@ Like a kingfisher, it waits, watches, and dives for the one fish worth catching.
 
 ## Results: same prompts, hidden tests, real cost
 
-120 headless Claude Code runs: 8 tasks from easy to complex × 5 configurations × 3 repetitions, graded by hidden tests the agent never sees. Each step of the ladder adds one cut to the one before it.
+**The plugin as installed (0.3.0, zero flags) cost 56.1% less than Claude Code defaults on Opus, with no quality loss:** 9 tasks × 3 repetitions per arm, every run passed every hidden check.
+
+| level | defaults (Opus) | tokenfisher plugin | change |
+|---|---|---|---|
+| easy | $0.141 | $0.075 | −46.9% |
+| medium | $0.146 | $0.081 | −44.4% |
+| hard | $0.286 | $0.128 | −55.2% |
+| complex | $0.351 | $0.127 | −63.8% |
+| **all** | **$0.253** | **$0.111** | **−56.1%** (95% CI −60.1% … −51.8%) |
+
+It keeps every tool and your MCP servers. Sonnet solved every task alone; the Opus escalation agent was never called. Evidence: [`evidence/merged-2026-10-29/`](evidence/merged-2026-10-29/REPORT.md), $9.81 total.
+
+The ladder below shows where the savings come from. 120 headless Claude Code runs: 8 tasks from easy to complex × 5 configurations × 3 repetitions, graded by hidden tests the agent never sees. Each step of the ladder adds one cut to the one before it.
 
 | step | configuration | quality (hidden checks passed) | cost vs baseline (95% CI) |
 |---|---|---|---|
@@ -24,7 +36,7 @@ Like a kingfisher, it waits, watches, and dives for the one fish worth catching.
 | **T** | Opus + only the 7 core coding tools + no MCP + lean prompt + output hook | 100% (24/24) | **−31.4%** (−22.0% … −41.6%) |
 | **S** | T on Sonnet | 100% (24/24) | **−73.7%** (−69.1% … −78.7%) |
 | **L** | S with `--effort low` | 100% (24/24) | **−76.5%** (−72.5% … −80.8%) |
-| **M** | the `tokenfisher-max` plugin (S + Opus escalation agent + Haiku scout), zero flags | 100% (24/24) | **−73.6%** (−70.8% … −76.4%) |
+| **M** | the former `tokenfisher-max` profile (S + Opus escalation agent + Haiku scout), zero flags | 100% (24/24) | **−73.6%** (−70.8% … −76.4%) |
 
 By difficulty:
 
@@ -40,8 +52,9 @@ What the numbers say, without spin:
 - **No quality loss in any of the 120 runs, from easy to complex.** But every configuration scored 100%, so the tasks still don't separate a strong config from a weak one. Read it as "no regression found on these 8 tasks", not "no regression anywhere".
 - **Tool schemas were the hidden cost.** About 70% of every request was the schemas of built-in tools a coding task never calls. Keeping only the 7 core tools cut Opus spend by 31%, with no model change.
 - **Model routing is the big lever.** Sonnet with the core tools cost 74% less and passed every hidden check, including the three hard and two complex tasks.
-- **The Opus escalation in `tokenfisher-max` was never used.** Sonnet solved every task alone, so M cost the same as S. The safety net is wired and verified to load, but it has not yet been shown to trigger or to help.
+- **The Opus escalation in M was never used.** Sonnet solved every task alone, so M cost the same as S. The safety net is wired and verified to load, but it has not yet been shown to trigger or to help.
 - **`--effort low` saved a little more (−76.5%) at no measured quality cost** on these tasks.
+- **The plugin's default since 0.3.0 sits between A and S.** It runs Sonnet but keeps every tool and your MCP servers: −56.1% instead of S's −73.7%. The gap is the price of not losing any tool.
 
 Evidence (transcript, grade and diff for every run): [`evidence/ladder-2026-10-29/`](evidence/ladder-2026-10-29/REPORT.md). Total spend: $16.55 at list price.
 
@@ -55,9 +68,9 @@ An earlier 60-run eval on the first 5 tasks is in [`evidence/ab-2026-10-28-opus/
 
 | tool | what it does |
 |---|---|
+| **Sonnet main thread** | The plugin runs the main conversation on Sonnet (`agents/main.md`) and keeps every tool, so MCP servers and web tools still load when you ask for them. Hard work (cross-module design, concurrency/security logic, tricky specs, a bug that survived two attempts) goes to an `opus-architect` subagent; a Haiku `scout` digests big files and logs. A ~120-token policy at session start asks for locating before reading and batching tool calls. Start a session with `claude --model opus` when you want Opus as the main model. |
 | **`token-report`** | Reads your Claude Code transcripts and shows where tokens went: input vs cache write vs cache read vs output, by model, by project, main vs subagents. It also shows the **rent** each tool result pays by staying in context, cache rebuilds, and long sessions, with concrete suggestions. `--simulate` replays the compression filter over your past shell output to estimate its savings for *your* workload. |
 | **`token-audit`** | Breaks down what every session loads before your first prompt (system prompt, skill and agent listings, MCP tool names and instructions, hook output, CLAUDE.md/memory). It traces each entry to the file or plugin it came from and ranks what you can remove. |
-| **`tokenfisher-max`** (opt-in plugin) | Makes the cheap configuration the default with zero flags. The main thread runs on Sonnet with only Bash, PowerShell, Read, Edit, Write, Glob and Grep. An `opus-architect` subagent takes cross-module design, concurrency/security logic, tricky specs, and bugs that survived two attempts; a Haiku `scout` digests big files and logs. Prefix per request: 13.4k tokens vs 40.8k. Trade-off: no WebFetch/WebSearch, notebooks or other built-in tools in that session. Disable the plugin for sessions that need them. |
 | **squash hook** | A `PostToolUse` hook for `Bash` and `PowerShell`. The command runs untouched (permissions, cwd and exit code unchanged); only what Claude *reads* is compressed, and the full output is saved to disk so Claude can read it back. |
 | **session warning** | A `UserPromptSubmit` hook. When the context passes 80k tokens (then every +40k), or your prompt arrives after the prompt cache expired (5 min, or 1h when the session uses the 1h TTL), it tells you and Claude once: every tool result is re-billed on each later turn, so `/compact`, or `/clear` when switching tasks. It reads only the tail of the transcript. Set the threshold with `TOKENFISHER_WARN_TOKENS` (`0` turns it off). |
 | **A/B eval** | The harness behind the numbers above: fixed prompts, fresh repos, hidden graders, a grader self-test, paired bootstrap CIs and per-run evidence. Bring your own tasks. |
@@ -71,13 +84,23 @@ In Claude Code:
 /plugin install tokenfisher@tokenfisher
 ```
 
-For the cheapest measured setup, also install the max profile. It switches every session to Sonnet with the core tools, so disable it with `/plugin` when you need web tools or Opus as the main model:
+Third-party marketplaces don't auto-update by default. Turn it on in `/plugin` → Marketplaces → `tokenfisher`, or update by hand:
 
 ```
-/plugin install tokenfisher-max@tokenfisher
+/plugin marketplace update tokenfisher
 ```
 
-The same setup without the plugin, for one session:
+Once a day, at session start, the plugin also checks the version on GitHub and tells you when a newer one is out. Turn that off with `TOKENFISHER_NO_UPDATE_CHECK=1`.
+
+After install, new sessions run on Sonnet with every tool. For one session on Opus:
+
+```bash
+claude --model opus
+```
+
+Setting `"model"` in `settings.json` does not override the plugin's main agent; the `--model` flag does.
+
+The cheapest measured setup (arm S) also drops every tool except the 7 core coding tools, at the price of MCP and web tools in that session:
 
 ```bash
 claude --model sonnet --tools Bash,PowerShell,Read,Edit,Write,Glob,Grep --strict-mcp-config
