@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 50576,
+  "stop_reason": "end_turn",
+  "session_id": "e07bea0e-7e11-4ffa-84e5-a1a470736e37",
+  "total_cost_usd": 0.28740560000000004,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 17354,
+    "cache_read_input_tokens": 97448,
+    "output_tokens": 6453,
+    "output_tokens_details": {
+      "thinking_tokens": 836
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17354,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 793,
+        "cache_read_input_tokens": 37879,
+        "cache_creation_input_tokens": 5586,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 5586
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 6453,
+      "cacheReadInputTokens": 97448,
+      "cacheCreationInputTokens": 17354,
+      "webSearchRequests": 0,
+      "costUSD": 0.28740560000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 836,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17354,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 3,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry to the store and the API, and `npm test` passes: all 181 tests, 16 of them new.\n\n**Store (`src/store.js`)**\n- Reservations use the store's `clock` as the only time source. They expire once `clock() >= creation time + ttlMs`.\n- `getAvailable(sku)` is physical stock minus the reservations that haven't expired. `getStock` still returns physical stock.\n- `removeItem` now checks against available stock, so it can't take reserved units. It still throws `INSUFFICIENT_STOCK` as before.\n- Expired reservations are kept rather than deleted. They no longer count against availability, and confirming one gives `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`.\n- `confirm` returns `{sku, stock}`, which the API sends back directly.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now includes `available`.\n- `POST /reservations` (201/409/400), `POST /reservations/:id/confirm` (200/404/410) and `DELETE /reservations/:id` (204) are added with the status codes you listed. Existing routes behave as before.\n\n**Tests (`test/reservations.test.js`)** cover the store rules (unique ids, input checks, expiry exactly at the deadline, confirm/release, `removeItem` respecting reservations, separate SKUs) and the HTTP status codes for each new route.\n\nDecisions for you:\n- **Invalid `ttlMs`:** you didn't specify what to do with it, so `reserve` throws `Error('INVALID_TTL')` unless `ttlMs` is a finite number ≥ 0, and the API returns 400 for it. Without a check, a missing `ttlMs` would make a reservation that never expires. If you'd rather a missing TTL be allowed or have a default, that's a small change.\n- **Expired reservations pile up:** keeping them is what makes `RESERVATION_EXPIRED` possible, but nothing ever cleans them up, so memory use grows over time in a long-running process. Adding cleanup would mean ids expired long ago return `RESERVATION_NOT_FOUND` instead.\n- **Empty 204 body:** `DELETE` returns `{ status: 204, body: null }`.",
+  "ttft_ms": 2503,
+  "type": "result",
+  "duration_ms": 54093,
+  "uuid": "573dd578-5ab7-4202-aa15-1c862b3e720a",
+  "ttft_stream_ms": 1373,
+  "time_to_request_ms": 347,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 47,
+    "resume_other": 7,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 267,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 1,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 373,
+  "time_to_request_major_faults": 4,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1374,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 6453,
+      "cacheReadInputTokens": 97448,
+      "cacheCreationInputTokens": 17354,
+      "webSearchRequests": 0,
+      "costUSD": 0.28740560000000004,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 836,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17354,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

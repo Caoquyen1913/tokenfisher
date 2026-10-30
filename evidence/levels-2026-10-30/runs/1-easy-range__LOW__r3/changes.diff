@@ -1,0 +1,21 @@
+diff --git a/eval/results/levels-2026-10-30/runs/1-easy-range__LOW__r3/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/1-easy-range__LOW__r3/tokenfisher/update.json
+new file mode 100644
+index 0000000..402c8d6
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/1-easy-range__LOW__r3/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332496688}
+\ No newline at end of file
+diff --git a/src/range.js b/src/range.js
+index c82e078..ef48a90 100644
+--- a/src/range.js
++++ b/src/range.js
+@@ -1,7 +1,7 @@
+ // Returns the integers from start to end, both inclusive, counting by step (> 0).
+ function range(start, end, step = 1) {
+   const out = [];
+-  for (let i = start; i < end; i += step) out.push(i);
++  for (let i = start; i <= end; i += step) out.push(i);
+   return out;
+ }
+ 

@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 61041,
+  "stop_reason": "end_turn",
+  "session_id": "91e77aba-144a-4970-afed-b0a2e8266d66",
+  "total_cost_usd": 0.202793,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 22632,
+    "cache_read_input_tokens": 186150,
+    "output_tokens": 9363,
+    "output_tokens_details": {
+      "thinking_tokens": 2858
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22632,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 345,
+        "cache_read_input_tokens": 48049,
+        "cache_creation_input_tokens": 694,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 694
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 9363,
+      "cacheReadInputTokens": 186150,
+      "cacheCreationInputTokens": 22632,
+      "webSearchRequests": 0,
+      "costUSD": 0.202793,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2858,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 22632,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 12,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` following `docs/SPEC.md`, and `npm test` passes (4 of 4).\n\nThe tests are in `test/satisfies.test.js`. They check matching versions, non-matching versions, and invalid input, using the examples from the spec. The invalid-input cases (bad versions, bad ranges, non-string arguments) all return `false` without throwing.\n\n- **Spec gaps:** where the spec is silent, I made these choices:\n  - An empty set between `||` means any version.\n  - `>*` and `<*` match nothing.\n  - Prerelease identifiers that are numeric may have leading zeros, because the spec only restricts their characters.\n  - A prerelease on a wildcard range such as `1.2.x-beta` is invalid.\n- **Number size:** numbers are parsed as `BigInt`, so very large version numbers compare correctly.\n- **Initial failure:** the first test run failed on `1.2.x-beta` being accepted. I fixed the parser to reject it.",
+  "ttft_ms": 2330,
+  "type": "result",
+  "duration_ms": 64886,
+  "uuid": "3d08bce8-c54d-4be3-be1d-4e85f7f5777f",
+  "ttft_stream_ms": 1679,
+  "time_to_request_ms": 217,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 24,
+    "resume_other": 0,
+    "process_user_input": 4,
+    "input_attachments": 26,
+    "input_hooks": 148,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 2,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 122,
+  "time_to_request_cpu_ms": 207,
+  "time_to_request_major_faults": 6,
+  "input_attachments_detail": {
+    "slowest_producer": "skill_listing",
+    "slowest_producer_ms": 23,
+    "cpu_ms": 26,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1679,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 9363,
+      "cacheReadInputTokens": 186150,
+      "cacheCreationInputTokens": 22632,
+      "webSearchRequests": 0,
+      "costUSD": 0.202793,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2858,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 22632,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

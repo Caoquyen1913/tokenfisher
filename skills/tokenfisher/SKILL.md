@@ -15,6 +15,9 @@ node <this skill's base directory>/../../bin/token-report.js --days 7
 
 Options: `--days N`, `--project <substr>`, `--session <id>`, `--top N`, `--simulate` (replays the squash filter over past shell output to estimate its savings), `--json`.
 
+- **A month's total** ("how much did I use in October", "which account"): `--month 2026-10`. Totals the calendar month and splits it by account (claude.ai login, API key or `CLAUDE_CODE_OAUTH_TOKEN`, shown as a short hash), source (desktop, CLI, SDK, IDE), model, tokenfisher level and project. Sessions started before tokenfisher 0.4.0 have no account record and show as unknown.
+- **Before vs after a change** (a new level, a new habit): `--compare 2026-10-30 --days 7`. Puts the 7 days before that date next to the 7 days from it. Point at the per-request and per-session lines; totals follow how much the user worked.
+
 Present the result in a few lines: the biggest category, the biggest lever, and the 2–3 suggestions the report prints. Don't paste the whole table unless asked.
 
 ## Audit startup context

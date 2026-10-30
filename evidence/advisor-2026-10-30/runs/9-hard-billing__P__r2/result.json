@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 18781,
+  "stop_reason": "end_turn",
+  "session_id": "95152dfa-daa1-4744-9472-78c6ec215fe1",
+  "total_cost_usd": 0.11482220000000001,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17405,
+    "cache_read_input_tokens": 182822,
+    "output_tokens": 2690,
+    "output_tokens_details": {
+      "thinking_tokens": 313
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17405,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 575,
+        "cache_read_input_tokens": 42542,
+        "cache_creation_input_tokens": 974,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 974
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2690,
+      "cacheReadInputTokens": 182822,
+      "cacheCreationInputTokens": 17405,
+      "webSearchRequests": 0,
+      "costUSD": 0.11482220000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 313,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17405,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Japan and Korea customers are no longer charged 100 times their invoice total. `npm test` passes, 8 of 8, including three new tests.\n\n**Root cause:** `buildChargePayload` in `src/payments/gateway/payload.js` lowercases the currency (`jpy`) for the gateway. It then passes that lowercase code to `toMinor`. The currency registry in `src/lib/currency/registry.js` only had upper-case keys, so `exponent('jpy')` found nothing and fell back to the default of 2 decimal places. ¥1,500 became 150,000. USD and EUR use 2 decimals anyway, so the wrong lookup happened to give the right answer for them. The same bug would have hit KRW, VND and CLP (0 decimals) and BHD and KWD (3 decimals).\n\n**Fix:** In `src/lib/currency/registry.js`, `exponent`, `isSupported` and `symbol` now trim and upper-case the code before looking it up. This fixes the gateway payload and any other caller that passes a lowercase code.\n\n**Tests:** I added three tests to `test/charge.test.js`:\n- A JPY ¥1,500 charge produces an amount of 1500.\n- A KRW 12,000 charge produces an amount of 12000.\n- `exponent('jpy')` is 0 and `exponent('kwd')` is 3.\n\nI didn't run the new tests against the old code to confirm they fail there. By the trace above the JPY and KRW charge tests would have failed.\n\n**Not changed:** a currency code that isn't in the registry still silently defaults to 2 decimals. That's how this bug stayed hidden, so you may want it to throw instead. I left it alone because it would change behavior for unknown codes.",
+  "ttft_ms": 2049,
+  "type": "result",
+  "duration_ms": 22633,
+  "uuid": "da205e19-e9cb-4746-a86b-20f0a4e7648b",
+  "ttft_stream_ms": 1128,
+  "time_to_request_ms": 77,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 12,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 6,
+    "input_hooks": 31,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 11,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 25,
+  "time_to_request_cpu_ms": 83,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 8,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1128,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2690,
+      "cacheReadInputTokens": 182822,
+      "cacheCreationInputTokens": 17405,
+      "webSearchRequests": 0,
+      "costUSD": 0.11482220000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 313,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17405,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

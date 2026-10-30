@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "thousands separator",
+      "ok": true
+    },
+    {
+      "name": "several separators",
+      "ok": true
+    },
+    {
+      "name": "one decimal digit",
+      "ok": true
+    },
+    {
+      "name": "cents only",
+      "ok": true
+    },
+    {
+      "name": "surrounding spaces",
+      "ok": true
+    },
+    {
+      "name": "garbage throws Invalid amount",
+      "ok": true
+    },
+    {
+      "name": "empty throws Invalid amount",
+      "ok": true
+    },
+    {
+      "name": "checkout with big price",
+      "ok": true
+    },
+    {
+      "name": "regression test added",
+      "ok": true
+    }
+  ],
+  "passed": 12,
+  "total": 12,
+  "score": 1
+}

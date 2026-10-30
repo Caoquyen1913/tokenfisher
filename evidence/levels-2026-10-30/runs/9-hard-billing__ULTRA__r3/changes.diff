@@ -1,0 +1,55 @@
+diff --git a/eval/results/levels-2026-10-30/runs/9-hard-billing__ULTRA__r3/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/9-hard-billing__ULTRA__r3/tokenfisher/update.json
+new file mode 100644
+index 0000000..9eb790b
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/9-hard-billing__ULTRA__r3/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332994495}
+\ No newline at end of file
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..53cf86a 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,23 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Codes may arrive lower-case (gateway format); the table is keyed upper-case.
++function lookup(code) {
++  return CURRENCIES[String(code).trim().toUpperCase()];
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return lookup(code) !== undefined;
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..9679b72 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,11 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++test('zero-decimal currencies are not scaled by 100 in the gateway payload', () => {
++  const jp = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(jp.amount, 1500);
++  assert.strictEqual(jp.currency, 'jpy');
++  const kr = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 20000 }, customer);
++  assert.strictEqual(kr.amount, 20000);
++});

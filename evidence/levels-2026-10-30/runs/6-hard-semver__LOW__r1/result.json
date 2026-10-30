@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 97573,
+  "stop_reason": "end_turn",
+  "session_id": "21379ed4-0961-4495-b542-fc382c743970",
+  "total_cost_usd": 0.49844960000000005,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 24572,
+    "cache_read_input_tokens": 328648,
+    "output_tokens": 11804,
+    "output_tokens_details": {
+      "thinking_tokens": 3163
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24572,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 665,
+        "cache_read_input_tokens": 49617,
+        "cache_creation_input_tokens": 1066,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1066
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 11804,
+      "cacheReadInputTokens": 328648,
+      "cacheCreationInputTokens": 24572,
+      "webSearchRequests": 0,
+      "costUSD": 0.49844960000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3163,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24572,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 11,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` and added tests in `test/semver.test.js`. `npm test` passes: 13 tests, 0 failed.\n\n**How it works:** each range is turned into simple `<`, `<=`, `>`, `>=`, `=` comparisons against full versions, then checked:\n- Versions are parsed strictly: no leading zeros, an optional `v` and surrounding whitespace are allowed, and build metadata is ignored.\n- Prereleases are ordered as the spec describes.\n- Each X-range, tilde, caret and hyphen range expands to the bounds in the spec's tables.\n- A prerelease version only matches a set if some comparison in that set has a prerelease on the same `MAJOR.MINOR.PATCH`.\n- Version numbers are handled as exact big integers, so very large ones compare correctly.\n- Bad input never throws: invalid versions or ranges, and arguments that aren't strings, return `false`.\n\n**Tests:** there is a check for every row of every table in the spec, plus prerelease ordering, the prerelease-matching rule, `||` and whitespace handling, large numbers, and lists of invalid versions and ranges. The first test run had two failures, and both were mistakes in my own test expectations, not in the code. For example, `1.0.0-rc.1` correctly does not match `<1.0.0` under the prerelease rule. I corrected those expectations.\n\n**Choices where the spec is silent:**\n- `1.x.3` (a number after a wildcard) and a prerelease on a partial version (`1.2-beta`) are treated as invalid, so they return `false`.\n- `<*` and `>*` match nothing.\n- An empty set inside `||` (e.g. `1.x || `) means \"any version\".\n- Whitespace is allowed after `~` and `^`, the same as after the other operators.\n- A hyphen range is only recognised when it makes up the whole comparator set.",
+  "ttft_ms": 2524,
+  "type": "result",
+  "duration_ms": 103331,
+  "uuid": "8c1c092e-4ce6-4993-9f26-04aa7b28625c",
+  "ttft_stream_ms": 1155,
+  "time_to_request_ms": 329,
+  "time_to_request_phases_ms": {
+    "other": 7,
+    "system_prompt": 29,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 16,
+    "input_hooks": 33,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 202,
+    "tool_schema_build": 13,
+    "message_normalization": 1,
+    "client_creation": 17,
+    "request_build": 5
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 22,
+  "time_to_request_cpu_ms": 243,
+  "time_to_request_major_faults": 12,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 14,
+    "cpu_ms": 7,
+    "major_faults": 6
+  },
+  "first_content_frame_ms": 1156,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 11804,
+      "cacheReadInputTokens": 328648,
+      "cacheCreationInputTokens": 24572,
+      "webSearchRequests": 0,
+      "costUSD": 0.49844960000000005,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3163,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24572,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

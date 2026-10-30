@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 26947,
+  "stop_reason": "end_turn",
+  "session_id": "31d6635b-e7f9-4e24-a583-f328a5a0ae2c",
+  "total_cost_usd": 0.2182196,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 14836,
+    "cache_read_input_tokens": 213518,
+    "output_tokens": 2839,
+    "output_tokens_details": {
+      "thinking_tokens": 213
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14836,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 657,
+        "cache_read_input_tokens": 40556,
+        "cache_creation_input_tokens": 391,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 391
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2839,
+      "cacheReadInputTokens": 213518,
+      "cacheCreationInputTokens": 14836,
+      "webSearchRequests": 0,
+      "costUSD": 0.2182196,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 213,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14836,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed the bug in `src/money.js`, and `npm test` now passes (7 of 7).\n\n**Root cause:** Every one of the 37 checkout 500s in `logs/app.log` is the same error, `TypeError: Cannot read properties of null (reading '1')` in `parseAmount` (`src/money.js:5`). The log line just before each one shows a price written with a comma for thousands: `\"1,299.00\"` (15 times), `\"2,450.50\"` (12) or `\"1,005.99\"` (10). These are the only non-plain prices anywhere in the log. The price pattern in `parseAmount` didn't allow commas, so it found no match, and the code then read from that empty result and crashed. Orders with plain prices like `\"99.99\"` went through fine, which is why the errors looked random. The payment-gateway retry and slow-query warnings in the log have nothing to do with it.\n\n**Fix:**\n- `parseAmount` now accepts amounts with correctly placed thousands commas, like `1,299.00` or `1,234,567`, and strips the commas before converting.\n- Anything else that isn't a valid amount (`abc`, `1,29.00`, `12,3456`) now throws the `Invalid amount: <input>` error the code's own comment already promised, instead of crashing.\n\n**Regression tests** (added to `test/money.test.js`):\n- the three comma prices from the log, plus a multi-comma value;\n- badly formatted amounts throwing `Invalid amount`;\n- a full checkout for the logged order `ord_14143` (`1,005.99` × 3, which should total 301,797 cents).\n\nI put the old `src/money.js` back temporarily and ran the tests: all three new tests fail with the same TypeError as production, so they would have caught this.\n\n**Still open:** A truly invalid price still gets a 500, because `src/server.js` turns every error into a 500. If you want bad input to get a 400 instead, that's a small follow-up in `src/server.js`; I didn't make that change.",
+  "ttft_ms": 2988,
+  "type": "result",
+  "duration_ms": 31341,
+  "uuid": "115d14ca-3f6e-42c4-b407-c82d6eab39b6",
+  "ttft_stream_ms": 1213,
+  "time_to_request_ms": 326,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 61,
+    "resume_other": 8,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 229,
+    "tool_schema_build": 4,
+    "message_normalization": 2,
+    "client_creation": 1,
+    "request_build": 5
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 13,
+  "time_to_request_cpu_ms": 394,
+  "time_to_request_major_faults": 78,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 1213,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 2839,
+      "cacheReadInputTokens": 213518,
+      "cacheCreationInputTokens": 14836,
+      "webSearchRequests": 0,
+      "costUSD": 0.2182196,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 213,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14836,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

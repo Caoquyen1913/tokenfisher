@@ -1,0 +1,48 @@
+diff --git a/eval/results/levels-2026-10-30/runs/4-hard-logs__HIGH__r2/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/4-hard-logs__HIGH__r2/tokenfisher/update.json
+new file mode 100644
+index 0000000..09feba8
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/4-hard-logs__HIGH__r2/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332038388}
+\ No newline at end of file
+diff --git a/src/money.js b/src/money.js
+index 29e6d7c..d672178 100644
+--- a/src/money.js
++++ b/src/money.js
+@@ -1,8 +1,9 @@
+ // Parses a user-entered amount such as "12.50" into integer cents.
+ // Throws Error('Invalid amount: <input>') for input that is not an amount.
+ function parseAmount(input) {
+-  const m = String(input).trim().match(/^(\d+)(?:\.(\d{1,2}))?$/);
+-  const whole = Number(m[1]);
++  const m = String(input).trim().match(/^(\d+|\d{1,3}(?:,\d{3})+)(?:\.(\d{1,2}))?$/);
++  if (!m) throw new Error(`Invalid amount: ${input}`);
++  const whole = Number(m[1].replace(/,/g, ''));
+   const frac = m[2] ? Number(m[2].padEnd(2, '0')) : 0;
+   return whole * 100 + frac;
+ }
+diff --git a/test/money.test.js b/test/money.test.js
+index 966b68c..5ae3f81 100644
+--- a/test/money.test.js
++++ b/test/money.test.js
+@@ -4,6 +4,19 @@ const { checkout } = require('../src/checkout');
+ 
+ test('parses whole amounts', () => assert.strictEqual(parseAmount('7'), 700));
+ test('parses cents', () => assert.strictEqual(parseAmount('12.50'), 1250));
++test('parses thousands separators', () => {
++  assert.strictEqual(parseAmount('2,450.50'), 245050);
++  assert.strictEqual(parseAmount('1,299.00'), 129900);
++  assert.strictEqual(parseAmount('1,234,567'), 123456700);
++});
++test('rejects invalid amounts with a descriptive Error', () => {
++  for (const bad of ['abc', '', '1,23', '12.345', '-5']) {
++    assert.throws(() => parseAmount(bad), (e) => e.constructor === Error && e.message === `Invalid amount: ${bad}`);
++  }
++});
++test('checkout accepts comma-formatted prices', () => {
++  assert.deepStrictEqual(checkout({ id: 'o2', items: [{ sku: 'P', price: '2,450.50', qty: 2 }] }), { orderId: 'o2', totalCents: 490100 });
++});
+ test('formats cents', () => assert.strictEqual(formatCents(1250), '12.50'));
+ test('checkout sums items', () => {
+   assert.deepStrictEqual(checkout({ id: 'o1', items: [{ sku: 'A', price: '2.50', qty: 2 }] }), { orderId: 'o1', totalCents: 500 });

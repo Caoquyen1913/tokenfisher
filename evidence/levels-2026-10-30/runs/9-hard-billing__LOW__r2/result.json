@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 29329,
+  "stop_reason": "end_turn",
+  "session_id": "305f5b86-6d56-4734-8caa-b41ffc4c9a3d",
+  "total_cost_usd": 0.2584384,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 18722,
+    "cache_read_input_tokens": 224772,
+    "output_tokens": 3183,
+    "output_tokens_details": {
+      "thinking_tokens": 592
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18722,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 718,
+        "cache_read_input_tokens": 44483,
+        "cache_creation_input_tokens": 350,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 350
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3183,
+      "cacheReadInputTokens": 224772,
+      "cacheCreationInputTokens": 18722,
+      "webSearchRequests": 0,
+      "costUSD": 0.2584384,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 592,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18722,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found and fixed the bug, and `npm test` passes (9 of 9).\n\n**Root cause:** in `src/payments/gateway/payload.js`, the charge code lowercases the currency for the gateway (`\"JPY\"` → `\"jpy\"`). It then passed that lowercase code to `toMinor` to convert the invoice total into the smallest currency unit. The currency table in `src/lib/currency/registry.js` only has upper-case codes, so `\"jpy\"` wasn't found and the lookup quietly fell back to the default of 2 decimal places. ¥1,500 was therefore sent to the gateway as 150000. Yen and won have no decimal places; dollars and euros have 2, so the fallback happened to be correct for them. That's why US and EU customers were fine.\n\n**Fix:**\n- **`src/payments/gateway/payload.js`:** the amount is now worked out from the currency code as stored on the invoice (`\"JPY\"`). The lowercase code is only used in the `currency` field sent to the gateway.\n- **`src/lib/currency/registry.js`:** currency lookups now ignore case. Codes from the gateway, CRM and ERP arrive lowercase, so any other part of the code that passes one in now gets the right number of decimal places instead of the default of 2.\n\n**Regression tests** in `test/charge.test.js`:\n- A ¥1,500 invoice is charged as 1500 with currency `jpy`.\n- A ₩25,000 invoice is charged as 25000 with currency `krw`.\n- Converting amounts gives the same result with lowercase codes (`jpy`, `bhd`, `usd`).\n\nWith the original code, all three new tests fail, so they would have caught this bug.\n\nTwo other things:\n- Any currency that isn't in the table still silently gets 2 decimal places. If you want, I can make it throw an error instead, so a missing currency fails loudly rather than overcharging.\n- An untracked `eval/` directory appeared in the repo during the session. I didn't create it and didn't touch it.",
+  "ttft_ms": 1421,
+  "type": "result",
+  "duration_ms": 34133,
+  "uuid": "40ec1c21-4dde-44a8-b088-648f9d8a9411",
+  "ttft_stream_ms": 884,
+  "time_to_request_ms": 153,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 7,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 33,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 88,
+    "tool_schema_build": 6,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 5,
+  "time_to_request_cpu_ms": 130,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 884,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3183,
+      "cacheReadInputTokens": 224772,
+      "cacheCreationInputTokens": 18722,
+      "webSearchRequests": 0,
+      "costUSD": 0.2584384,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 592,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18722,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

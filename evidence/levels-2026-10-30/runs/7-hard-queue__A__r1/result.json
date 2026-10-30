@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 26938,
+  "stop_reason": "end_turn",
+  "session_id": "80c8d5d6-ac04-417a-ba39-86d7b51a50cf",
+  "total_cost_usd": 0.19425140000000002,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 13471,
+    "cache_read_input_tokens": 134857,
+    "output_tokens": 2974,
+    "output_tokens_details": {
+      "thinking_tokens": 319
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13471,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 612,
+        "cache_read_input_tokens": 39023,
+        "cache_creation_input_tokens": 559,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 559
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2974,
+      "cacheReadInputTokens": 134857,
+      "cacheCreationInputTokens": 13471,
+      "webSearchRequests": 0,
+      "costUSD": 0.19425140000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 319,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13471,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js` and added 7 regression tests in `test/queue.test.js`. `npm test` passes with 9 of 9 tests. I also ran the new tests against the original queue code: 4 of them fail there, one for each reported problem plus the sync-throw case below.\n\n**What was wrong and how it's fixed:**\n\n1. **Hangs after a job fails.** When a job failed, the queue rejected its promise but never lowered the `running` count or started the next job. That slot stayed taken forever, and with concurrency 1 the whole queue stopped. Now the cleanup (lower the count, start the next job, check for idle) runs whether the job succeeds or fails.\n2. **Crash on non-promise jobs.** The contract allows a job to return a plain value or throw, but `fn().then(...)` broke on both. Each job is now wrapped in `new Promise((r) => r(fn()))`. A sync throw becomes a rejection of that job's own promise, and a plain value is treated like a resolved promise.\n3. **`onIdle()` resolving too early.** It only checked that nothing was waiting in the queue, so it resolved while the last jobs were still running. It now also requires that no jobs are running.\n4. **Only one job after `pause()`/`resume()`.** `resume()` called `next()` once, and `next()` started at most one job. `next()` now keeps starting jobs until every free slot is used, so resuming with concurrency 4 starts 4 jobs.\n\n**New tests cover:** a failing job doesn't stop later jobs; sync throws and plain return values; `onIdle()` waits for running jobs; `onIdle()` resolves at once when already idle; the concurrency limit is never exceeded; `resume()` fills every free slot; `pause()` lets running jobs finish but starts no new ones.\n\nNothing is committed.",
+  "ttft_ms": 2673,
+  "type": "result",
+  "duration_ms": 42037,
+  "uuid": "57f84ef0-3809-4f32-ae78-877a8e183df6",
+  "ttft_stream_ms": 1430,
+  "time_to_request_ms": 323,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 50,
+    "resume_other": 8,
+    "process_user_input": 2,
+    "input_attachments": 6,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 239,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 31,
+  "time_to_request_cpu_ms": 375,
+  "time_to_request_major_faults": 3,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1430,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2974,
+      "cacheReadInputTokens": 134857,
+      "cacheCreationInputTokens": 13471,
+      "webSearchRequests": 0,
+      "costUSD": 0.19425140000000002,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 319,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13471,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

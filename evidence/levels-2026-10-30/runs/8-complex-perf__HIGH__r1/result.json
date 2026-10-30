@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 20624,
+  "stop_reason": "end_turn",
+  "session_id": "fac550d3-d713-445c-8ec6-38ac10a9adf1",
+  "total_cost_usd": 0.10197210000000001,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 14653,
+    "cache_read_input_tokens": 135841,
+    "output_tokens": 2976,
+    "output_tokens_details": {
+      "thinking_tokens": 337
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14653,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 467,
+        "cache_read_input_tokens": 38580,
+        "cache_creation_input_tokens": 2184,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2184
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2976,
+      "cacheReadInputTokens": 135841,
+      "cacheCreationInputTokens": 14653,
+      "webSearchRequests": 0,
+      "costUSD": 0.10197210000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 337,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14653,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now takes about 30 ms for 200,000 orders, down from minutes, and its output is unchanged. `npm test` passes, 4 of 4.\n\nThere were three causes of the slowness, all in `src/report.js`:\n- **Duplicate check:** `seen.includes` scanned an array for every order. It is now a `Set`.\n- **Customer lookup:** `groups.find` scanned every customer for every order. It is now a `Map` from customer id to group.\n- **Sorting:** the leaderboard was re-sorted after every order. It is now sorted once at the end. The ranking order always ends up unique, because `byRank` falls back to the customer id and each customer appears once. So one final sort gives the same order as sorting every time.\n\nI added two tests to `test/report.test.js`:\n- **Equivalence test:** it runs 3,000 generated orders through a copy of the original algorithm and compares the results with `deepStrictEqual` at limits 1, 10 and 100. The data includes duplicate ids, refunded and pending orders, EUR amounts and ties on spend and first-order time.\n- **Speed test:** it fails if 200,000 orders take 1 second or more.\n\nThe equivalence check differs from the original in one place: a customer id of `NaN`. The old `find` never matched it, so it created a new group each time, while the `Map` does match it. I left that alone because customer ids shouldn't be `NaN`.",
+  "ttft_ms": 1746,
+  "type": "result",
+  "duration_ms": 24885,
+  "uuid": "47734f67-117d-45c6-99cf-e2cb2d6188d9",
+  "ttft_stream_ms": 1144,
+  "time_to_request_ms": 300,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 29,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 237,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 8,
+  "time_to_request_cpu_ms": 190,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1144,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2976,
+      "cacheReadInputTokens": 135841,
+      "cacheCreationInputTokens": 14653,
+      "webSearchRequests": 0,
+      "costUSD": 0.10197210000000001,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 337,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14653,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

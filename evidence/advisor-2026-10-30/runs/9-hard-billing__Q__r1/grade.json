@@ -1,0 +1,51 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "JPY charged in yen",
+      "ok": true
+    },
+    {
+      "name": "KRW charged in won",
+      "ok": true
+    },
+    {
+      "name": "BHD charged in fils (3 decimals)",
+      "ok": true
+    },
+    {
+      "name": "USD still charged in cents",
+      "ok": true
+    },
+    {
+      "name": "gateway currency stays lower-case",
+      "ok": true
+    },
+    {
+      "name": "chargeInvoice sends the yen amount",
+      "ok": true
+    },
+    {
+      "name": "invoice totals unchanged",
+      "ok": true
+    },
+    {
+      "name": "regression test added",
+      "ok": true
+    }
+  ],
+  "passed": 11,
+  "total": 11,
+  "score": 1
+}

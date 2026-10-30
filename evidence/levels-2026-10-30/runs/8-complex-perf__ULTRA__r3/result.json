@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 19114,
+  "stop_reason": "end_turn",
+  "session_id": "af08844d-c3f9-479a-8380-2ea8fca53a7e",
+  "total_cost_usd": 0.0958534,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 14203,
+    "cache_read_input_tokens": 136054,
+    "output_tokens": 2542,
+    "output_tokens_details": {
+      "thinking_tokens": 393
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14203,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 541,
+        "cache_read_input_tokens": 38770,
+        "cache_creation_input_tokens": 1544,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1544
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2542,
+      "cacheReadInputTokens": 136054,
+      "cacheCreationInputTokens": 14203,
+      "webSearchRequests": 0,
+      "costUSD": 0.0958534,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 393,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14203,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` in `src/report.js` is now fast, and its output is unchanged. `npm test` passes, including two new tests.\n\n**What was slow.** The old code did four things that each scaled badly with order count:\n- It looked up duplicate order ids with `seen.includes`, which scans a list.\n- It looked up each customer with `groups.find`, which also scans a list.\n- It re-sorted the whole customer list after every order.\n- The repeated sorting was the worst of these.\n\n**The fix.**\n- Duplicate ids are now tracked in a `Set`, and customers are looked up in a `Map`.\n- The ranking sort runs once at the end instead of after every order.\n- Sorting once gives the same order as sorting repeatedly. The comparator `byRank` is a total order, because `customerId` breaks ties and each customer appears once.\n- Everything else is untouched. That covers the duplicate check happening before the refund skip, the EUR rounding, the `firstOrderAt` logic, the `spendCents > 0` filter, the limit and the rank numbering.\n\n**Tests added** in `test/report.test.js`:\n- **Equivalence test:** it compares the new output with the original implementation on 50 randomized datasets, at four different limits each. The data has duplicate ids, refunded and pending orders, EUR orders, and ties on spend and first-order time. The original is saved as `test/reference-report.js` so this stays a true behavior check.\n- **Speed test:** it runs 200,000 orders through `summarize()` and requires it to finish in under 1 second. I didn't record the actual timing, only that it passes that bar.\n\nI didn't create a git commit.",
+  "ttft_ms": 1672,
+  "type": "result",
+  "duration_ms": 22349,
+  "uuid": "398e01c8-5b65-4d18-b6bb-b7ceefc46c80",
+  "ttft_stream_ms": 1035,
+  "time_to_request_ms": 82,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 4,
+    "input_hooks": 36,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 14,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 9,
+  "time_to_request_cpu_ms": 109,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1035,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 2542,
+      "cacheReadInputTokens": 136054,
+      "cacheCreationInputTokens": 14203,
+      "webSearchRequests": 0,
+      "costUSD": 0.0958534,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 393,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14203,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

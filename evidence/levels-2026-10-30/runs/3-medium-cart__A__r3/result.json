@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 10803,
+  "stop_reason": "end_turn",
+  "session_id": "4552eed7-615c-4cc8-92dd-a55e0f983526",
+  "total_cost_usd": 0.1384584,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 11365,
+    "cache_read_input_tokens": 132032,
+    "output_tokens": 1055,
+    "output_tokens_details": {
+      "thinking_tokens": 28
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11365,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 320,
+        "cache_read_input_tokens": 36950,
+        "cache_creation_input_tokens": 526,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 526
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1055,
+      "cacheReadInputTokens": 132032,
+      "cacheCreationInputTokens": 11365,
+      "webSearchRequests": 0,
+      "costUSD": 0.1384584,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 28,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 11365,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed two bugs in `src/`, and `npm test` now passes all 243 tests. The tests are unchanged.\n\n1. **Discount and tax were applied in the wrong order** (`src/cart.js`). `total()` added tax first and then took the discount off the taxed amount. The code's own comment says the discount should come off the pre-tax subtotal, so I swapped the order: discount first, then tax. The percent-discount tests passed anyway because taking a percentage off gives the same result whether it happens before or after tax. Only fixed discounts showed the difference: 100 − 20 = 80, plus 10% tax, is 88, but the old code returned 90.\n2. **A fixed discount could push the total below zero** (`src/discount.js`). A fixed discount bigger than the amount gave a negative total (−14.5 in the test). It now stops at zero, which matches the comment's \"never below\".",
+  "ttft_ms": 2297,
+  "type": "result",
+  "duration_ms": 14391,
+  "uuid": "923e7d68-6695-4fb7-88f0-6b7d3ab20eaf",
+  "ttft_stream_ms": 1252,
+  "time_to_request_ms": 428,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 40,
+    "resume_other": 7,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 353,
+    "tool_schema_build": 9,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 16,
+  "time_to_request_cpu_ms": 416,
+  "time_to_request_major_faults": 8,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1252,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 1055,
+      "cacheReadInputTokens": 132032,
+      "cacheCreationInputTokens": 11365,
+      "webSearchRequests": 0,
+      "costUSD": 0.1384584,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 28,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 11365,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

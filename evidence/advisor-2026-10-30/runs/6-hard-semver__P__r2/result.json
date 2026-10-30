@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 75657,
+  "stop_reason": "end_turn",
+  "session_id": "d302c869-ba53-4d38-8df9-efa80708e81f",
+  "total_cost_usd": 0.254914,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 25199,
+    "cache_read_input_tokens": 331760,
+    "output_tokens": 12091,
+    "output_tokens_details": {
+      "thinking_tokens": 2890
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 25199,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 419,
+        "cache_read_input_tokens": 50551,
+        "cache_creation_input_tokens": 759,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 759
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 12091,
+      "cacheReadInputTokens": 331760,
+      "cacheCreationInputTokens": 25199,
+      "webSearchRequests": 0,
+      "costUSD": 0.254914,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2890,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 25199,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 14,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` following `docs/SPEC.md`, and `npm test` now passes (5 of 5).\n\nIt covers every section of the spec. It returns `false` for invalid versions and ranges, and it never throws. It handles very large version numbers.\n\nThe tests are in `test/satisfies.test.js`. They cover each spec table, the prerelease rules and ordering, and invalid or non-string input.\n\n**Spec gaps:** the spec doesn't say what to do in these cases, so I picked behaviour for them:\n- `>*` and `<*` match nothing.\n- `>=*` and `<=*` match everything.\n- Positions after a wildcard are ignored, so `1.x.3` is read as `1.x`.\n- A prerelease on a partial version, such as `1.x-beta`, is invalid.\n- An empty `||` segment, as in `1.0.0 ||`, means \"any version\".\n- Leading zeros are accepted in prerelease identifiers, because the spec only forbids them in `MAJOR.MINOR.PATCH`.\n\nMy first test run had one failure, which was a mistake in my own test: I treated `'x'` as an invalid range, but it's a valid wildcard. I fixed the test, not the implementation.",
+  "ttft_ms": 2110,
+  "type": "result",
+  "duration_ms": 80052,
+  "uuid": "f062bef3-9961-422d-afb7-7628dc78c7a5",
+  "ttft_stream_ms": 1450,
+  "time_to_request_ms": 452,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 12,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 7,
+    "input_hooks": 45,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 364,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 1,
+  "time_to_request_cpu_ms": 139,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1450,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 12091,
+      "cacheReadInputTokens": 331760,
+      "cacheCreationInputTokens": 25199,
+      "webSearchRequests": 0,
+      "costUSD": 0.254914,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2890,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 25199,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

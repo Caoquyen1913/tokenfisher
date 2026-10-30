@@ -83,12 +83,13 @@ async function main() {
   console.log(`Warming prompt cache for arms ${armIds.join(', ')}…`);
   await Promise.all(armIds.map(async (arm) => {
     const wd = prepareWorkdir(tasks[0]);
-    await runClaude(opts.claude, [...commonArgs(opts), ...defs[arm].args], 'Reply with just: ok', wd, process.env, 5 * 60e3);
+    await runClaude(opts.claude, [...commonArgs(opts), ...defs[arm].args], 'Reply with just: ok', wd, { ...process.env, ...defs[arm].env }, 5 * 60e3);
     fs.rmSync(wd, { recursive: true, force: true });
   }));
 
   console.log(`${jobs.length} runs (${tasks.length} tasks × ${armIds.length} arms × ${opts.reps} reps), ${opts.parallel} at a time → ${opts.out}`);
   let done = 0;
+  let limitHit = null;
   const runsFile = path.join(opts.out, 'runs.jsonl');
 
   async function work(job) {
@@ -97,10 +98,17 @@ async function main() {
     const runDir = path.join(opts.out, 'runs', name);
     fs.mkdirSync(runDir, { recursive: true });
     const wd = prepareWorkdir(task);
-    const env = { ...process.env, TOKENFISHER_HOME: path.join(runDir, 'tokenfisher') };
+    const env = { ...process.env, ...defs[arm].env, TOKENFISHER_HOME: path.join(runDir, 'tokenfisher') };
     const t0 = Date.now();
     const r = await runClaude(opts.claude, [...commonArgs(opts), ...defs[arm].args], task.prompt, wd, env, opts.timeoutMin * 60e3);
     const res = parseResult(r.stdout);
+    // An account limit fails every later run in about a second; record nothing and stop the queue.
+    if (res && res.api_error === 'usage_limit_reached') {
+      limitHit = res.result;
+      fs.rmSync(runDir, { recursive: true, force: true });
+      fs.rmSync(wd, { recursive: true, force: true });
+      return;
+    }
     const g = grade(task, wd);
     let changes = '';
     try { changes = diff(wd); } catch (e) { changes = `diff failed: ${e.message}`; }
@@ -134,8 +142,13 @@ async function main() {
 
   const queue = [...jobs];
   await Promise.all(Array.from({ length: Math.max(1, opts.parallel) }, async () => {
-    while (queue.length) await work(queue.shift());
+    while (queue.length && !limitHit) await work(queue.shift());
   }));
+  if (limitHit) {
+    console.error(`\nStopped after ${done} runs: ${limitHit}. Runs that hit the limit were not recorded.`);
+    process.exitCode = 2;
+    return;
+  }
   console.log(`\nDone. Report: node eval/report.js "${opts.out}"`);
 }
 

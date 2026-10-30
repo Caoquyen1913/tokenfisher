@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 23800,
+  "stop_reason": "end_turn",
+  "session_id": "cde452d4-cb98-47fd-a8d4-466e8443933f",
+  "total_cost_usd": 0.1134479,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 15304,
+    "cache_read_input_tokens": 211279,
+    "output_tokens": 3108,
+    "output_tokens_details": {
+      "thinking_tokens": 358
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15304,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 408,
+        "cache_read_input_tokens": 40461,
+        "cache_creation_input_tokens": 954,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 954
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3108,
+      "cacheReadInputTokens": 211279,
+      "cacheCreationInputTokens": 15304,
+      "webSearchRequests": 0,
+      "costUSD": 0.1134479,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 358,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 15304,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`slugify(text)` is now implemented in `src/strings.js`, and `npm test` passes all 13 tests (2 existing, 11 new).\n\nIt does the following, in order:\n- `đ` and `Đ` become `d`.\n- The text is decomposed so combining accents can be stripped, which leaves plain ASCII for Vietnamese and other Latin text.\n- The text is lowercased.\n- Every run of characters outside `a-z` and `0-9` becomes a single hyphen.\n- Leading hyphens are removed, the result is cut to 50 characters, and any trailing hyphens are removed after the cut. This ordering is what stops a slug cut at 50 from ending in a hyphen.\n\nThe new tests in `test/strings.test.js` cover:\n- lowercasing and hyphenation\n- Vietnamese and other Latin diacritics\n- `đ`/`Đ`\n- runs of punctuation\n- hyphen trimming\n- digits\n- empty and symbol-only input\n- the 50-character cut, including a cut that lands on a hyphen and a 50-character slug that ends on a letter\n\nMy first draft of two of the length tests miscounted characters and failed. The bug was in the tests, not in `slugify`, and I corrected them.",
+  "ttft_ms": 2639,
+  "type": "result",
+  "duration_ms": 28216,
+  "uuid": "963f7f07-62be-457d-8b74-00e5597acd4f",
+  "ttft_stream_ms": 1933,
+  "time_to_request_ms": 308,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 12,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 6,
+    "input_hooks": 36,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 229,
+    "tool_schema_build": 7,
+    "message_normalization": 2,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 4,
+  "time_to_request_cpu_ms": 109,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 5,
+    "cpu_ms": 9,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1933,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3108,
+      "cacheReadInputTokens": 211279,
+      "cacheCreationInputTokens": 15304,
+      "webSearchRequests": 0,
+      "costUSD": 0.1134479,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 358,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 15304,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

@@ -1,0 +1,46 @@
+diff --git a/eval/results/levels-2026-10-30/runs/4-hard-logs__PROMAX__r3/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/4-hard-logs__PROMAX__r3/tokenfisher/update.json
+new file mode 100644
+index 0000000..0091631
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/4-hard-logs__PROMAX__r3/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332565426}
+\ No newline at end of file
+diff --git a/src/money.js b/src/money.js
+index 29e6d7c..b51225a 100644
+--- a/src/money.js
++++ b/src/money.js
+@@ -1,8 +1,9 @@
+-// Parses a user-entered amount such as "12.50" into integer cents.
++// Parses a user-entered amount such as "12.50" or "2,450.50" into integer cents.
+ // Throws Error('Invalid amount: <input>') for input that is not an amount.
+ function parseAmount(input) {
+-  const m = String(input).trim().match(/^(\d+)(?:\.(\d{1,2}))?$/);
+-  const whole = Number(m[1]);
++  const m = String(input).trim().match(/^(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?$/);
++  if (!m) throw new Error(`Invalid amount: ${input}`);
++  const whole = Number(m[1].replace(/,/g, ''));
+   const frac = m[2] ? Number(m[2].padEnd(2, '0')) : 0;
+   return whole * 100 + frac;
+ }
+diff --git a/test/money.test.js b/test/money.test.js
+index 966b68c..f5d786b 100644
+--- a/test/money.test.js
++++ b/test/money.test.js
+@@ -8,3 +8,16 @@ test('formats cents', () => assert.strictEqual(formatCents(1250), '12.50'));
+ test('checkout sums items', () => {
+   assert.deepStrictEqual(checkout({ id: 'o1', items: [{ sku: 'A', price: '2.50', qty: 2 }] }), { orderId: 'o1', totalCents: 500 });
+ });
++
++// Regression: prices with thousands separators caused 500s on POST /checkout.
++test('parses thousands separators', () => {
++  assert.strictEqual(parseAmount('2,450.50'), 245050);
++  assert.strictEqual(parseAmount('1,299.00'), 129900);
++});
++test('rejects invalid amounts with a descriptive error', () => {
++  assert.throws(() => parseAmount('abc'), /Invalid amount: abc/);
++  assert.throws(() => parseAmount('1,23'), /Invalid amount/);
++});
++test('checkout handles comma-formatted prices', () => {
++  assert.deepStrictEqual(checkout({ id: 'o2', items: [{ sku: 'A', price: '1,299.00', qty: 2 }] }), { orderId: 'o2', totalCents: 259800 });
++});

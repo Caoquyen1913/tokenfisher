@@ -1,0 +1,46 @@
+diff --git a/src/payments/gateway/payload.js b/src/payments/gateway/payload.js
+index 31fa0dc..2e92420 100644
+--- a/src/payments/gateway/payload.js
++++ b/src/payments/gateway/payload.js
+@@ -5,10 +5,11 @@ const { toGatewayCurrency } = require('../../lib/currency/normalize');
+ 
+ // Body of POST /v1/charges on the card gateway.
+ function buildChargePayload(invoice, customer) {
+-  const currency = toGatewayCurrency(invoice.currency);
++  // Minor units come from the registry, which is keyed by the upper-case code on the
++  // invoice; lower-casing first makes JPY/KRW miss and fall back to 2 decimals (x100).
+   return {
+-    amount: toMinor(invoice.total, currency),
+-    currency,
++    amount: toMinor(invoice.total, invoice.currency),
++    currency: toGatewayCurrency(invoice.currency),
+     customer: customer.gatewayId,
+     description: `Invoice ${invoice.number}`,
+     metadata: { invoice_id: invoice.id },
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..99614d1 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,22 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++// Regression: zero-decimal currencies were charged 100x because the exponent was
++// looked up with the lower-cased gateway code and fell back to 2 decimals.
++test('JPY invoice is charged in whole yen', () => {
++  const p = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(p.amount, 1500);
++  assert.strictEqual(p.currency, 'jpy');
++});
++
++test('KRW invoice is charged in whole won', () => {
++  const p = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 25000 }, customer);
++  assert.strictEqual(p.amount, 25000);
++  assert.strictEqual(p.currency, 'krw');
++});
++
++test('BHD invoice is charged in fils (3 decimals)', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'BHD', total: 12.345 }, customer);
++  assert.strictEqual(p.amount, 12345);
++});

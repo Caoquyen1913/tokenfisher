@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 88254,
+  "stop_reason": "end_turn",
+  "session_id": "ab7cee25-15a8-4002-8b8e-90476da71459",
+  "total_cost_usd": 0.3888148,
+  "usage": {
+    "input_tokens": 14,
+    "cache_creation_input_tokens": 19510,
+    "cache_read_input_tokens": 267694,
+    "output_tokens": 8957,
+    "output_tokens_details": {
+      "thinking_tokens": 4413
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 19510,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 745,
+        "cache_read_input_tokens": 45343,
+        "cache_creation_input_tokens": 278,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 278
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 8957,
+      "cacheReadInputTokens": 267694,
+      "cacheCreationInputTokens": 19510,
+      "webSearchRequests": 0,
+      "costUSD": 0.3888148,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4413,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 19510,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now runs 200,000 orders in about 40 ms on this machine; before it took minutes. Its output should be unchanged, and `npm test` passes (5 of 5).\n\n**Why it was slow** (`src/report.js`). For every order it searched an ever-growing array to check for duplicates, searched the groups array to find the customer, and re-sorted the whole leaderboard. That work grows roughly with the square of the order count.\n\n**What changed:**\n- Duplicate checks use a `Set` and customer lookups use a `Map`. These match the old comparisons, including one edge case: a `NaN` customer id never matched itself before, so each such order still starts its own group.\n- The leaderboard is sorted once at the end instead of after every order. With well-formed data this gives exactly the same order, because the ranking rule always produces one fixed ordering when customer ids are distinct strings, timestamps are strings and amounts are real numbers.\n- If any order breaks those conditions (a non-string customer id or timestamp, a non-numeric or `NaN` amount), the final order could depend on the sort history. In that case the code re-runs the old sort-after-every-order process on those orders so the result still matches exactly. This path is only for bad data and is as slow as before.\n\n**Tests:**\n- `test/fixtures/report-reference.js` is a frozen copy of the original `summarize()`, kept as the reference.\n- A randomized test with a fixed seed runs 300 rounds and checks the new code against the reference with three different limits. The data includes repeated deliveries of the same order (some with a changed status), refunded/pending/failed orders, EUR amounts, and many ties in spend and first-order time.\n- A second test compares both versions on bad data: numeric and `NaN` customer ids, `NaN` and string amounts, and missing timestamps.\n- A timing test fails if 200,000 orders take more than 2 seconds. That is a loose limit so slower CI machines don't fail it, but it would still catch a return to the old minutes-long behaviour.\n- I checked that the randomized test catches a real change: when I temporarily removed the duplicate check, it failed.\n\nThe changes aren't committed.",
+  "ttft_ms": 2095,
+  "type": "result",
+  "duration_ms": 92891,
+  "uuid": "76a89854-62d3-4235-ab01-2eb4ca55058e",
+  "ttft_stream_ms": 1152,
+  "time_to_request_ms": 357,
+  "time_to_request_phases_ms": {
+    "other": 9,
+    "system_prompt": 40,
+    "resume_other": 7,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 1,
+    "model_gates": 277,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 21,
+  "time_to_request_cpu_ms": 392,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1152,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 14,
+      "outputTokens": 8957,
+      "cacheReadInputTokens": 267694,
+      "cacheCreationInputTokens": 19510,
+      "webSearchRequests": 0,
+      "costUSD": 0.3888148,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 4413,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 19510,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

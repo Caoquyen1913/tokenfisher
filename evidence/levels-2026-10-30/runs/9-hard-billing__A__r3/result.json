@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 34993,
+  "stop_reason": "end_turn",
+  "session_id": "de428507-b303-47bc-8760-c7c8a66a8e38",
+  "total_cost_usd": 0.2663806,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 18382,
+    "cache_read_input_tokens": 220883,
+    "output_tokens": 3755,
+    "output_tokens_details": {
+      "thinking_tokens": 576
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18382,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 761,
+        "cache_read_input_tokens": 43793,
+        "cache_creation_input_tokens": 700,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 700
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3755,
+      "cacheReadInputTokens": 220883,
+      "cacheCreationInputTokens": 18382,
+      "webSearchRequests": 0,
+      "costUSD": 0.2663806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 576,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18382,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I found and fixed the bug, and `npm test` passes: 10 tests, 0 failed. I also ran the new tests against the old code, where they fail, so they do catch this bug.\n\n**Root cause:** In `src/payments/gateway/payload.js`, the code turns the invoice currency into the gateway's lower-case format (`'JPY'` → `'jpy'`) *before* converting the amount to the smallest currency unit. That conversion uses `toMinor`, which looks up how many decimal places the currency has in a table keyed by upper-case codes (`src/lib/currency/registry.js`). `'jpy'` isn't found, so the lookup quietly falls back to the default of 2 decimals. A ¥1,500 invoice therefore became `1500 × 10² = 150000`, and the gateway charged that as ¥150,000. The PDF was right because invoice totals and rendering use the upper-case code. US and EU customers were fine only because USD and EUR really do have 2 decimals, the same as the fallback.\n\n**Fix:**\n- **`src/payments/gateway/payload.js`:** the amount is now converted using the invoice's own currency code. The lower-case code is only used for the `currency` field sent to the gateway.\n- **`src/lib/currency/registry.js`:** currency lookups now ignore case, so a lower-case code can no longer silently fall back to 2 decimals. The refunds, payouts, coupons, dunning and proration code all use the same conversion, so this protects them too.\n\n**Regression tests** (`test/charge.test.js`):\n- JPY ¥1,500 is charged as `1500`.\n- KRW ₩25,000 is charged as `25000`.\n- BHD 1.234 is charged as `1234`.\n- A lower-case code (`'jpy'`) converts the same as `'JPY'`.\n\nWorth knowing: the same bug affected every currency that doesn't use 2 decimals, not just Japan and Korea. VND and CLP customers would also have been overcharged 100×. BHD and KWD use 3 decimals, so those customers were undercharged 10× (BD 1.234 was charged as BD 1.23). You may want to check past charges in all six currencies for refunds or catch-up charges.",
+  "ttft_ms": 2621,
+  "type": "result",
+  "duration_ms": 40999,
+  "uuid": "08a733b2-5a9f-4647-acf7-4c101cf9c2f7",
+  "ttft_stream_ms": 1311,
+  "time_to_request_ms": 354,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 47,
+    "resume_other": 9,
+    "process_user_input": 2,
+    "input_attachments": 12,
+    "input_hooks": 1,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 259,
+    "tool_schema_build": 8,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 37,
+  "time_to_request_cpu_ms": 432,
+  "time_to_request_major_faults": 170,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 8,
+    "cpu_ms": 15,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1311,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 3755,
+      "cacheReadInputTokens": 220883,
+      "cacheCreationInputTokens": 18382,
+      "webSearchRequests": 0,
+      "costUSD": 0.2663806,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 576,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18382,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

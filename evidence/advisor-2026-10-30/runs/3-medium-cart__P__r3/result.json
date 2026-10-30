@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 8538,
+  "stop_reason": "end_turn",
+  "session_id": "25043301-e06f-4218-9274-dcb44ffa15c8",
+  "total_cost_usd": 0.0674945,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 11833,
+    "cache_read_input_tokens": 133965,
+    "output_tokens": 675,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 11833,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 201,
+        "cache_read_input_tokens": 37513,
+        "cache_creation_input_tokens": 431,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 431
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 675,
+      "cacheReadInputTokens": 133965,
+      "cacheCreationInputTokens": 11833,
+      "webSearchRequests": 0,
+      "costUSD": 0.0674945,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 11833,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`npm test` now passes (243 of 243). There were two bugs in `src/`, and I didn't touch the tests.\n\n- **`src/cart.js`:** `total` applied tax before the discount. It now applies the discount to the subtotal first and then adds tax to what's left, as the comment above the function says.\n- **`src/discount.js`:** a fixed discount larger than the subtotal could push the amount below zero. It's now clamped with `Math.max(0, …)`.\n\nMy first command included a stray `sed` that errored because of a newline in its pattern. It changed nothing; the Python edits that followed made both fixes.",
+  "ttft_ms": 2254,
+  "type": "result",
+  "duration_ms": 12153,
+  "uuid": "3f2c18a4-1011-4eed-a824-0ce16ffebefc",
+  "ttft_stream_ms": 1493,
+  "time_to_request_ms": 316,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 12,
+    "resume_other": 0,
+    "process_user_input": 0,
+    "input_attachments": 5,
+    "input_hooks": 31,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 248,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 6,
+  "time_to_request_cpu_ms": 126,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1494,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 675,
+      "cacheReadInputTokens": 133965,
+      "cacheCreationInputTokens": 11833,
+      "webSearchRequests": 0,
+      "costUSD": 0.0674945,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 11833,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

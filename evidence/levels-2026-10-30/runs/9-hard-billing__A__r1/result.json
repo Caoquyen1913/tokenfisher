@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 27996,
+  "stop_reason": "end_turn",
+  "session_id": "60402235-3db2-46c5-8439-ac0b2c309eb6",
+  "total_cost_usd": 0.234788,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17312,
+    "cache_read_input_tokens": 176960,
+    "output_tokens": 3043,
+    "output_tokens_details": {
+      "thinking_tokens": 481
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17312,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 857,
+        "cache_read_input_tokens": 41485,
+        "cache_creation_input_tokens": 1938,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1938
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3043,
+      "cacheReadInputTokens": 176960,
+      "cacheCreationInputTokens": 17312,
+      "webSearchRequests": 0,
+      "costUSD": 0.234788,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 481,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17312,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed it: Japanese and Korean cards will now be charged the invoice total, not 100 times it. `npm test` passes (9 of 9), and the new tests fail on the old code.\n\n**Root cause:** in `src/payments/gateway/payload.js`, `buildChargePayload` lowercased the currency for the gateway (`'JPY'` → `'jpy'`) and then used that lowercased code to convert the amount to the smallest currency unit (`toMinor`). The currency list in `src/lib/currency/registry.js` only has upper-case keys, so `'jpy'` wasn't found. In that case the code quietly assumes 2 decimal places, so ¥1,500 became 150,000 and the gateway charged ¥150,000. The PDF was right because invoice totals and rendering use the upper-case code. USD and EUR really do have 2 decimal places, so the wrong assumption happened to give the right answer for them.\n\n**Fix:** the amount is now converted using the invoice's own upper-case currency code. The code is still lowercased for the `currency` field sent to the gateway, so the request is otherwise unchanged.\n\n**Regression tests** (in `test/charge.test.js`):\n- JPY: ¥1,500 is charged as `1500` with currency `'jpy'`.\n- KRW: ₩25,000 is charged as `25000` with currency `'krw'`.\n- BHD: 12.345 BHD is charged as `12345`.\n\n**Also affected:** BHD and KWD, which use 3 decimal places, hit the same bug the other way. A 12.345 BHD invoice was sent as `1235`, which the gateway reads as 1.235 BHD, so those customers were undercharged by about 10×. The fix covers them too. VND and CLP also have no decimal places, so they were probably overcharged 100× as well, though I only tested JPY, KRW and BHD. Finance may want to review past charges in all of these currencies for refunds or adjustments.\n\n**Possible follow-up (not done):** the currency lookup still silently assumes 2 decimals for any code it doesn't recognise, including a lowercase one. None of the other places that convert amounts lowercase the code first, so they aren't affected today. Making the lookup ignore case, or fail on unknown codes, would stop this kind of bug from coming back. That changes a shared helper, so I left it out of this fix.\n\nI haven't committed anything.",
+  "ttft_ms": 2045,
+  "type": "result",
+  "duration_ms": 33031,
+  "uuid": "0024c408-2ab8-41ba-adb8-231e3f7c0ef0",
+  "ttft_stream_ms": 1047,
+  "time_to_request_ms": 324,
+  "time_to_request_phases_ms": {
+    "other": 4,
+    "system_prompt": 67,
+    "resume_other": 7,
+    "process_user_input": 2,
+    "input_attachments": 5,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 226,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 4,
+  "time_to_request_cpu_ms": 392,
+  "time_to_request_major_faults": 7,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 8,
+    "major_faults": 1
+  },
+  "first_content_frame_ms": 1047,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3043,
+      "cacheReadInputTokens": 176960,
+      "cacheCreationInputTokens": 17312,
+      "webSearchRequests": 0,
+      "costUSD": 0.234788,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 481,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17312,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

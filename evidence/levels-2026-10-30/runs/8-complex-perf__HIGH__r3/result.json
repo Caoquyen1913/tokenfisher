@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 24150,
+  "stop_reason": "end_turn",
+  "session_id": "39f2cace-344f-4392-bff2-95db9e140841",
+  "total_cost_usd": 0.11007449999999999,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 15600,
+    "cache_read_input_tokens": 135985,
+    "output_tokens": 3406,
+    "output_tokens_details": {
+      "thinking_tokens": 497
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 15600,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 641,
+        "cache_read_input_tokens": 38737,
+        "cache_creation_input_tokens": 2974,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2974
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3406,
+      "cacheReadInputTokens": 135985,
+      "cacheCreationInputTokens": 15600,
+      "webSearchRequests": 0,
+      "costUSD": 0.11007449999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 497,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 15600,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now handles 200,000 orders well inside the 1-second budget. The test that checks this passes, and `npm test` passes 5/5. I didn't record the exact timing.\n\n**Cause:** there were three quadratic costs in `src/report.js`:\n- Duplicate detection used `seen.includes`, a linear scan per order.\n- Customer lookup used `groups.find`, also a linear scan per order.\n- The whole leaderboard was re-sorted after every order.\n\n**Fix:**\n- `seen` is now a `Set`.\n- Customers are looked up through a `Map`.\n- The sort runs once at the end.\n\n**Why the output is unchanged:**\n- **Ordering:** `byRank` is a total order, because it ends by comparing `customerId` and every customer appears once. Sorting once therefore gives the same ordering as sorting after every order.\n- **Duplicates and refunds:** the dedup-before-refund behaviour is kept, so a refunded first delivery still blocks a later paid duplicate with the same id.\n- **Output shape:** the zero-spend filter, the `limit` slice and the output field order are untouched.\n\n**Tests added in `test/report.test.js`:**\n- **Equivalence check:** it compares `summarize` with a copy of the original algorithm on 20 seeded datasets of 400 orders each, at several limits. The data includes duplicate ids, refunds, EUR amounts and many ties. This is the test that would catch a behaviour change.\n- **Refunded-duplicate case:** it covers the refunded-then-paid duplicate described above.\n- **Speed check:** it times 200,000 orders and fails if `summarize` takes 1 second or more.\n\nI only checked the unchanged-ordering claim against ordinary string and number inputs. A `NaN` amount, or a `Date` instead of an ISO string, would make the sort comparator inconsistent. That would be true of the old code too, but I didn't test it.",
+  "ttft_ms": 1888,
+  "type": "result",
+  "duration_ms": 27222,
+  "uuid": "75fe1765-26f8-4d73-89cc-a77733e5dc26",
+  "ttft_stream_ms": 1153,
+  "time_to_request_ms": 132,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 7,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 4,
+    "input_hooks": 39,
+    "tool_pool_refresh": 1,
+    "init_message": 4,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 62,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 3,
+  "time_to_request_cpu_ms": 146,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1153,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3406,
+      "cacheReadInputTokens": 135985,
+      "cacheCreationInputTokens": 15600,
+      "webSearchRequests": 0,
+      "costUSD": 0.11007449999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 497,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 15600,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

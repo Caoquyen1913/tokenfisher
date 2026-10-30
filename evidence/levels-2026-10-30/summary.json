@@ -1,0 +1,127 @@
+{
+  "config": {
+    "model": "opus",
+    "reps": 3,
+    "baseline": "A",
+    "margin": 0.05
+  },
+  "arms": {
+    "A": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.25249855555555556,
+      "totalCost": 6.817461,
+      "tokens": 184263.11111111112,
+      "output": 4374.185185185185,
+      "turns": 5.62962962962963,
+      "errors": 0
+    },
+    "LOW": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.2564819851851852,
+      "totalCost": 6.925013600000001,
+      "tokens": 191601.55555555556,
+      "output": 4513.222222222223,
+      "turns": 5.777777777777778,
+      "errors": 0
+    },
+    "HIGH": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.11757953703703704,
+      "totalCost": 3.1746475,
+      "tokens": 188144.85185185185,
+      "output": 3604.185185185185,
+      "turns": 8.37037037037037,
+      "errors": 0
+    },
+    "ULTRA": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.11012934814814816,
+      "totalCost": 2.9734924000000005,
+      "tokens": 186874.77777777778,
+      "output": 3148.777777777778,
+      "turns": 7.814814814814815,
+      "errors": 0
+    },
+    "PROMAX": {
+      "n": 27,
+      "quality": 1,
+      "fullPass": 1,
+      "cost": 0.06920805185185185,
+      "totalCost": 1.8686173999999998,
+      "tokens": 61944.77777777778,
+      "output": 2674.4814814814813,
+      "turns": 6.148148148148148,
+      "errors": 0
+    }
+  },
+  "comparisons": {
+    "LOW": {
+      "pairs": 27,
+      "costCut": [
+        -0.015776049177252505,
+        -0.08433891263009263,
+        0.06498183832359505
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": false
+    },
+    "HIGH": {
+      "pairs": 27,
+      "costCut": [
+        0.5343358033144597,
+        0.4813164722885336,
+        0.583482087298273
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "ULTRA": {
+      "pairs": 27,
+      "costCut": [
+        0.563841670674757,
+        0.5179206006209665,
+        0.6073207263436455
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    },
+    "PROMAX": {
+      "pairs": 27,
+      "costCut": [
+        0.7259071375692505,
+        0.697021281219921,
+        0.7529477928172376
+      ],
+      "qualityDelta": [
+        0,
+        0,
+        0
+      ],
+      "nonInferior": true,
+      "significant": true
+    }
+  }
+}

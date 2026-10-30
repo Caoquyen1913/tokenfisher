@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 26915,
+  "stop_reason": "end_turn",
+  "session_id": "233aa233-090d-4dfc-ad3a-b686adcee7bb",
+  "total_cost_usd": 0.2232228,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 16440,
+    "cache_read_input_tokens": 177514,
+    "output_tokens": 2808,
+    "output_tokens_details": {
+      "thinking_tokens": 402
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16440,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 693,
+        "cache_read_input_tokens": 40697,
+        "cache_creation_input_tokens": 1854,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1854
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2808,
+      "cacheReadInputTokens": 177514,
+      "cacheCreationInputTokens": 16440,
+      "webSearchRequests": 0,
+      "costUSD": 0.2232228,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 402,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 16440,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The 500s on `POST /checkout` were caused by `parseAmount` crashing on prices of 1,000 or more. I fixed it, added regression tests, and `npm test` passes (7/7).\n\n**What the log shows:** all 37 `POST /checkout 500` errors in `logs/app.log` are the same `TypeError: Cannot read properties of null (reading '1')` at `src/money.js:5`. In every case, the request logged just before the error has a price written with a thousands separator: `\"1,299.00\"`, `\"2,450.50\"` or `\"1,005.99\"`. It's intermittent because only orders containing an item priced at 1,000 or more fail.\n\n**Root cause:** the regex in `parseAmount` (`/^(\\d+)(?:\\.(\\d{1,2}))?$/`) doesn't allow commas. For these prices `match()` returns `null`, and reading `m[1]` throws. That also broke the function's documented contract, which says bad input should throw `Error('Invalid amount: <input>')`.\n\n**Fix** (`src/money.js`):\n- The regex now accepts correctly grouped thousands separators (`1,299.00`, `1,234,567.8`) and strips the commas before converting.\n- Badly grouped input like `12,34.00` or `1,2,3` is still rejected.\n- Input that doesn't match now throws the documented `Invalid amount: …` error instead of a TypeError.\n\n**Regression tests** (`test/money.test.js`):\n- `parseAmount` handles the prices that failed in production.\n- Malformed amounts are rejected with the documented error.\n- `checkout()` totals an order containing `\"1,299.00\"` correctly.\n\nWith the `src/` change temporarily reverted, the three new tests fail, so they would have caught this bug.\n\nMalformed amounts still come back as HTTP 500, because `server.js` returns 500 for any error. If you want those to be 400s instead, that would be a small change in `server.js`.",
+  "ttft_ms": 3207,
+  "type": "result",
+  "duration_ms": 30669,
+  "uuid": "6b1a72f1-4d68-4a05-82aa-ac4313170167",
+  "ttft_stream_ms": 1011,
+  "time_to_request_ms": 92,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 10,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 35,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 23,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 1,
+  "time_to_request_cpu_ms": 111,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 7,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 1011,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 2808,
+      "cacheReadInputTokens": 177514,
+      "cacheCreationInputTokens": 16440,
+      "webSearchRequests": 0,
+      "costUSD": 0.2232228,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 402,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 16440,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

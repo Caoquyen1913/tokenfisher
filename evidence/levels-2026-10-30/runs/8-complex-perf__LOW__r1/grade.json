@@ -1,0 +1,59 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "identical output on random days (5 seeds)",
+      "ok": true
+    },
+    {
+      "name": "identical output with every customer listed",
+      "ok": true
+    },
+    {
+      "name": "duplicate ids: first delivery wins",
+      "ok": true
+    },
+    {
+      "name": "failed and pending count as orders, not spend",
+      "ok": true
+    },
+    {
+      "name": "EUR rounds per order",
+      "ok": true
+    },
+    {
+      "name": "ties: first order time, then code-unit order of ids",
+      "ok": true
+    },
+    {
+      "name": "zero-spend customers left out; empty input",
+      "ok": true
+    },
+    {
+      "name": "does not mutate the input",
+      "ok": true
+    },
+    {
+      "name": "fast on 200,000 orders",
+      "ok": true
+    },
+    {
+      "name": "regression test added",
+      "ok": true
+    }
+  ],
+  "passed": 13,
+  "total": 13,
+  "score": 1
+}

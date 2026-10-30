@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 31839,
+  "stop_reason": "end_turn",
+  "session_id": "96f634be-fb03-4a06-b744-0f418ee436aa",
+  "total_cost_usd": 0.1480769,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 18406,
+    "cache_read_input_tokens": 178729,
+    "output_tokens": 5656,
+    "output_tokens_details": {
+      "thinking_tokens": 323
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 18406,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 474,
+        "cache_read_input_tokens": 41530,
+        "cache_creation_input_tokens": 2987,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 2987
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 5656,
+      "cacheReadInputTokens": 178729,
+      "cacheCreationInputTokens": 18406,
+      "webSearchRequests": 0,
+      "costUSD": 0.1480769,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 323,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18406,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Reservations with expiry are in, in `src/store.js` and `src/api.js`. `npm test` passes: 175 tests, 0 failed, including the new ones.\n\n- **Store:** `reserve`, `getAvailable`, `confirm` and `release` work as specified, using only the store's `clock`. `removeItem` now checks the quantity against available stock, so reserved stock can't be removed.\n- **API:** `GET /stock/:sku` now includes `available`. `POST /reservations`, `POST /reservations/:id/confirm` and `DELETE /reservations/:id` return the statuses you listed.\n\nSome choices the spec left open:\n- **`confirm` return value:** `confirm(id)` returns `{ sku, qty }`, which the API uses to build its response.\n- **Expired reservations:** An expired reservation stays in memory rather than being removed, so confirming it again keeps returning `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`.\n- **Reservation ids:** Ids look like `res-1`, `res-2`.\n- **Unspecified inputs:** I added no validation for `ttlMs`, since the spec didn't ask for it. Any `POST /reservations` error other than `INSUFFICIENT_STOCK` returns 400.\n\nI added store tests for each rule, including expiry at exactly `creation + ttlMs`. I also added API tests for every status code.",
+  "ttft_ms": 1492,
+  "type": "result",
+  "duration_ms": 35359,
+  "uuid": "74b2f7c4-7b3a-4af4-8578-3ed4c648b4d6",
+  "ttft_stream_ms": 826,
+  "time_to_request_ms": 125,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 4,
+    "input_hooks": 48,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 46,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 0,
+  "time_to_request_cpu_ms": 116,
+  "time_to_request_major_faults": 6,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 826,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 5656,
+      "cacheReadInputTokens": 178729,
+      "cacheCreationInputTokens": 18406,
+      "webSearchRequests": 0,
+      "costUSD": 0.1480769,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 323,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 18406,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

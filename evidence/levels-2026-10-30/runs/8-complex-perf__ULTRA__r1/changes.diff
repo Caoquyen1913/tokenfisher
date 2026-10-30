@@ -1,0 +1,83 @@
+diff --git a/eval/results/levels-2026-10-30/runs/8-complex-perf__ULTRA__r1/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/8-complex-perf__ULTRA__r1/tokenfisher/update.json
+new file mode 100644
+index 0000000..c6c4162
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/8-complex-perf__ULTRA__r1/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793331820451}
+\ No newline at end of file
+diff --git a/src/report.js b/src/report.js
+index 37e0465..d01ffe0 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -9,27 +9,29 @@ function byRank(a, b) {
+ }
+ 
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  const seen = new Set();
++  const byCustomer = new Map();
+   const groups = [];
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    let group = byCustomer.get(order.customerId);
+     if (!group) {
+       group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
+       groups.push(group);
++      byCustomer.set(order.customerId, group);
+     }
+     group.orderCount++;
+     if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
+   }
++  // byRank is a total order (customerIds are unique), so one sort at the end matches sorting as we go.
++  groups.sort(byRank);
+   return groups
+     .filter((g) => g.spendCents > 0)
+     .slice(0, limit)
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..2db31ad 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,30 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++test('dedupes, skips refunds, converts EUR and breaks ties exactly', () => {
++  const report = summarize([
++    order('o1', 'cus_b', 'paid', 1000, '2026-10-01T10:00:00Z'),
++    order('o1', 'cus_b', 'paid', 1000, '2026-10-01T10:00:00Z'), // duplicate id
++    order('o2', 'cus_a', 'paid', 1000, '2026-10-01T09:00:00Z'), // ties cus_b on spend, earlier first order
++    order('o3', 'cus_c', 'paid', 925, '2026-10-01T08:00:00Z', 'EUR'), // 999
++    order('o4', 'cus_d', 'refunded', 5000, '2026-10-01T07:00:00Z'),
++    order('o4', 'cus_d', 'paid', 5000, '2026-10-01T07:00:00Z'), // duplicate of refunded id: ignored
++    order('o5', 'cus_e', 'pending', 700, '2026-10-01T06:00:00Z'), // counted, no spend: filtered out
++    order('o6', 'cus_b', 'pending', 1, '2026-09-30T00:00:00Z'),
++    order('o7', 'cus_z', 'paid', 1000, '2026-10-01T09:00:00Z'), // ties cus_a fully; id order decides
++  ]);
++  assert.deepStrictEqual(report, [
++    { rank: 1, customerId: 'cus_b', spendCents: 1000, orderCount: 2, firstOrderAt: '2026-09-30T00:00:00Z' },
++    { rank: 2, customerId: 'cus_a', spendCents: 1000, orderCount: 1, firstOrderAt: '2026-10-01T09:00:00Z' },
++    { rank: 3, customerId: 'cus_z', spendCents: 1000, orderCount: 1, firstOrderAt: '2026-10-01T09:00:00Z' },
++    { rank: 4, customerId: 'cus_c', spendCents: 999, orderCount: 1, firstOrderAt: '2026-10-01T08:00:00Z' },
++  ]);
++});
++
++test('handles 200,000 orders quickly', () => {
++  const orders = Array.from({ length: 200000 }, (_, i) => order(`o${i}`, `cus_${i % 5000}`, 'paid', 100 + (i % 97), '2026-10-01T10:00:00Z'));
++  const t = Date.now();
++  summarize(orders);
++  assert.ok(Date.now() - t < 1000);
++});

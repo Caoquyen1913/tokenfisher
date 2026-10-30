@@ -8,6 +8,9 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { lastRequest, levelFor, check } = require('../bin/session-warn');
 
+// Pin the level so a level chosen on this machine doesn't move the default threshold.
+process.env.TOKENFISHER_LEVEL = 'high';
+
 const HOOK = path.join(__dirname, '..', 'bin', 'session-warn.js');
 const MIN = 60e3;
 

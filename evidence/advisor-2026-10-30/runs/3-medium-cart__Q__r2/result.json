@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 12896,
+  "stop_reason": "end_turn",
+  "session_id": "32ac2667-9224-454f-b4a7-37a19dd8a831",
+  "total_cost_usd": 0.08905679999999999,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 13949,
+    "cache_read_input_tokens": 217268,
+    "output_tokens": 1151,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13949,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 261,
+        "cache_read_input_tokens": 39923,
+        "cache_creation_input_tokens": 137,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 137
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 1151,
+      "cacheReadInputTokens": 217268,
+      "cacheCreationInputTokens": 13949,
+      "webSearchRequests": 0,
+      "costUSD": 0.08905679999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13949,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`npm test` now passes: 243 of 243, up from 241. There were two bugs in `src/`, and I didn't touch the tests.\n\n- **`src/cart.js`:** `total` applied tax first and the discount second. It now applies the discount to the subtotal and then tax to what's left, which is what the comment above the function says should happen. This fixed the \"fixed discount comes off before tax\" test.\n- **`src/discount.js`:** a fixed discount larger than the amount made the result negative. It's now `Math.max(0, amount - discount.value)`, so the amount floors at zero. This fixed the \"fixed discount larger than subtotal gives zero\" test.\n\nMy first attempt used `sed` and failed on macOS's `sed`, so nothing changed until I redid both edits with the Edit tool.",
+  "ttft_ms": 1909,
+  "type": "result",
+  "duration_ms": 16389,
+  "uuid": "8d8e7ae2-5ed5-404a-a960-0336a49c2d2c",
+  "ttft_stream_ms": 1185,
+  "time_to_request_ms": 74,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 10,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 42,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 2,
+  "time_to_request_cpu_ms": 80,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1186,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 1151,
+      "cacheReadInputTokens": 217268,
+      "cacheCreationInputTokens": 13949,
+      "webSearchRequests": 0,
+      "costUSD": 0.08905679999999999,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13949,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

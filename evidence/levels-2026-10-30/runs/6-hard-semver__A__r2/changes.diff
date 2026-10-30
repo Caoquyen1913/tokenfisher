@@ -1,0 +1,339 @@
+diff --git a/src/semver.js b/src/semver.js
+index 0ff5fc8..da50c60 100644
+--- a/src/semver.js
++++ b/src/semver.js
+@@ -1,6 +1,198 @@
+ // See docs/SPEC.md.
++
++const NUM = '(?:0|[1-9]\\d*)';
++const IDENT = '[0-9A-Za-z-]+';
++const DOTTED = `${IDENT}(?:\\.${IDENT})*`;
++const PRE_BUILD = `(?:-(${DOTTED}))?(?:\\+${DOTTED})?`;
++const VERSION_RE = new RegExp(`^v?(${NUM})\\.(${NUM})\\.(${NUM})${PRE_BUILD}$`);
++// A partial version: each position is a number or a wildcard; a prerelease only after a full version.
++const PART = `(${NUM}|[xX*])`;
++const PARTIAL_RE = new RegExp(`^v?${PART}(?:\\.${PART}(?:\\.${PART}${PRE_BUILD})?)?$`);
++const OPERATORS = ['<', '<=', '>', '>=', '='];
++
++function toInt(s) {
++  const n = Number(s);
++  return Number.isSafeInteger(n) ? n : null;
++}
++
++function makeVersion(major, minor, patch, pre) {
++  return { major, minor, patch, pre: pre ? pre.split('.') : [] };
++}
++
++function parseVersion(str) {
++  const m = VERSION_RE.exec(str.trim());
++  if (!m) return null;
++  const nums = [m[1], m[2], m[3]].map(toInt);
++  if (nums.includes(null)) return null;
++  return makeVersion(...nums, m[4]);
++}
++
++// Returns { nums: [major?, minor?, patch?], pre } where nums holds only the
++// leading non-wildcard positions, or null when invalid.
++function parsePartial(str) {
++  const m = PARTIAL_RE.exec(str);
++  if (!m) return null;
++  const nums = [];
++  let wild = false;
++  for (const part of [m[1], m[2], m[3]]) {
++    const isWild = part === undefined || /^[xX*]$/.test(part);
++    if (isWild) wild = true;
++    else if (wild) return null; // a number after a wildcard, e.g. `1.x.3`
++    else {
++      const n = toInt(part);
++      if (n === null) return null;
++      nums.push(n);
++    }
++  }
++  if (m[4] !== undefined && nums.length < 3) return null;
++  return { nums, pre: m[4] };
++}
++
++function compareIdent(a, b) {
++  const an = /^\d+$/.test(a);
++  const bn = /^\d+$/.test(b);
++  if (an && bn) {
++    // Compare as big integers without precision loss.
++    const x = a.replace(/^0+(?=.)/, '');
++    const y = b.replace(/^0+(?=.)/, '');
++    if (x.length !== y.length) return x.length < y.length ? -1 : 1;
++    return x < y ? -1 : x > y ? 1 : 0;
++  }
++  if (an) return -1;
++  if (bn) return 1;
++  return a < b ? -1 : a > b ? 1 : 0;
++}
++
++function compare(a, b) {
++  for (const k of ['major', 'minor', 'patch']) {
++    if (a[k] !== b[k]) return a[k] < b[k] ? -1 : 1;
++  }
++  // A version without a prerelease is greater than one with a prerelease.
++  if (!a.pre.length || !b.pre.length) return Math.sign(b.pre.length) - Math.sign(a.pre.length);
++  for (let i = 0; i < Math.min(a.pre.length, b.pre.length); i++) {
++    const c = compareIdent(a.pre[i], b.pre[i]);
++    if (c) return c;
++  }
++  return Math.sign(a.pre.length - b.pre.length);
++}
++
++const NOTHING = [{ op: '<', version: makeVersion(0, 0, 0) }]; // nothing is below 0.0.0
++const ANY = [];
++
++const ge = (version) => ({ op: '>=', version });
++const lt = (version) => ({ op: '<', version });
++
++// Filled-in lower bound of a partial with at least one number: missing positions are zeros.
++function floor({ nums, pre }) {
++  return makeVersion(nums[0], nums[1] || 0, nums[2] || 0, pre);
++}
++
++// Smallest version above everything matched by a partial with 1 or 2 numbers.
++function ceiling({ nums }) {
++  return nums.length === 1 ? makeVersion(nums[0] + 1, 0, 0) : makeVersion(nums[0], nums[1] + 1, 0);
++}
++
++// Desugars `op` + partial into a list of primitive comparators.
++function desugar(op, p) {
++  const n = p.nums.length;
++  const full = n === 3 ? floor(p) : null;
++  const [M, m, pt] = p.nums;
++  switch (op) {
++    case '':
++    case '=':
++      if (n === 0) return ANY;
++      if (full) return [{ op: '=', version: full }];
++      return [ge(floor(p)), lt(ceiling(p))];
++    case '>':
++      if (n === 0) return NOTHING;
++      return full ? [{ op: '>', version: full }] : [ge(ceiling(p))];
++    case '>=':
++      return n === 0 ? ANY : [ge(floor(p))];
++    case '<':
++      return n === 0 ? NOTHING : [lt(floor(p))];
++    case '<=':
++      if (n === 0) return ANY;
++      return full ? [{ op: '<=', version: full }] : [lt(ceiling(p))];
++    case '~':
++      if (n === 0) return ANY;
++      return [ge(floor(p)), lt(n === 1 ? makeVersion(M + 1, 0, 0) : makeVersion(M, m + 1, 0))];
++    case '^': {
++      if (n === 0) return ANY;
++      let upper;
++      if (M > 0 || n === 1) upper = makeVersion(M + 1, 0, 0);
++      else if (m > 0 || n === 2) upper = makeVersion(0, m + 1, 0);
++      else upper = makeVersion(0, 0, pt + 1);
++      return [ge(floor(p)), lt(upper)];
++    }
++    default:
++      return null;
++  }
++}
++
++function hyphen(a, b) {
++  const result = [];
++  if (a.nums.length) result.push(ge(floor(a)));
++  if (b.nums.length === 3) result.push({ op: '<=', version: floor(b) });
++  else if (b.nums.length) result.push(lt(ceiling(b)));
++  return result;
++}
++
++// Parses one comparator set into a list of primitive comparators, or null when invalid.
++function parseSet(str) {
++  const tokens = str.trim().split(/\s+/).filter(Boolean);
++  const result = [];
++  for (let i = 0; i < tokens.length; i++) {
++    if (tokens[i + 1] === '-') {
++      const a = parsePartial(tokens[i]);
++      const b = tokens[i + 2] === undefined ? null : parsePartial(tokens[i + 2]);
++      if (!a || !b) return null;
++      result.push(...hyphen(a, b));
++      i += 2;
++      continue;
++    }
++    let token = tokens[i];
++    if (OPERATORS.includes(token)) {
++      if (tokens[i + 1] === undefined) return null;
++      token += tokens[++i];
++    }
++    const [, op, rest] = /^(<=|>=|<|>|=|~|\^)?(.*)$/.exec(token);
++    const p = parsePartial(rest);
++    if (!p) return null;
++    result.push(...desugar(op || '', p));
++  }
++  return result;
++}
++
++function test(version, { op, version: other }) {
++  const c = compare(version, other);
++  switch (op) {
++    case '<': return c < 0;
++    case '<=': return c <= 0;
++    case '>': return c > 0;
++    case '>=': return c >= 0;
++    case '=': return c === 0;
++  }
++  return false;
++}
++
++function satisfiesSet(version, set) {
++  if (!set.every((c) => test(version, c))) return false;
++  if (!version.pre.length) return true;
++  return set.some(({ version: v }) => v.pre.length
++    && v.major === version.major && v.minor === version.minor && v.patch === version.patch);
++}
++
+ function satisfies(version, range) {
+-  throw new Error('not implemented');
++  try {
++    if (typeof version !== 'string' || typeof range !== 'string') return false;
++    const v = parseVersion(version);
++    if (!v) return false;
++    const sets = range.split('||').map(parseSet);
++    if (sets.includes(null)) return false;
++    return sets.some((set) => satisfiesSet(v, set));
++  } catch {
++    return false;
++  }
+ }
+ 
+ module.exports = { satisfies };
+diff --git a/test/satisfies.test.js b/test/satisfies.test.js
+new file mode 100644
+index 0000000..5ad8f2c
+--- /dev/null
++++ b/test/satisfies.test.js
+@@ -0,0 +1,129 @@
++const assert = require('assert');
++const { satisfies } = require('../src/semver');
++
++function check(range, yes, no) {
++  for (const v of yes) assert.strictEqual(satisfies(v, range), true, `${v} should satisfy ${JSON.stringify(range)}`);
++  for (const v of no) assert.strictEqual(satisfies(v, range), false, `${v} should not satisfy ${JSON.stringify(range)}`);
++}
++
++test('exact versions, leading v, whitespace and build metadata', () => {
++  check('1.2.3', ['1.2.3', 'v1.2.3', '  1.2.3  ', '1.2.3+build.5'], ['1.2.4', '1.2.2']);
++  check('=1.2.3', ['1.2.3'], ['1.2.4']);
++  check('v1.2.3+meta', ['1.2.3'], ['1.2.4']);
++  check('1.0.0-alpha+001', ['1.0.0-alpha', '1.0.0-alpha+zzz'], ['1.0.0-alpha.1']);
++});
++
++test('invalid versions return false', () => {
++  for (const v of ['1.2', '1.2.3.4', '01.2.3', '1.02.3', '1.2.03', '1.2.3-', '1.2.3-a..b', '1.2.3+', '1.2.3-a_b', 'x.2.3', '-1.2.3', 'vv1.2.3', '', 'abc']) {
++    assert.strictEqual(satisfies(v, '*'), false, v);
++    assert.strictEqual(satisfies(v, '>=0.0.0'), false, v);
++  }
++  assert.strictEqual(satisfies(null, '*'), false);
++  assert.strictEqual(satisfies(undefined, '*'), false);
++  assert.strictEqual(satisfies(123, '*'), false);
++});
++
++test('invalid ranges return false and never throw', () => {
++  for (const r of ['>>1.2.3', '1.2.3.4', 'abc', '~>1.2.3', '>=', '1.2 -', '- 1.2', '01.2.3', '1.x.3', '1.2-beta', '>=1.2.3 || foo', '^~1.2.3', '!1.2.3']) {
++    assert.strictEqual(satisfies('1.2.3', r), false, r);
++  }
++  assert.strictEqual(satisfies('1.2.3', null), false);
++  assert.strictEqual(satisfies('1.2.3', undefined), false);
++  assert.strictEqual(satisfies('1.2.3', {}), false);
++});
++
++test('ordering: numeric parts and prereleases', () => {
++  const ordered = [
++    '1.0.0-alpha', '1.0.0-alpha.1', '1.0.0-alpha.beta', '1.0.0-beta', '1.0.0-beta.2',
++    '1.0.0-beta.11', '1.0.0-rc.1', '1.0.0', '1.0.1', '1.1.0', '1.10.0', '2.0.0', '10.0.0',
++  ];
++  for (let i = 0; i < ordered.length; i++) {
++    for (let j = 0; j < ordered.length; j++) {
++      const a = ordered[i];
++      const b = ordered[j];
++      // A prerelease only matches a comparator with a prerelease on the same tuple (tested separately).
++      if (a.includes('-') && !(b.includes('-') && a.split('-')[0] === b.split('-')[0])) continue;
++      assert.strictEqual(satisfies(a, `<${b}`), i < j, `${a} < ${b}`);
++      assert.strictEqual(satisfies(a, `>${b}`), i > j, `${a} > ${b}`);
++      assert.strictEqual(satisfies(a, `<=${b}`), i <= j, `${a} <= ${b}`);
++      assert.strictEqual(satisfies(a, `>=${b}`), i >= j, `${a} >= ${b}`);
++      assert.strictEqual(satisfies(a, `=${b}`), i === j, `${a} = ${b}`);
++    }
++  }
++  // Uppercase sorts before lowercase in ASCII; hyphenated identifiers are alphanumeric.
++  check('<1.0.0-a', ['1.0.0-B', '1.0.0-1', '1.0.0-99999', '1.0.0--'], ['1.0.0-a', '1.0.0-b', '1.0.0-a-']);
++  // Numeric identifiers compare numerically even beyond Number precision.
++  check('>1.0.0-9007199254740993', ['1.0.0-9007199254740994', '1.0.0-10000000000000000000'], ['1.0.0-9007199254740992']);
++});
++
++test('comparators, whitespace and sets', () => {
++  check('>= 1.2.3', ['1.2.3', '2.0.0'], ['1.2.2']);
++  check('>=1.2.3 <2.0.0', ['1.2.3', '1.9.9'], ['2.0.0', '1.2.2']);
++  check('  >1.0.0   <=1.5.0  ', ['1.0.1', '1.5.0'], ['1.0.0', '1.5.1']);
++  check('<1.0.0 || >=2.0.0', ['0.9.9', '2.0.0', '3.1.0'], ['1.0.0', '1.9.9']);
++  check('1.2.3 || 1.2.5', ['1.2.3', '1.2.5'], ['1.2.4']);
++  check('>1.0.0 <1.0.0', [], ['1.0.0', '0.0.0', '2.0.0']);
++});
++
++test('wildcards and partial versions without an operator', () => {
++  for (const r of ['*', '', '  ', 'x', 'X', 'x.x', '*.*.*']) check(r, ['0.0.0', '1.2.3', '99.0.1'], []);
++  for (const r of ['1', '1.x', '1.X', '1.*', '1.x.x', '=1', 'v1']) check(r, ['1.0.0', '1.9.9'], ['0.9.9', '2.0.0']);
++  for (const r of ['1.2', '1.2.x', '1.2.*', '=1.2']) check(r, ['1.2.0', '1.2.99'], ['1.1.9', '1.3.0']);
++});
++
++test('partial versions with an operator', () => {
++  check('>1', ['2.0.0'], ['1.9.9']);
++  check('>1.2', ['1.3.0'], ['1.2.9']);
++  check('>=1', ['1.0.0'], ['0.9.9']);
++  check('>=1.2', ['1.2.0'], ['1.1.9']);
++  check('<1', ['0.9.9'], ['1.0.0']);
++  check('<1.2', ['1.1.9'], ['1.2.0']);
++  check('<=1', ['1.9.9'], ['2.0.0']);
++  check('<=1.2', ['1.2.9'], ['1.3.0']);
++  check('>1.x', ['2.0.0'], ['1.9.9']);
++  check('>= 1.2.x', ['1.2.0'], ['1.1.9']);
++});
++
++test('tilde ranges', () => {
++  check('~1.2.3', ['1.2.3', '1.2.9'], ['1.2.2', '1.3.0']);
++  check('~1.2', ['1.2.0', '1.2.9'], ['1.1.9', '1.3.0']);
++  check('~1', ['1.0.0', '1.9.9'], ['0.9.9', '2.0.0']);
++  check('~1.2.3-beta.2', ['1.2.3-beta.2', '1.2.3-beta.10', '1.2.3', '1.2.9'], ['1.2.3-beta.1', '1.2.3-alpha', '1.2.4-beta', '1.3.0']);
++  check('~0.0.1', ['0.0.1', '0.0.9'], ['0.1.0']);
++});
++
++test('caret ranges', () => {
++  check('^1.2.3', ['1.2.3', '1.9.9'], ['1.2.2', '2.0.0']);
++  check('^0.2.3', ['0.2.3', '0.2.9'], ['0.2.2', '0.3.0']);
++  check('^0.0.3', ['0.0.3'], ['0.0.2', '0.0.4']);
++  check('^1.2', ['1.2.0', '1.9.9'], ['1.1.9', '2.0.0']);
++  check('^1', ['1.0.0', '1.9.9'], ['0.9.9', '2.0.0']);
++  check('^0.2', ['0.2.0', '0.2.9'], ['0.1.9', '0.3.0']);
++  check('^0.0', ['0.0.0', '0.0.9'], ['0.1.0']);
++  check('^0', ['0.0.0', '0.9.9'], ['1.0.0']);
++  check('^0.x', ['0.0.0', '0.9.9'], ['1.0.0']);
++  check('^1.2.3-beta.2', ['1.2.3-beta.2', '1.2.3-beta.3', '1.2.3', '1.9.9'], ['1.2.3-beta.1', '1.2.4-beta', '2.0.0']);
++  check('^*', ['0.0.0', '5.0.0'], []);
++});
++
++test('hyphen ranges', () => {
++  check('1.2.3 - 2.3.4', ['1.2.3', '2.3.4'], ['1.2.2', '2.3.5']);
++  check('1.2 - 2.3.4', ['1.2.0', '2.3.4'], ['1.1.9', '2.3.5']);
++  check('1.2.3 - 2.3', ['1.2.3', '2.3.9'], ['1.2.2', '2.4.0']);
++  check('1.2.3 - 2', ['1.2.3', '2.9.9'], ['1.2.2', '3.0.0']);
++  check('1.2.3   -   2.3.4', ['2.0.0'], ['3.0.0']);
++  check('1.0.0 - 1.0.5 || 2.0.0 - 2.0.5', ['1.0.3', '2.0.5'], ['1.5.0', '2.0.6']);
++  check('1.2.3-beta - 2.3.4', ['1.2.3-beta', '1.2.3-rc'], ['1.2.3-alpha', '2.3.4-beta']);
++  // Without spaces the hyphen starts a prerelease, so this is the exact version 1.2.3-2.3.4.
++  check('1.2.3-2.3.4', ['1.2.3-2.3.4'], ['1.2.3', '2.0.0']);
++});
++
++test('prereleases need a comparator with a prerelease on the same tuple', () => {
++  check('>1.2.3-alpha.3', ['1.2.3-alpha.7', '1.2.3', '3.4.5'], ['3.4.5-alpha.9', '1.2.3-alpha.3', '1.2.4-alpha']);
++  check('^1.2.3', ['1.2.3'], ['1.2.4-beta', '1.2.3-beta']);
++  check('*', [], ['1.0.0-alpha', '0.0.0-0']);
++  check('', [], ['1.0.0-alpha']);
++  check('<2.0.0', ['1.9.9'], ['2.0.0-rc.1']);
++  check('>=1.2.3-alpha <1.2.4 || >=2.0.0-rc.1', ['1.2.3-beta', '2.0.0-rc.2', '2.1.0'], ['1.2.4-alpha', '2.1.0-rc.1']);
++  check('1.2.3-alpha', ['1.2.3-alpha'], ['1.2.3-beta']);
++});
