@@ -1,0 +1,180 @@
+diff --git a/src/report.js b/src/report.js
+index 37e0465..d075f4b 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -8,28 +8,51 @@ function byRank(a, b) {
+   return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
+ }
+ 
+-function summarize(orders, limit = 10) {
+-  const seen = [];
++// Groups orders per customer. With sortEachStep the leaderboard is re-sorted after every
++// order (the historical behaviour); otherwise the caller sorts once at the end.
++// Returns { groups, totalOrder }: totalOrder is false if any value could make byRank
++// something other than a strict total order (non-string ids/timestamps, non-numeric
++// or NaN amounts), in which case the final order depends on the sort history.
++function aggregate(orders, sortEachStep) {
++  const seen = new Set();
++  const byCustomer = new Map();
+   const groups = [];
++  let totalOrder = true;
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    const customerId = order.customerId;
++    // NaN never matched itself under the old `===` lookup, so it always starts a new group.
++    let group = customerId === customerId ? byCustomer.get(customerId) : undefined;
+     if (!group) {
+-      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      group = { customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
+       groups.push(group);
++      if (customerId === customerId) byCustomer.set(customerId, group);
++      if (typeof customerId !== 'string') totalOrder = false;
+     }
+     group.orderCount++;
++    if (typeof order.createdAt !== 'string') totalOrder = false;
+     if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+     if (order.status === 'paid') {
++      if (typeof order.amountCents !== 'number') totalOrder = false;
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++      if (Number.isNaN(group.spendCents)) totalOrder = false;
+     }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
++    if (sortEachStep) groups.sort(byRank);
+   }
++  return { groups, totalOrder };
++}
++
++function summarize(orders, limit = 10) {
++  const list = Array.isArray(orders) ? orders : [...orders];
++  let { groups, totalOrder } = aggregate(list, false);
++  // Under a strict total order, sorting once gives the same result as sorting after every
++  // order. For malformed data, replay the incremental sort to reproduce its exact output.
++  if (totalOrder) groups.sort(byRank);
++  else groups = aggregate(list, true).groups;
+   return groups
+     .filter((g) => g.spendCents > 0)
+     .slice(0, limit)
+diff --git a/test/fixtures/report-reference.js b/test/fixtures/report-reference.js
+new file mode 100644
+index 0000000..f06384c
+--- /dev/null
++++ b/test/fixtures/report-reference.js
+@@ -0,0 +1,40 @@
++// Frozen copy of the original (slow) summarize(), used by tests as the behavioral reference.
++// Do not optimize or edit: src/report.js must produce exactly the same output.
++// orders: [{ id, customerId, status, amountCents, currency: 'USD' | 'EUR', createdAt: ISO-8601 string }]
++const EUR_TO_USD = 1.08;
++
++function byRank(a, b) {
++  if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++  if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++  return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++}
++
++function summarize(orders, limit = 10) {
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    // Upstream retries can deliver the same order twice.
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    // Keep the leaderboard sorted as we go.
++    groups.sort(byRank);
++  }
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++module.exports = { summarize };
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..52ae43a 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,65 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++const { summarize: referenceSummarize } = require('./fixtures/report-reference');
++
++// Deterministic PRNG so failures are reproducible.
++function rng(seed) {
++  return () => {
++    seed = (seed * 1664525 + 1013904223) >>> 0;
++    return seed / 2 ** 32;
++  };
++}
++
++function randomOrders(rand, n, customers) {
++  const statuses = ['paid', 'paid', 'paid', 'pending', 'refunded', 'failed'];
++  const orders = [];
++  for (let i = 0; i < n; i++) {
++    // Re-deliver an earlier order (sometimes with different fields) to exercise de-duplication.
++    if (orders.length && rand() < 0.1) {
++      const dup = orders[Math.floor(rand() * orders.length)];
++      orders.push(rand() < 0.5 ? dup : { ...dup, status: statuses[Math.floor(rand() * statuses.length)] });
++      continue;
++    }
++    orders.push(order(
++      `o${i}`,
++      `cus_${Math.floor(rand() * customers)}`,
++      statuses[Math.floor(rand() * statuses.length)],
++      // Small amounts and few timestamps produce plenty of spend and firstOrderAt ties.
++      Math.floor(rand() * 5) * 100 + (rand() < 0.2 ? 37 : 0),
++      `2026-10-01T1${Math.floor(rand() * 4)}:00:00Z`,
++      rand() < 0.3 ? 'EUR' : 'USD',
++    ));
++  }
++  return orders;
++}
++
++test('matches the reference implementation exactly on randomized orders', () => {
++  const rand = rng(42);
++  for (let round = 0; round < 300; round++) {
++    const orders = randomOrders(rand, Math.floor(rand() * 200), 1 + Math.floor(rand() * 40));
++    for (const limit of [undefined, 3, 1000]) {
++      assert.deepStrictEqual(summarize(orders, limit), referenceSummarize(orders, limit), `round ${round}, limit ${limit}`);
++    }
++  }
++});
++
++test('matches the reference implementation on malformed data', () => {
++  const cases = [
++    [order('o1', 1, 'paid', 100, '2026-10-01T10:00:00Z'), order('o2', '1', 'paid', 100, '2026-10-01T10:00:00Z'), order('o3', 'b', 'paid', 50, 'x')],
++    [order('o1', NaN, 'paid', 100, '2026-10-01T10:00:00Z'), order('o2', NaN, 'paid', 200, '2026-10-01T09:00:00Z'), order('o3', 'a', 'paid', 150, '2026-10-01T10:00:00Z')],
++    [order('o1', 'a', 'paid', NaN, '2026-10-01T10:00:00Z'), order('o2', 'b', 'paid', 300, '2026-10-01T10:00:00Z'), order('o3', 'c', 'paid', 200, '2026-10-01T11:00:00Z'), order('o4', 'd', 'paid', '250', '2026-10-01T10:00:00Z')],
++    [order('o1', 'a', 'paid', 100, undefined), order('o2', 'b', 'paid', 100, '2026-10-01T10:00:00Z'), order('o3', 'c', 'paid', 100, null)],
++  ];
++  for (const orders of cases) assert.deepStrictEqual(summarize(orders), referenceSummarize(orders));
++});
++
++test('summarizes 200,000 orders quickly', () => {
++  const orders = randomOrders(rng(7), 200000, 50000);
++  const start = process.hrtime.bigint();
++  summarize(orders);
++  const ms = Number(process.hrtime.bigint() - start) / 1e6;
++  // Typically well under 200 ms; the original implementation took minutes.
++  assert.ok(ms < 2000, `took ${ms.toFixed(0)} ms`);
++});

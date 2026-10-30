@@ -1,0 +1,227 @@
+diff --git a/eval/results/levels-2026-10-30/runs/8-complex-perf__LOW__r2/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/8-complex-perf__LOW__r2/tokenfisher/update.json
+new file mode 100644
+index 0000000..9ac91e5
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/8-complex-perf__LOW__r2/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332347511}
+\ No newline at end of file
+diff --git a/src/report.js b/src/report.js
+index 37e0465..75aa295 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -8,32 +8,71 @@ function byRank(a, b) {
+   return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
+ }
+ 
++function spendOf(order) {
++  return order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++}
++
++function toReport(groups, limit) {
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++// Fast path: O(n) grouping plus one sort at the end.
++// When every customerId and createdAt is a string and every total is a finite number,
++// byRank is a strict total order over the groups (customerIds are distinct), so a single
++// final sort yields exactly the order the original sort-after-every-order loop produced.
++// Anything else (malformed data) goes to summarizeExact, which replays the original algorithm.
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  const seen = new Set();
++  const byCustomer = new Map();
+   const groups = [];
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    if (typeof order.customerId !== 'string' || typeof order.createdAt !== 'string') return summarizeExact(orders, limit);
++    let group = byCustomer.get(order.customerId);
+     if (!group) {
+       group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      byCustomer.set(order.customerId, group);
+       groups.push(group);
+     }
+     group.orderCount++;
+     if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+-    if (order.status === 'paid') {
+-      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    if (order.status === 'paid') group.spendCents += spendOf(order);
++  }
++  for (const g of groups) {
++    if (typeof g.spendCents !== 'number' || !Number.isFinite(g.spendCents)) return summarizeExact(orders, limit);
++  }
++  groups.sort(byRank);
++  return toReport(groups, limit);
++}
++
++// The original algorithm (re-sorting after every order), kept for malformed input where
++// the ranking comparator has ties or is inconsistent and the history of sorts matters.
++function summarizeExact(orders, limit) {
++  const seen = new Set(); // same SameValueZero semantics as Array#includes
++  const groups = [];
++  for (const order of orders) {
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
++    if (order.status === 'refunded') continue;
++
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
+     }
+-    // Keep the leaderboard sorted as we go.
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') group.spendCents += spendOf(order);
+     groups.sort(byRank);
+   }
+-  return groups
+-    .filter((g) => g.spendCents > 0)
+-    .slice(0, limit)
+-    .map((g, i) => ({ rank: i + 1, ...g }));
++  return toReport(groups, limit);
+ }
+ 
+ module.exports = { summarize };
+diff --git a/test/report.equivalence.test.js b/test/report.equivalence.test.js
+new file mode 100644
+index 0000000..8aa508f
+--- /dev/null
++++ b/test/report.equivalence.test.js
+@@ -0,0 +1,126 @@
++const assert = require('assert');
++const { summarize } = require('../src/report');
++
++// Verbatim copy of the original (slow) summarize, used as the oracle: any change to
++// grouping, dedup, refund handling, currency conversion, ranking or tie-breaking shows up as a diff.
++function originalSummarize(orders, limit = 10) {
++  const EUR_TO_USD = 1.08;
++  function byRank(a, b) {
++    if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++    if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++    return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++  }
++  const seen = [];
++  const groups = [];
++  for (const order of orders) {
++    if (seen.includes(order.id)) continue;
++    seen.push(order.id);
++    if (order.status === 'refunded') continue;
++    let group = groups.find((g) => g.customerId === order.customerId);
++    if (!group) {
++      group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
++      groups.push(group);
++    }
++    group.orderCount++;
++    if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
++    if (order.status === 'paid') {
++      group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
++    }
++    groups.sort(byRank);
++  }
++  return groups
++    .filter((g) => g.spendCents > 0)
++    .slice(0, limit)
++    .map((g, i) => ({ rank: i + 1, ...g }));
++}
++
++// Small deterministic PRNG so failures are reproducible.
++function rng(seed) {
++  return () => {
++    seed = (seed * 1103515245 + 12345) % 2147483648;
++    return seed / 2147483648;
++  };
++}
++
++function randomOrders(seed, n) {
++  const r = rng(seed);
++  const pick = (xs) => xs[Math.floor(r() * xs.length)];
++  const statuses = ['paid', 'paid', 'paid', 'pending', 'refunded', 'failed'];
++  const times = ['2026-10-01T08:00:00Z', '2026-10-01T09:00:00Z', '2026-10-01T09:00:00Z', '2026-10-01T10:30:00Z', '2026-10-01T23:59:59Z'];
++  const amounts = [0, 100, 100, 250, 999, 1234, 5000]; // few values => many spend ties
++  const orders = [];
++  for (let i = 0; i < n; i++) {
++    if (orders.length && r() < 0.15) {
++      // Retry duplicate: same id, possibly different content (the first delivery must win).
++      const prev = pick(orders);
++      orders.push({ ...prev, status: pick(statuses), amountCents: pick(amounts) });
++      continue;
++    }
++    orders.push({
++      id: `o${i}`,
++      customerId: `cus_${Math.floor(r() * (n / 4 + 1))}`,
++      status: pick(statuses),
++      amountCents: pick(amounts),
++      currency: r() < 0.3 ? 'EUR' : 'USD',
++      createdAt: pick(times),
++    });
++  }
++  return orders;
++}
++
++test('matches the original implementation exactly on randomized orders', () => {
++  for (let seed = 1; seed <= 300; seed++) {
++    const orders = randomOrders(seed, 5 + (seed % 120));
++    for (const limit of [undefined, 1, 3, 10, 1000]) {
++      const expected = originalSummarize(orders, limit);
++      const actual = summarize(orders, limit);
++      assert.deepStrictEqual(actual, expected, `seed ${seed}, limit ${limit}`);
++      // Key order matters for the finance exports (JSON.stringify).
++      assert.strictEqual(JSON.stringify(actual), JSON.stringify(expected), `seed ${seed}, limit ${limit}`);
++    }
++  }
++});
++
++test('keeps first delivery of a duplicate id, even when it was refunded', () => {
++  const orders = [
++    { id: 'o1', customerId: 'cus_a', status: 'refunded', amountCents: 500, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++    { id: 'o1', customerId: 'cus_a', status: 'paid', amountCents: 500, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++    { id: 'o2', customerId: 'cus_b', status: 'paid', amountCents: 101, currency: 'EUR', createdAt: '2026-10-01T10:00:00Z' },
++  ];
++  assert.deepStrictEqual(summarize(orders), originalSummarize(orders));
++  assert.deepStrictEqual(summarize(orders), [{ rank: 1, customerId: 'cus_b', spendCents: 109, orderCount: 1, firstOrderAt: '2026-10-01T10:00:00Z' }]);
++});
++
++test('matches the original on malformed input (numeric/mixed ids, NaN amounts)', () => {
++  const cases = [
++    [
++      { id: 1, customerId: 7, status: 'paid', amountCents: 100, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++      { id: 2, customerId: '7', status: 'paid', amountCents: 100, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++      { id: 3, customerId: NaN, status: 'paid', amountCents: 50, currency: 'USD', createdAt: '2026-10-01T09:00:00Z' },
++      { id: 4, customerId: NaN, status: 'paid', amountCents: 50, currency: 'USD', createdAt: '2026-10-01T09:00:00Z' },
++    ],
++    [
++      { id: 'a', customerId: 'cus_a', status: 'paid', amountCents: undefined, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++      { id: 'b', customerId: 'cus_b', status: 'paid', amountCents: 300, currency: 'USD', createdAt: '2026-10-01T10:00:00Z' },
++      { id: 'c', customerId: 'cus_c', status: 'paid', amountCents: 200, currency: 'USD', createdAt: '2026-10-01T11:00:00Z' },
++    ],
++  ];
++  for (const orders of cases) assert.deepStrictEqual(summarize(orders), originalSummarize(orders));
++});
++
++test('handles a day of orders (200,000) well under a second', () => {
++  const r = rng(42);
++  const orders = Array.from({ length: 200000 }, (_, i) => ({
++    id: `o${i % 190000}`, // ~5% retried duplicates
++    customerId: `cus_${Math.floor(r() * 50000)}`,
++    status: r() < 0.05 ? 'refunded' : 'paid',
++    amountCents: Math.floor(r() * 100000),
++    currency: r() < 0.3 ? 'EUR' : 'USD',
++    createdAt: new Date(Date.UTC(2026, 9, 1) + Math.floor(r() * 86400000)).toISOString(),
++  }));
++  const start = process.hrtime.bigint();
++  const report = summarize(orders);
++  const ms = Number(process.hrtime.bigint() - start) / 1e6;
++  assert.strictEqual(report.length, 10);
++  assert.ok(ms < 1000, `took ${ms.toFixed(0)} ms`);
++});

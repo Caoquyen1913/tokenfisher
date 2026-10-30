@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 98115,
+  "stop_reason": "end_turn",
+  "session_id": "6581d52a-e72a-4229-814f-2037c135585f",
+  "total_cost_usd": 0.44500019999999996,
+  "usage": {
+    "input_tokens": 16,
+    "cache_creation_input_tokens": 22340,
+    "cache_read_input_tokens": 316581,
+    "output_tokens": 10145,
+    "output_tokens_details": {
+      "thinking_tokens": 3042
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 22340,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 821,
+        "cache_read_input_tokens": 47118,
+        "cache_creation_input_tokens": 1333,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1333
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 10145,
+      "cacheReadInputTokens": 316581,
+      "cacheCreationInputTokens": 22340,
+      "webSearchRequests": 0,
+      "costUSD": 0.44500019999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3042,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 22340,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 8,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` now takes about 45 ms on 200,000 orders. Its output is unchanged, including order, and `npm test` passes (6 tests).\n\n**Why it was slow:** for every order, the old code scanned all the order ids it had already seen, searched the whole customer list, and re-sorted the leaderboard. That's quadratic work and worse.\n\n**The fix (`src/report.js`):**\n- Duplicate detection and customer lookup now use a Set and a Map. These match values the same way the old code did, so the same duplicates are dropped and the same customers are grouped.\n- The leaderboard is sorted once at the end instead of after every order. On normal data the ranking rule never treats two customers as equal, so one final sort gives exactly the same order as re-sorting every time. Removing customers with zero spend before sorting doesn't change the order either.\n- On bad data (a non-string customer id or timestamp, or a spend that ends up not being a number), one final sort could rank things differently. In that case the function runs the original algorithm unchanged, so results still match the old ones exactly. That path is slow, but normal data never takes it.\n- If it's given an iterable instead of an array, it copies it into an array first, so the fallback can read it a second time.\n\n**New tests (`test/report.test.js`):**\n- **Comparison with the original:** a word-for-word copy of the old function is embedded in the test file and compared against the new one on 300 random order sets. These include retried duplicates, refunds, EUR conversion, tied spend and timestamps, negative and zero amounts, and different limits.\n- **Bad-data comparison:** the same check on 200 sets with number or `NaN` customer ids, missing amounts and null timestamps, which exercises the fallback.\n- **Fixed example:** a hand-written day of orders with the full expected output written out, covering ties broken by first order time and then by customer id.\n- **Speed:** 200,000 orders must finish in under 1 second.\n\n**How I checked it:**\n- I broke the new code on purpose in five ways: removing duplicate detection, removing the first-order-time update, flipping the customer-id tie-break, sorting by spend only, and removing the fallback. The tests failed every time. A first attempt at this check silently left the code unchanged, so I redid it with a reliable string replacement.\n- On a separate 8,000-order sample, the old and new versions gave byte-identical output.",
+  "ttft_ms": 3404,
+  "type": "result",
+  "duration_ms": 105675,
+  "uuid": "105a0c65-6970-4a7e-861d-ee7769795da5",
+  "ttft_stream_ms": 2067,
+  "time_to_request_ms": 341,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 36,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 270,
+    "tool_schema_build": 7,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 19,
+  "time_to_request_cpu_ms": 214,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 1
+  },
+  "first_content_frame_ms": 2067,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 16,
+      "outputTokens": 10145,
+      "cacheReadInputTokens": 316581,
+      "cacheCreationInputTokens": 22340,
+      "webSearchRequests": 0,
+      "costUSD": 0.44500019999999996,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3042,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 22340,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

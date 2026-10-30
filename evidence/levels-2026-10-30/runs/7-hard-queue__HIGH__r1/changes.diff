@@ -1,0 +1,121 @@
+diff --git a/eval/results/levels-2026-10-30/runs/7-hard-queue__HIGH__r1/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/7-hard-queue__HIGH__r1/tokenfisher/update.json
+new file mode 100644
+index 0000000..a925315
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/7-hard-queue__HIGH__r1/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793331756577}
+\ No newline at end of file
+diff --git a/src/queue.js b/src/queue.js
+index 0645d89..484e5d3 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -15,21 +15,28 @@ function createQueue({ concurrency = 1 } = {}) {
+   let idleWaiters = [];
+ 
+   function next() {
+-    if (paused || running >= concurrency || pending.length === 0) return;
+-    const { fn, resolve, reject } = pending.shift();
+-    running++;
+-    fn().then((value) => {
+-      running--;
+-      resolve(value);
+-      next();
+-      checkIdle();
+-    }, reject);
++    while (!paused && running < concurrency && pending.length > 0) {
++      const { fn, resolve, reject } = pending.shift();
++      running++;
++      let result;
++      try {
++        result = Promise.resolve(fn());
++      } catch (err) {
++        result = Promise.reject(err);
++      }
++      result.then(resolve, reject).then(() => {
++        running--;
++        next();
++        checkIdle();
++      });
++    }
+   }
+ 
+   function checkIdle() {
+-    if (pending.length === 0) {
+-      idleWaiters.forEach((wake) => wake());
++    if (pending.length === 0 && running === 0) {
++      const waiters = idleWaiters;
+       idleWaiters = [];
++      waiters.forEach((wake) => wake());
+     }
+   }
+ 
+diff --git a/test/queue.test.js b/test/queue.test.js
+index be49570..2d3e115 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -15,3 +15,64 @@ test('starts jobs in order with concurrency 1', async () => {
+   await Promise.all(['a', 'b', 'c'].map((x) => q.add(async () => { order.push(x); await sleep(1); })));
+   assert.deepStrictEqual(order, ['a', 'b', 'c']);
+ });
++
++test('keeps going after a job rejects, a throws synchronously, or returns a plain value', async () => {
++  const q = createQueue();
++  const failed = q.add(async () => { throw new Error('boom'); });
++  const thrown = q.add(() => { throw new Error('sync'); });
++  const plain = q.add(() => 42);
++  await assert.rejects(failed, /boom/);
++  await assert.rejects(thrown, /sync/);
++  assert.strictEqual(await plain, 42);
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++  assert.strictEqual(q.pending, 0);
++});
++
++test('onIdle waits for running jobs, and resolves immediately when idle', async () => {
++  const q = createQueue({ concurrency: 2 });
++  await q.onIdle();
++  let done = 0;
++  q.add(async () => { await sleep(20); done++; });
++  q.add(async () => { await sleep(20); done++; });
++  assert.strictEqual(q.pending, 0);
++  assert.strictEqual(q.running, 2);
++  await q.onIdle();
++  assert.strictEqual(done, 2);
++});
++
++test('onIdle resolves after failing jobs too', async () => {
++  const q = createQueue({ concurrency: 2 });
++  q.add(async () => { await sleep(5); throw new Error('x'); }).catch(() => {});
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('resume starts as many jobs as there are free slots', async () => {
++  const q = createQueue({ concurrency: 4 });
++  q.pause();
++  let started = 0;
++  const jobs = [];
++  for (let i = 0; i < 6; i++) jobs.push(q.add(async () => { started++; await sleep(20); }));
++  assert.strictEqual(started, 0);
++  q.resume();
++  assert.strictEqual(started, 4);
++  assert.strictEqual(q.running, 4);
++  assert.strictEqual(q.pending, 2);
++  await Promise.all(jobs);
++  assert.strictEqual(started, 6);
++});
++
++test('pause stops new jobs from starting but lets running ones finish', async () => {
++  const q = createQueue();
++  const order = [];
++  const a = q.add(async () => { order.push('a'); await sleep(5); });
++  const b = q.add(async () => { order.push('b'); });
++  q.pause();
++  await a;
++  await sleep(10);
++  assert.deepStrictEqual(order, ['a']);
++  q.resume();
++  await b;
++  assert.deepStrictEqual(order, ['a', 'b']);
++});

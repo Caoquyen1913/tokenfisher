@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 28753,
+  "stop_reason": "end_turn",
+  "session_id": "761a6085-b1a1-448d-8f42-fbe4a4906c2f",
+  "total_cost_usd": 0.20707679999999998,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 14679,
+    "cache_read_input_tokens": 138064,
+    "output_tokens": 3100,
+    "output_tokens_details": {
+      "thinking_tokens": 574
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 14679,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 706,
+        "cache_read_input_tokens": 40295,
+        "cache_creation_input_tokens": 495,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 495
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3100,
+      "cacheReadInputTokens": 138064,
+      "cacheCreationInputTokens": 14679,
+      "webSearchRequests": 0,
+      "costUSD": 0.20707679999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 574,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14679,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js` and added regression tests. `npm test` passes: 8 of 8.\n\n**What was wrong and how I fixed it** (all in `next()` and `checkIdle()`):\n1. **Hangs after a job fails:** when a job failed, its slot was never freed and the next job was never started. Throwing synchronously or returning a plain value also broke the queue, because the code assumed `fn()` always returns a promise. Each job is now wrapped in a promise, so all three cases (promise, plain value, throw) work. Success and failure then share the same cleanup: free the slot, start the next job, check whether the queue is idle.\n2. **`onIdle()` resolved too early:** it only checked that nothing was waiting, not that nothing was running. It now requires both `pending.length === 0` and `running === 0`.\n3. **One job at a time after `resume()`:** `next()` started at most one job and `resume()` called it once. `next()` is now a loop that fills every free slot.\n\n**Tests:** I added six to `test/queue.test.js`:\n- a failing job rejects only its own promise and later jobs still run\n- synchronous throws and plain return values are handled\n- `onIdle()` waits for running jobs, and resolves straight away when already idle\n- `onIdle()` resolves after the last job fails\n- `resume()` brings 4 jobs back to running at once\n- `pause()` lets running jobs finish but starts no new ones\n\nTo check the tests catch the bugs, I also ran them against the original `queue.js`. Five failed, covering all three reported problems: two timed out as hangs, two showed `onIdle()` resolving too early, and one ran a single job after resume. The pause test passes on both versions, so it guards behaviour that already worked.\n\n**Repo state:** my changes are uncommitted. `src/queue.js` ended up staged as a side effect of how I restored it after that check. There is also an untracked `eval/` directory that I didn't create and left alone.",
+  "ttft_ms": 2385,
+  "type": "result",
+  "duration_ms": 42746,
+  "uuid": "bf24ebbf-537d-499e-8245-e622569c65f1",
+  "ttft_stream_ms": 1196,
+  "time_to_request_ms": 212,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 9,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 57,
+    "tool_pool_refresh": 1,
+    "init_message": 3,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 118,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 6,
+  "time_to_request_cpu_ms": 208,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 7,
+    "major_faults": 1
+  },
+  "first_content_frame_ms": 1196,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3100,
+      "cacheReadInputTokens": 138064,
+      "cacheCreationInputTokens": 14679,
+      "webSearchRequests": 0,
+      "costUSD": 0.20707679999999998,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 574,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 14679,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 49286,
+  "stop_reason": "end_turn",
+  "session_id": "c152560d-0d38-4f9a-b370-eddbdba16140",
+  "total_cost_usd": 0.2893794,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 17743,
+    "cache_read_input_tokens": 138717,
+    "output_tokens": 5983,
+    "output_tokens_details": {
+      "thinking_tokens": 834
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17743,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 798,
+        "cache_read_input_tokens": 38891,
+        "cache_creation_input_tokens": 4963,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 4963
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 5983,
+      "cacheReadInputTokens": 138717,
+      "cacheCreationInputTokens": 17743,
+      "webSearchRequests": 0,
+      "costUSD": 0.2893794,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 834,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17743,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added reservations with expiry to the store and the API. `npm test` passes all 175 tests: the original ones still pass unchanged, and 10 new ones are in `test/reservations.test.js`.\n\n**Store (`src/store.js`)**\n- `reserve(sku, qty, ttlMs)` returns ids like `res-1`, `res-2`. Ids come from a counter in each store, so they're unique within one store but not across stores.\n- `getAvailable(sku)` is physical stock minus reservations that haven't expired, where expired means `clock() >= creation time + ttlMs`. `getStock` still returns physical stock, and the `clock` option is the only time source.\n- `confirm(id)` reduces physical stock by the reserved quantity and deletes the reservation, so confirming the same id again throws `RESERVATION_NOT_FOUND`. It returns `{sku, stock}`, which the API sends back as is.\n- `release(id)` deletes the reservation and silently does nothing for unknown or repeated ids.\n- `removeItem` now checks the quantity against available stock rather than physical stock.\n- **Expired reservations are kept in memory** so that `confirm` can report `RESERVATION_EXPIRED` instead of \"not found\". The catch is that they're only cleared by `release` or `confirm`, so they pile up over a long-running process.\n\n**API (`src/api.js`)**\n- `GET /stock/:sku` now also returns `available`.\n- `POST /reservations` returns 201 `{id}`, 409 for insufficient stock, or 400 for a bad quantity.\n- `POST /reservations/:id/confirm` returns 200 `{sku, stock}`, 404 for not found, or 410 for expired.\n- `DELETE /reservations/:id` always returns 204.\n\n**One addition you didn't ask for:** `reserve` throws `Error('INVALID_TTL')` (400 from the API) unless `ttlMs` is a positive number. Without this check, a missing `ttlMs` in a request would create a reservation that never expires and locks that stock indefinitely. If you'd rather not have it, it's a single line to remove.\n\nThe new tests cover:\n- the exact expiry boundary\n- confirming an id that is unknown, released, already confirmed or expired\n- releasing the same id twice\n- `removeItem` not touching reserved stock, and being allowed again once the reservation expires\n- every API status code listed above",
+  "ttft_ms": 2927,
+  "type": "result",
+  "duration_ms": 54201,
+  "uuid": "2f1a3d07-a042-46f1-bb4d-30e20f55842f",
+  "ttft_stream_ms": 1755,
+  "time_to_request_ms": 91,
+  "time_to_request_phases_ms": {
+    "other": 7,
+    "system_prompt": 14,
+    "resume_other": 0,
+    "process_user_input": 2,
+    "input_attachments": 16,
+    "input_hooks": 39,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 0,
+    "tool_schema_build": 3,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 0,
+  "time_to_request_cpu_ms": 89,
+  "time_to_request_major_faults": 0,
+  "input_attachments_detail": {
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 14,
+    "cpu_ms": 22,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1755,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 5983,
+      "cacheReadInputTokens": 138717,
+      "cacheCreationInputTokens": 17743,
+      "webSearchRequests": 0,
+      "costUSD": 0.2893794,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 834,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17743,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

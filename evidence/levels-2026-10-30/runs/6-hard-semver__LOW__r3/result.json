@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 100282,
+  "stop_reason": "end_turn",
+  "session_id": "23d78328-2038-4af7-bd06-3bac5458bfa6",
+  "total_cost_usd": 0.4870654,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 24697,
+    "cache_read_input_tokens": 230707,
+    "output_tokens": 12165,
+    "output_tokens_details": {
+      "thinking_tokens": 3043
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24697,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 760,
+        "cache_read_input_tokens": 49502,
+        "cache_creation_input_tokens": 1306,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1306
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12165,
+      "cacheReadInputTokens": 230707,
+      "cacheCreationInputTokens": 24697,
+      "webSearchRequests": 0,
+      "costUSD": 0.4870654,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3043,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24697,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 9,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`satisfies(version, range)` is now in `src/semver.js` and follows `docs/SPEC.md`. `npm test` passes: 11 of 11, including 10 new test groups in `test/semver.test.js`.\n\n**What it covers:**\n- **Versions:** an optional leading `v` and surrounding whitespace are accepted, and build metadata is ignored. Ordering follows the spec, including the prerelease rules.\n- **Ranges:** `||` alternatives, comparator sets, all five operators (with or without a space before the version), wildcards and partial versions with and without operators, tilde, caret and hyphen ranges.\n- **Prerelease rule:** a prerelease version matches a set only if some comparator in that set has a prerelease on the same `MAJOR.MINOR.PATCH`. So `*` never matches a prerelease, and neither does `^1.2.3` for `1.2.4-beta`.\n- **Never throws:** an invalid version or range returns `false`, as do non-string arguments. If any one alternative in a range is invalid, the whole range is invalid.\n- **Large numbers:** version numbers are compared exactly, however large.\n\nThe tests cover every example table in the spec, a full prerelease ordering check, the prerelease rule's examples, and a set of invalid versions and ranges.\n\n**Cases the spec doesn't decide.** I chose these myself; each is a small change if you want different behaviour:\n- Anything after a wildcard counts as a wildcard, so `1.x.3` means `1.x`.\n- `>*` and `<*` match nothing; `>=*`, `<=*` and `=*` match anything.\n- A space is also allowed after `~` and `^` (`~ 1.2.3`), not just after the five comparison operators.\n- A hyphen range can sit alongside other comparators in a set (`1.2.3 - 2.3.4 >=2.0.0`). An operator on either end of a hyphen range (`>=1.2.3 - 2.0.0`) makes it invalid.\n- An empty `||` alternative means \"any version\", the same as an empty range.",
+  "ttft_ms": 2460,
+  "type": "result",
+  "duration_ms": 104525,
+  "uuid": "ae9e60bc-981c-4e0f-9108-333847e5c3f5",
+  "ttft_stream_ms": 1136,
+  "time_to_request_ms": 256,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 9,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 6,
+    "input_hooks": 43,
+    "tool_pool_refresh": 1,
+    "init_message": 3,
+    "engine_pickup": 0,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 176,
+    "tool_schema_build": 5,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 15,
+  "time_to_request_cpu_ms": 209,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 8,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 1136,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12165,
+      "cacheReadInputTokens": 230707,
+      "cacheCreationInputTokens": 24697,
+      "webSearchRequests": 0,
+      "costUSD": 0.4870654,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 3043,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24697,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

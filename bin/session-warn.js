@@ -2,7 +2,7 @@
 'use strict';
 
 // UserPromptSubmit hook. Warns when a session has become expensive to keep going:
-// - its context passed TOKENFISHER_WARN_TOKENS (default 80k), then every further +40k:
+// - its context passed TOKENFISHER_WARN_TOKENS (default set by the level, 80k at high), then every further +40k:
 //   every tool result in it is re-billed on each later turn;
 // - the prompt arrives after the prompt cache expired (5 min, or 1h when the session
 //   writes 1h cache), so this turn rewrites the whole prefix to cache.
@@ -12,6 +12,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { normUsage } = require('./token-report');
+const { config } = require('../lib/level');
 
 const HOME = process.env.TOKENFISHER_HOME || path.join(os.homedir(), '.claude', 'tokenfisher');
 const STATE_DIR = path.join(HOME, 'warn');
@@ -21,7 +22,7 @@ const MAX_CHUNK = 16 * 1024 * 1024;
 
 function threshold() {
   const n = Number(process.env.TOKENFISHER_WARN_TOKENS);
-  return Number.isFinite(n) && process.env.TOKENFISHER_WARN_TOKENS !== '' ? n : 80000;
+  return Number.isFinite(n) && process.env.TOKENFISHER_WARN_TOKENS !== '' ? n : config().warnTokens;
 }
 
 // Last API request in the current context: { size, ts, ttlMin }, or null when there is

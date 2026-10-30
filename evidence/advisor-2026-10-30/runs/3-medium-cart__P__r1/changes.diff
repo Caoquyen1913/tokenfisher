@@ -1,0 +1,36 @@
+diff --git a/eval/results/advisor-2026-10-30/runs/3-medium-cart__P__r1/tokenfisher/update.json b/eval/results/advisor-2026-10-30/runs/3-medium-cart__P__r1/tokenfisher/update.json
+new file mode 100644
+index 0000000..b10dd34
+--- /dev/null
++++ b/eval/results/advisor-2026-10-30/runs/3-medium-cart__P__r1/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793327925740}
+\ No newline at end of file
+diff --git a/src/cart.js b/src/cart.js
+index 980a45a..4aa884b 100644
+--- a/src/cart.js
++++ b/src/cart.js
+@@ -7,8 +7,8 @@ const round2 = (n) => Math.round(n * 100) / 100;
+ // can bring the subtotal down to zero but never below.
+ function total(items, { discount, taxRate = 0 } = {}) {
+   const subtotal = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+-  const taxed = applyTax(subtotal, taxRate);
+-  return round2(applyDiscount(taxed, discount));
++  const discounted = applyDiscount(subtotal, discount);
++  return round2(applyTax(discounted, taxRate));
+ }
+ 
+ module.exports = { total };
+diff --git a/src/discount.js b/src/discount.js
+index 5efd8f8..d721ae6 100644
+--- a/src/discount.js
++++ b/src/discount.js
+@@ -2,7 +2,7 @@
+ function applyDiscount(amount, discount) {
+   if (!discount) return amount;
+   if (discount.type === 'percent') return amount * (1 - discount.value / 100);
+-  if (discount.type === 'fixed') return amount - discount.value;
++  if (discount.type === 'fixed') return Math.max(0, amount - discount.value);
+   throw new Error(`Unknown discount type: ${discount.type}`);
+ }
+ 

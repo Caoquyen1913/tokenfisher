@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 4184,
+  "stop_reason": "end_turn",
+  "session_id": "9ea089b1-e8de-43f3-8a87-18e1bf91461b",
+  "total_cost_usd": 0.0544598,
+  "usage": {
+    "input_tokens": 6,
+    "cache_creation_input_tokens": 10173,
+    "cache_read_input_tokens": 95458,
+    "output_tokens": 421,
+    "output_tokens_details": {
+      "thinking_tokens": 0
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 10173,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 90,
+        "cache_read_input_tokens": 35834,
+        "cache_creation_input_tokens": 450,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 450
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 421,
+      "cacheReadInputTokens": 95458,
+      "cacheCreationInputTokens": 10173,
+      "webSearchRequests": 0,
+      "costUSD": 0.0544598,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 10173,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "Fixed in `src/range.js`: the loop condition was `i < end`, so the last number was left out. It's now `i <= end`, and `range(1, 5)` returns `[1, 2, 3, 4, 5]`. `npm test` passes, 2 of 2.",
+  "ttft_ms": 1478,
+  "type": "result",
+  "duration_ms": 7351,
+  "uuid": "7055f802-fc96-4f82-ba3b-6a92b15c4fae",
+  "ttft_stream_ms": 953,
+  "time_to_request_ms": 256,
+  "time_to_request_phases_ms": {
+    "other": 13,
+    "system_prompt": 111,
+    "resume_other": 0,
+    "process_user_input": 2,
+    "input_attachments": 9,
+    "input_hooks": 70,
+    "tool_pool_refresh": 3,
+    "init_message": 18,
+    "engine_pickup": 2,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "autocompact": 2,
+    "query_setup": 0,
+    "model_gates": 0,
+    "tool_schema_build": 5,
+    "message_normalization": 2,
+    "client_creation": 10,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 47,
+  "time_to_request_cpu_ms": 390,
+  "time_to_request_major_faults": 7,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 6,
+    "cpu_ms": 13,
+    "major_faults": 1
+  },
+  "first_content_frame_ms": 954,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-sonnet-5-5": {
+      "inputTokens": 6,
+      "outputTokens": 421,
+      "cacheReadInputTokens": 95458,
+      "cacheCreationInputTokens": 10173,
+      "webSearchRequests": 0,
+      "costUSD": 0.0544598,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 10173,
+      "canonicalModel": "claude-sonnet-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

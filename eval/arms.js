@@ -3,6 +3,7 @@
 const path = require('path');
 
 const PLUGIN_ROOT = path.join(__dirname, '..');
+const { LEVELS, settingsObject } = require('../lib/level');
 const CORE_TOOLS = 'Bash,PowerShell,Read,Edit,Write,Glob,Grep';
 
 // Behavioural layer of tokenfisher: ~90 tokens, aimed at reads and re-reads, not at answer quality.
@@ -47,6 +48,19 @@ function arms({ model }) {
       describe: 'tokenfisher plugin, zero flags: Sonnet main thread with every tool, Opus escalation agent, Haiku scout, policy, output hook',
       args: ['--plugin-dir', PLUGIN_ROOT],
     },
+    Q: {
+      label: 'plugin + advisor',
+      describe: 'P with advisorModel opus: the Sonnet main thread can consult Opus, which reads the whole transcript',
+      args: ['--plugin-dir', PLUGIN_ROOT, '--settings', JSON.stringify({ advisorModel: 'opus' })],
+    },
+    // One arm per /tokenfisher:set level: the settings it writes go in via --settings, the level itself via env.
+    // low keeps "your" model, which here is the baseline's (--model).
+    ...Object.fromEntries(Object.keys(LEVELS).map((name) => [name.toUpperCase(), {
+      label: `level ${name}`,
+      describe: `tokenfisher plugin at /tokenfisher:set ${name}: ${LEVELS[name].summary}`,
+      args: ['--plugin-dir', PLUGIN_ROOT, '--settings', JSON.stringify(settingsObject(name)), ...(name === 'low' ? ['--model', model] : [])],
+      env: { TOKENFISHER_LEVEL: name },
+    }])),
     C: { label: 'tokenfisher + sonnet', describe: 'B with model routed to Sonnet', args: ['--model', 'sonnet', ...diet] },
     D: { label: 'tokenfisher + effort medium', describe: `B (${model}) with --effort medium`, args: ['--model', model, ...diet, '--effort', 'medium'] },
   };

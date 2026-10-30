@@ -1,0 +1,55 @@
+{
+  "checks": [
+    {
+      "name": "visible test suite passes",
+      "ok": true
+    },
+    {
+      "name": "original tests still present",
+      "ok": true
+    },
+    {
+      "name": "hidden checks load",
+      "ok": true
+    },
+    {
+      "name": "basic words",
+      "ok": true
+    },
+    {
+      "name": "vietnamese diacritics",
+      "ok": true
+    },
+    {
+      "name": "đ becomes d",
+      "ok": true
+    },
+    {
+      "name": "other latin accents",
+      "ok": true
+    },
+    {
+      "name": "punctuation runs collapse",
+      "ok": true
+    },
+    {
+      "name": "empty and symbols only",
+      "ok": true
+    },
+    {
+      "name": "max 50 without trailing hyphen",
+      "ok": true
+    },
+    {
+      "name": "capitalize untouched",
+      "ok": true
+    },
+    {
+      "name": "tests were added for slugify",
+      "ok": true
+    }
+  ],
+  "passed": 12,
+  "total": 12,
+  "score": 1
+}

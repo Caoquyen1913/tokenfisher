@@ -69,7 +69,7 @@ An earlier 60-run eval on the first 5 tasks is in [`evidence/ab-2026-10-28-opus/
 | tool | what it does |
 |---|---|
 | **Sonnet main thread** | The plugin runs the main conversation on Sonnet (`agents/main.md`) and keeps every tool, so MCP servers and web tools still load when you ask for them. Hard work (cross-module design, concurrency/security logic, tricky specs, a bug that survived two attempts) goes to an `opus-architect` subagent; a Haiku `scout` digests big files and logs. A ~120-token policy at session start asks for locating before reading and batching tool calls. Start a session with `claude --model opus` when you want Opus as the main model. |
-| **`token-report`** | Reads your Claude Code transcripts and shows where tokens went: input vs cache write vs cache read vs output, by model, by project, main vs subagents. It also shows the **rent** each tool result pays by staying in context, cache rebuilds, and long sessions, with concrete suggestions. `--simulate` replays the compression filter over your past shell output to estimate its savings for *your* workload. |
+| **`token-report`** | Reads your Claude Code transcripts and shows where tokens went: input vs cache write vs cache read vs output, by model, by project, main vs subagents. It also shows the **rent** each tool result pays by staying in context, cache rebuilds, and long sessions, with concrete suggestions. `--simulate` replays the compression filter over your past shell output to estimate its savings for *your* workload. `--month 2026-10` totals a calendar month by account (claude.ai login, API key or `CLAUDE_CODE_OAUTH_TOKEN`, as a short hash; recorded from 0.4.0 on), source (desktop, CLI, SDK, IDE), model, level and project. `--compare 2026-10-30` puts the week before a date next to the week after, per request and per session. |
 | **`token-audit`** | Breaks down what every session loads before your first prompt (system prompt, skill and agent listings, MCP tool names and instructions, hook output, CLAUDE.md/memory). It traces each entry to the file or plugin it came from and ranks what you can remove. |
 | **squash hook** | A `PostToolUse` hook for `Bash` and `PowerShell`. The command runs untouched (permissions, cwd and exit code unchanged); only what Claude *reads* is compressed, and the full output is saved to disk so Claude can read it back. |
 | **session warning** | A `UserPromptSubmit` hook. When the context passes 80k tokens (then every +40k), or your prompt arrives after the prompt cache expired (5 min, or 1h when the session uses the 1h TTL), it tells you and Claude once: every tool result is re-billed on each later turn, so `/compact`, or `/clear` when switching tasks. It reads only the tail of the transcript. Set the threshold with `TOKENFISHER_WARN_TOKENS` (`0` turns it off). |
@@ -100,6 +100,21 @@ claude --model opus
 
 Setting `"model"` in `settings.json` does not override the plugin's main agent; the `--model` flag does.
 
+**In the Claude desktop app, the model picker wins.** The app starts every Code session with the model chosen in its picker, so the plugin can't switch it to Sonnet there. Pick Sonnet in the picker to get the savings; the hooks, policy and subagents work either way.
+
+### Levels
+
+`/tokenfisher:set <level>` switches how hard tokenfisher saves, for every project (it writes `~/.claude/settings.json` at user scope). It shows the changes first, applies them only on a yes, never overwrites a value you set yourself, and backs the file up. `/tokenfisher:set` shows the current level; `/tokenfisher:set off` removes everything it wrote.
+
+| level | main thread | tools | effort | compact at | warn at | cost vs Opus defaults (95% CI) |
+|---|---|---|---|---|---|---|
+| low | your model | all | default | not set | 120k | +1.6% (−6.5% … +8.4%) |
+| **high** (default) | Sonnet | all | default | 200k | 80k | **−53.4%** (−58.3% … −48.1%) |
+| ultra | Sonnet | all | low | 150k | 60k | **−56.4%** (−60.7% … −51.8%) |
+| promax | Sonnet | 7 core tools, no MCP or web | low | 100k | 50k | **−72.6%** (−75.3% … −69.7%) |
+
+From high up, subagents run on Sonnet (`CLAUDE_CODE_SUBAGENT_MODEL`) and the session policy asks for Haiku when a subagent only locates code or digests logs. ultra and promax also compress shell output harder. Measured on 9 tasks × 3 runs per level, every run passed every hidden check: [`evidence/levels-2026-10-30/`](evidence/levels-2026-10-30/REPORT.md). low costs about the same as the defaults because it keeps Opus; it is for people who want the warnings and reports without a model change. Compaction never triggered in these runs (the tasks stay under 100k), so the compact settings are not measured yet.
+
 The cheapest measured setup (arm S) also drops every tool except the 7 core coding tools, at the price of MCP and web tools in that session:
 
 ```bash
@@ -116,7 +131,7 @@ git clone https://github.com/Caoquyen1913/tokenfisher.git
 claude --plugin-dir ./tokenfisher
 ```
 
-Requires Node 18+, no npm dependencies. Developed and tested on Windows 11 (Git Bash and PowerShell). It is plain Node, so macOS and Linux should work, but they are not verified yet.
+Requires Node 18+, no npm dependencies. Tested on Windows 11 (Git Bash and PowerShell) and macOS. Linux should work, but it is not verified yet.
 
 ## Use
 
@@ -172,6 +187,7 @@ These were measured while building the eval:
 - **Startup context is mostly fixed.** In a desktop-app session about 75% of the 75k startup tokens were tool schemas; the part you control was ~10%.
 - **On one real 30-day history, cache reads were 61% of weighted cost**, cache writes 30% and output 9%. Long sessions and idle gaps (cache rebuilds were 18.6%) matter more than verbose answers.
 - **Sending codebase exploration to the Haiku scout did not pay off.** Task 9 is a ~108-file repo whose prompt gives only the symptom. With an "explore via scout first" policy, M called scout in every run and its main-thread cache writes fell 45%, but the Haiku turns cost more than that saved: $0.065 vs $0.060 per run for S, 5 runs each, all 11/11. Sonnet explores in about 2 turns by batching `git ls-files` and `grep -rn` into one Bash call, so the policy was dropped. The ladder above covers tasks 1–8; task 9 was added later.
+- **The Opus advisor (`advisorModel: opus`) was never called and cost 6.5% more.** On the 9 tasks, the plugin with the advisor enabled vs without, 27 runs each, all 100%: Sonnet never consulted Opus, but the advisor's extra prompt raised cost by +6.5% (95% CI +2.5% … +10.4%). No level turns it on. Evidence: [`evidence/advisor-2026-10-30/`](evidence/advisor-2026-10-30/REPORT.md).
 
 ## Reproduce or extend the eval
 

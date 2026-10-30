@@ -1,0 +1,97 @@
+diff --git a/eval/results/levels-2026-10-30/runs/8-complex-perf__HIGH__r1/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/8-complex-perf__HIGH__r1/tokenfisher/update.json
+new file mode 100644
+index 0000000..2a8504f
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/8-complex-perf__HIGH__r1/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793331809486}
+\ No newline at end of file
+diff --git a/src/report.js b/src/report.js
+index 37e0465..0375b59 100644
+--- a/src/report.js
++++ b/src/report.js
+@@ -9,28 +9,30 @@ function byRank(a, b) {
+ }
+ 
+ function summarize(orders, limit = 10) {
+-  const seen = [];
++  const seen = new Set();
++  const byCustomer = new Map();
+   const groups = [];
+   for (const order of orders) {
+     // Upstream retries can deliver the same order twice.
+-    if (seen.includes(order.id)) continue;
+-    seen.push(order.id);
++    if (seen.has(order.id)) continue;
++    seen.add(order.id);
+     if (order.status === 'refunded') continue;
+ 
+-    let group = groups.find((g) => g.customerId === order.customerId);
++    let group = byCustomer.get(order.customerId);
+     if (!group) {
+       group = { customerId: order.customerId, spendCents: 0, orderCount: 0, firstOrderAt: order.createdAt };
+       groups.push(group);
++      byCustomer.set(order.customerId, group);
+     }
+     group.orderCount++;
+     if (order.createdAt < group.firstOrderAt) group.firstOrderAt = order.createdAt;
+     if (order.status === 'paid') {
+       group.spendCents += order.currency === 'EUR' ? Math.round(order.amountCents * EUR_TO_USD) : order.amountCents;
+     }
+-    // Keep the leaderboard sorted as we go.
+-    groups.sort(byRank);
+   }
++  // byRank is a total order (customerId is unique), so sorting once matches sorting incrementally.
+   return groups
++    .sort(byRank)
+     .filter((g) => g.spendCents > 0)
+     .slice(0, limit)
+     .map((g, i) => ({ rank: i + 1, ...g }));
+diff --git a/test/report.test.js b/test/report.test.js
+index 9353f4d..3d5b96a 100644
+--- a/test/report.test.js
++++ b/test/report.test.js
+@@ -17,3 +17,43 @@ test('respects the limit', () => {
+   assert.strictEqual(summarize(orders).length, 10);
+   assert.strictEqual(summarize(orders, 3).length, 3);
+ });
++
++test('matches the reference implementation on messy data, including ordering', () => {
++  const reference = (orders, limit = 10) => {
++    const seen = [];
++    const groups = [];
++    for (const o of orders) {
++      if (seen.includes(o.id)) continue;
++      seen.push(o.id);
++      if (o.status === 'refunded') continue;
++      let g = groups.find((x) => x.customerId === o.customerId);
++      if (!g) {
++        g = { customerId: o.customerId, spendCents: 0, orderCount: 0, firstOrderAt: o.createdAt };
++        groups.push(g);
++      }
++      g.orderCount++;
++      if (o.createdAt < g.firstOrderAt) g.firstOrderAt = o.createdAt;
++      if (o.status === 'paid') g.spendCents += o.currency === 'EUR' ? Math.round(o.amountCents * 1.08) : o.amountCents;
++      groups.sort((a, b) => {
++        if (a.spendCents !== b.spendCents) return b.spendCents - a.spendCents;
++        if (a.firstOrderAt !== b.firstOrderAt) return a.firstOrderAt < b.firstOrderAt ? -1 : 1;
++        return a.customerId < b.customerId ? -1 : a.customerId > b.customerId ? 1 : 0;
++      });
++    }
++    return groups.filter((g) => g.spendCents > 0).slice(0, limit).map((g, i) => ({ rank: i + 1, ...g }));
++  };
++  let seed = 42;
++  const rnd = (n) => { seed = (seed * 1103515245 + 12345) % 2147483648; return seed % n; };
++  const statuses = ['paid', 'paid', 'pending', 'refunded'];
++  const orders = Array.from({ length: 3000 }, () => order(
++    `o${rnd(2500)}`, `cus_${rnd(60)}`, statuses[rnd(4)], 100 * (1 + rnd(5)),
++    `2026-10-01T${String(rnd(24)).padStart(2, '0')}:00:00Z`, rnd(2) ? 'USD' : 'EUR'));
++  for (const limit of [1, 10, 100]) assert.deepStrictEqual(summarize(orders, limit), reference(orders, limit));
++});
++
++test('summarizes 200,000 orders quickly', () => {
++  const orders = Array.from({ length: 200000 }, (_, i) => order(`o${i}`, `cus_${i % 50000}`, 'paid', 100 + (i % 7), '2026-10-01T10:00:00Z'));
++  const t = Date.now();
++  summarize(orders);
++  assert.ok(Date.now() - t < 1000, 'summarize is too slow');
++});

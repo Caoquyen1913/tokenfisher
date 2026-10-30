@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 28260,
+  "stop_reason": "end_turn",
+  "session_id": "fa7fa8f3-c64c-4a4c-95d0-6f1a88667560",
+  "total_cost_usd": 0.1992238,
+  "usage": {
+    "input_tokens": 8,
+    "cache_creation_input_tokens": 13568,
+    "cache_read_input_tokens": 135039,
+    "output_tokens": 3182,
+    "output_tokens_details": {
+      "thinking_tokens": 284
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 13568,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 720,
+        "cache_read_input_tokens": 39199,
+        "cache_creation_input_tokens": 480,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 480
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3182,
+      "cacheReadInputTokens": 135039,
+      "cacheCreationInputTokens": 13568,
+      "webSearchRequests": 0,
+      "costUSD": 0.1992238,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 284,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13568,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 4,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I fixed all three problems in `src/queue.js` and added regression tests. `npm test` now passes, 11 of 11.\n\n**What was wrong:**\n\n1. **Hangs after a failure.** When a job failed, the queue never released its slot (`running` stayed counted) and never started the next job. Once every slot held a failed job, the queue stopped for good and `onIdle()` never resolved. Separately, a job that returned a plain value or threw an error straight away (rather than returning a promise) crashed inside `add()` instead of settling its own promise.\n2. **`onIdle()` resolved too early.** It only checked whether anything was waiting to start, not whether anything was still running. So it resolved as soon as the last job *started*.\n3. **One job at a time after `resume()`.** Resuming started a single job, and each finished job then started only one more, so the queue never grew back to its full concurrency.\n\n**The fix:**\n- Each job's result, whether a promise, a plain value or an error thrown straight away, is turned into one promise.\n- That promise settles the job's own `add()` promise. After it settles, success or failure, the queue frees the slot, starts the next job and checks whether it's idle.\n- The queue now starts jobs in a loop until every free slot is full. This is what fixes `resume()`.\n- `onIdle()` now waits until nothing is waiting **and** nothing is running.\n\n**Tests** (in `test/queue.test.js`): failed jobs, including ones that throw straight away, reject only their own promise and the queue carries on. Jobs can return plain values. `onIdle()` waits for running jobs, resolves after failures, and resolves straight away when the queue is already empty. `resume()` with concurrency 4 starts 4 jobs at once. `pause()` lets running jobs finish but starts no new ones. A mixed run with some failing jobs never goes over the concurrency limit and starts jobs in the order they were added.\n\nI also ran the new tests against the original queue code: 7 of the 9 new tests fail there, so they do catch the reported bugs. The two that already passed (`onIdle()` when already empty, and the `pause()` check) aren't affected by these bugs; they just pin down more of the contract.",
+  "ttft_ms": 2074,
+  "type": "result",
+  "duration_ms": 48038,
+  "uuid": "3f798750-afb8-4cfd-8765-cb40fa53c8d0",
+  "ttft_stream_ms": 1080,
+  "time_to_request_ms": 348,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 39,
+    "resume_other": 6,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 279,
+    "tool_schema_build": 2,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 4
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 13,
+  "time_to_request_cpu_ms": 357,
+  "time_to_request_major_faults": 4,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 6,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1080,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 8,
+      "outputTokens": 3182,
+      "cacheReadInputTokens": 135039,
+      "cacheCreationInputTokens": 13568,
+      "webSearchRequests": 0,
+      "costUSD": 0.1992238,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 284,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 13568,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

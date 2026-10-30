@@ -9,6 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const { squash, classify } = require('../lib/squash');
+const { config } = require('../lib/level');
 
 const HOME = process.env.TOKENFISHER_HOME || path.join(os.homedir(), '.claude', 'tokenfisher');
 const RAW_DIR = path.join(HOME, 'raw');
@@ -56,8 +57,9 @@ async function main() {
   const mode = classify(command);
   if (mode === 'pass') return;
 
-  const out = squash(res.stdout || '', { mode });
-  const err = squash(res.stderr || '', { mode });
+  const level = config().squash;
+  const out = squash(res.stdout || '', { ...level, mode });
+  const err = squash(res.stderr || '', { ...level, mode });
   if (!out.changed && !err.changed) return;
 
   const before = (res.stdout || '').length + (res.stderr || '').length;

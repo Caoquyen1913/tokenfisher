@@ -63,7 +63,7 @@ Lần eval đầu (60 lượt, 5 task đầu, khi dự án còn tên tạm `toke
 | công cụ | làm gì |
 |---|---|
 | **Luồng chính chạy Sonnet** | Plugin chạy hội thoại chính trên Sonnet (`agents/main.md`) và giữ mọi tool, nên MCP server và tool web vẫn được nạp khi bạn cần. Việc khó (thiết kế xuyên module, logic concurrency/bảo mật, spec rắc rối, bug sửa 2 lần chưa xong) chuyển cho subagent `opus-architect`; `scout` chạy Haiku để đọc file/log lớn. Một policy ~120 token lúc mở phiên nhắc tìm trước rồi mới đọc và gộp tool call. Muốn Opus làm model chính thì mở phiên bằng `claude --model opus`. |
-| **`token-report`** | Đọc transcript Claude Code và cho biết token đi đâu: input, cache write, cache read, output; theo model, theo project, main hay subagent. Có thêm **rent** của từng tool result (chi phí nằm lại trong context), số lần cache bị build lại, các phiên quá dài, kèm gợi ý cụ thể. `--simulate` chạy lại bộ lọc trên output shell cũ để ước tính mức tiết kiệm cho *chính cách bạn làm việc*. |
+| **`token-report`** | Đọc transcript Claude Code và cho biết token đi đâu: input, cache write, cache read, output; theo model, theo project, main hay subagent. Có thêm **rent** của từng tool result (chi phí nằm lại trong context), số lần cache bị build lại, các phiên quá dài, kèm gợi ý cụ thể. `--simulate` chạy lại bộ lọc trên output shell cũ để ước tính mức tiết kiệm cho *chính cách bạn làm việc*. `--month 2026-10` tổng hợp một tháng theo tài khoản (đăng nhập claude.ai, API key hay `CLAUDE_CODE_OAUTH_TOKEN`, hiện dưới dạng hash ngắn; ghi nhận từ bản 0.4.0), nguồn (desktop, CLI, SDK, IDE), model, level và project. `--compare 2026-10-30` đặt tuần trước một ngày cạnh tuần sau, tính theo request và theo phiên. |
 | **`token-audit`** | Tách những gì mỗi phiên nạp trước câu hỏi đầu tiên (system prompt, danh sách skill/agent, tên tool và hướng dẫn MCP, output hook, CLAUDE.md/memory). Truy từng mục về file hoặc plugin sinh ra nó, rồi xếp hạng những gì bạn bỏ được. |
 | **squash hook** | Hook `PostToolUse` cho `Bash` và `PowerShell`. Lệnh chạy nguyên vẹn (permission, cwd, exit code không đổi); chỉ phần Claude *đọc* được nén, còn bản đầy đủ được lưu ra file để Claude đọc lại khi cần. |
 | **cảnh báo phiên** | Hook `UserPromptSubmit`. Khi context vượt 80k token (rồi mỗi +40k), hoặc khi bạn quay lại sau lúc prompt cache đã hết hạn (5 phút, hoặc 1 giờ nếu phiên dùng TTL 1h), hook báo một lần cho cả bạn lẫn Claude: mọi tool result bị tính tiền lại ở mỗi lượt sau, nên `/compact`, hoặc `/clear` khi chuyển việc. Hook chỉ đọc phần đuôi transcript. Đổi ngưỡng bằng `TOKENFISHER_WARN_TOKENS` (`0` để tắt). |
@@ -94,6 +94,21 @@ claude --model opus
 
 Đặt `"model"` trong `settings.json` không thắng được agent chính của plugin; cờ `--model` thì có.
 
+**Trong app Claude desktop, ô chọn model thắng.** App mở mọi phiên Code theo model đang chọn ở ô chọn model, nên plugin không chuyển sang Sonnet được. Muốn tiết kiệm thì chọn Sonnet ở ô đó; hook, policy và subagent vẫn chạy dù chọn model nào.
+
+### Level
+
+`/tokenfisher:set <level>` đổi mức tiết kiệm của tokenfisher cho mọi project (ghi vào `~/.claude/settings.json`, scope user). Lệnh cho xem trước thay đổi, chỉ ghi khi bạn đồng ý, không đè giá trị bạn tự đặt, và sao lưu file trước. `/tokenfisher:set` xem level hiện tại; `/tokenfisher:set off` gỡ mọi thứ nó đã ghi.
+
+| level | luồng chính | tool | effort | compact ở | cảnh báo ở | chi phí so với Opus mặc định (95% CI) |
+|---|---|---|---|---|---|---|
+| low | model bạn chọn | đủ | mặc định | không đặt | 120k | +1,6% (−6,5% … +8,4%) |
+| **high** (mặc định) | Sonnet | đủ | mặc định | 200k | 80k | **−53,4%** (−58,3% … −48,1%) |
+| ultra | Sonnet | đủ | low | 150k | 60k | **−56,4%** (−60,7% … −51,8%) |
+| promax | Sonnet | 7 tool lõi, không MCP/web | low | 100k | 50k | **−72,6%** (−75,3% … −69,7%) |
+
+Từ high trở lên, subagent chạy Sonnet (`CLAUDE_CODE_SUBAGENT_MODEL`) và policy dặn dùng Haiku khi subagent chỉ tìm code hay đọc log. ultra và promax nén output shell mạnh hơn. Đo trên 9 task × 3 lần mỗi level, lượt nào cũng qua hết check ẩn: [`evidence/levels-2026-10-30/`](evidence/levels-2026-10-30/REPORT.md). low tốn ngang mặc định vì vẫn chạy Opus; level này dành cho ai muốn có cảnh báo và báo cáo mà không đổi model. Trong các lượt đo, compact chưa lần nào kích hoạt (task chưa tới 100k), nên phần compact chưa được đo.
+
 Cấu hình rẻ nhất đã đo (arm S) còn bỏ mọi tool trừ 7 tool lõi, đổi lại phiên đó không có MCP và tool web:
 
 ```bash
@@ -110,7 +125,7 @@ git clone https://github.com/Caoquyen1913/tokenfisher.git
 claude --plugin-dir ./tokenfisher
 ```
 
-Cần Node 18+, không có dependency npm. Đã phát triển và kiểm thử trên Windows 11 (Git Bash và PowerShell). Vì chỉ dùng Node thuần nên macOS/Linux nhiều khả năng chạy được, nhưng chưa kiểm chứng.
+Cần Node 18+, không có dependency npm. Đã kiểm thử trên Windows 11 (Git Bash và PowerShell) và macOS. Linux nhiều khả năng chạy được, nhưng chưa kiểm chứng.
 
 ## Sử dụng
 
@@ -149,6 +164,7 @@ Mỗi lệnh được xếp vào 1 trong 3 nhóm (`lib/squash.js`):
 - **Context khởi động phần lớn là cố định.** Trong một phiên desktop app, ~75% của 75k token khởi động là schema tool; phần bạn kiểm soát được chỉ ~10%.
 - **Trên lịch sử 30 ngày thực tế, cache read chiếm 61% chi phí quy đổi**, cache write 30%, output 9%. Phiên dài và các khoảng nghỉ (cache bị build lại chiếm 18,6%) quan trọng hơn việc câu trả lời dài hay ngắn.
 - **Giao việc khám phá codebase cho scout Haiku không đáng.** Task 9 là một repo khoảng 108 file, prompt chỉ mô tả triệu chứng. Khi bật chính sách "khám phá qua scout trước", M gọi scout ở mọi lượt và cache write của luồng chính giảm 45%. Nhưng tiền trả cho các lượt Haiku còn nhiều hơn phần tiết kiệm đó: $0,065 so với $0,060 mỗi lượt của S (5 lượt mỗi bên, đều đạt 11/11). Sonnet chỉ cần khoảng 2 lượt để khám phá, vì nó gộp `git ls-files` và `grep -rn` vào một lệnh Bash, nên chính sách này đã bị bỏ. Bảng ladder ở trên chỉ gồm task 1–8; task 9 được thêm sau.
+- **Advisor Opus (`advisorModel: opus`) không được gọi lần nào mà còn tốn thêm 6,5%.** Trên 9 task, plugin có bật advisor so với không bật, mỗi bên 27 lượt, đều 100%: Sonnet chưa hỏi Opus lần nào, nhưng phần prompt advisor thêm vào làm chi phí tăng 6,5% (95% CI +2,5% … +10,4%). Không level nào bật nó. Bằng chứng: [`evidence/advisor-2026-10-30/`](evidence/advisor-2026-10-30/REPORT.md).
 
 ## Chạy lại hoặc mở rộng eval
 

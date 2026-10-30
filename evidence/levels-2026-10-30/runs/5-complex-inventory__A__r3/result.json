@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 49262,
+  "stop_reason": "end_turn",
+  "session_id": "573072cc-2099-4076-af8b-c6df4e64ab29",
+  "total_cost_usd": 0.3042794,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 17789,
+    "cache_read_input_tokens": 174537,
+    "output_tokens": 6351,
+    "output_tokens_details": {
+      "thinking_tokens": 634
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 17789,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 672,
+        "cache_read_input_tokens": 40484,
+        "cache_creation_input_tokens": 3416,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 3416
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 6351,
+      "cacheReadInputTokens": 174537,
+      "cacheCreationInputTokens": 17789,
+      "webSearchRequests": 0,
+      "costUSD": 0.3042794,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 634,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17789,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 5,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I've added stock reservations with expiry to the store and the API, and `npm test` passes: 181 tests, 0 failed. That's the 165 existing tests plus 16 new ones in `test/reservations.test.js`, covering every point in your spec. I didn't change any existing tests.\n\n**Store (`src/store.js`)**\n- **`reserve(sku, qty, ttlMs)`** returns ids like `res-1`, `res-2`. They are unique within one store instance.\n- **Availability:** `getAvailable(sku)` is physical stock minus reservations that haven't expired. \"Now\" comes only from the injected `clock()`.\n- **`removeItem`** now checks the requested qty against available stock, not physical stock.\n- **Expired reservations** stay stored so that `confirm` can return `RESERVATION_EXPIRED` instead of `RESERVATION_NOT_FOUND`. They no longer count against availability. Confirming or releasing a reservation deletes it.\n- **`confirm(id)`** also returns `{sku, stock}`, which the API uses for its 200 response.\n\n**API (`src/api.js`)**\n- **`GET /stock/:sku`** now also returns `available`.\n- **The three new routes** map store errors to the status codes you listed. Any unexpected error is re-thrown rather than turned into a response.\n- **`DELETE /reservations/:id`** returns 204 with `body: null`.\n\n**Things to decide:**\n- **Bad `ttlMs` is not checked.** The spec didn't say what to do here. If `ttlMs` is missing or not a number, that reservation never expires and its stock stays held until it is released or confirmed. If you want it rejected, the simplest option is to throw `INVALID_QTY` or a new error.\n- **Expired reservations are never cleaned up.** Because they're kept for the `RESERVATION_EXPIRED` response, the store's memory keeps growing. It's fine for an in-memory service, but a periodic cleanup would be worth adding if the process runs for a long time.",
+  "ttft_ms": 2157,
+  "type": "result",
+  "duration_ms": 53752,
+  "uuid": "10c9e547-e64d-4864-8d03-2ab153441cfb",
+  "ttft_stream_ms": 1073,
+  "time_to_request_ms": 333,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 46,
+    "resume_other": 7,
+    "process_user_input": 2,
+    "input_attachments": 5,
+    "input_hooks": 1,
+    "tool_pool_refresh": 0,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 0,
+    "model_gates": 254,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 21,
+  "time_to_request_cpu_ms": 374,
+  "time_to_request_major_faults": 12,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 8,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1074,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 6351,
+      "cacheReadInputTokens": 174537,
+      "cacheCreationInputTokens": 17789,
+      "webSearchRequests": 0,
+      "costUSD": 0.3042794,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 634,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 17789,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

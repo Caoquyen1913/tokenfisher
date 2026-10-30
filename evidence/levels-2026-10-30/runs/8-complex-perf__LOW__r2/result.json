@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 83667,
+  "stop_reason": "end_turn",
+  "session_id": "e6f1e7a3-cf93-4775-8ac2-7442d5534f74",
+  "total_cost_usd": 0.3908648,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 20286,
+    "cache_read_input_tokens": 225144,
+    "output_tokens": 9175,
+    "output_tokens_details": {
+      "thinking_tokens": 2503
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 20286,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 966,
+        "cache_read_input_tokens": 45123,
+        "cache_creation_input_tokens": 1274,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1274
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 9175,
+      "cacheReadInputTokens": 225144,
+      "cacheCreationInputTokens": 20286,
+      "webSearchRequests": 0,
+      "costUSD": 0.3908648,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2503,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 20286,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 6,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "`summarize()` is now fast and gives the same output as before. On 30,000 orders the old code took 3.2 s and the new code takes 6 ms, with byte-identical JSON output (top 5,000 rows). The new 200,000-order test finishes well under its 1-second limit, though I didn't record the exact time. `npm test` passes, 6 of 6.\n\n**Why it was slow** (`src/report.js`): for every order, the old code scanned an array of every order ID seen so far to drop duplicates, scanned the customer list with `groups.find` to find the customer, and re-sorted the whole leaderboard. That is roughly quadratic work.\n\n**What changed:**\n- Duplicate IDs are now tracked in a `Set` and customers in a `Map`, so each lookup is constant time. The `Set` treats IDs exactly as the old `Array#includes` did.\n- The leaderboard is sorted once at the end instead of after every order. This gives the same order because customer IDs are unique strings, so the ranking never has two customers tied on every field.\n- Everything else is unchanged:\n  - A duplicate is still dropped before the refund check, so if the first copy of an order was refunded, a later \"paid\" copy of it is still ignored.\n  - EUR rounding works as before, and amounts are added in the same order, so totals come out identical.\n  - Ties still break on first order time, then customer ID.\n  - The output fields keep their order: `rank`, `customerId`, `spendCents`, `orderCount`, `firstOrderAt`.\n- **Safety net:** if the data is malformed (a customer ID or `createdAt` that isn't a string, or a total that ends up as NaN or a string), a customer can tie with another on every field. Then the result depends on the old re-sort-every-time history. In that case `summarize` runs the original algorithm, so even bad data gives the same output.\n\n**New tests** (`test/report.equivalence.test.js`):\n- An exact copy of the original function serves as the reference. The new version is compared against it on 300 seeded random datasets at several limits, checking the full objects and their JSON. The data includes duplicate IDs, refunds, pending orders, EUR orders, and many ties.\n- A case where a refunded order arrives again as paid.\n- Malformed inputs: numeric, mixed or NaN customer IDs, and undefined amounts.\n- A 200,000-order run that must finish under 1 second.\n\nTo check that the tests catch real changes, I broke the code on purpose twice: once by removing the customer-ID tie-break, and once by dropping duplicates after the refund check instead of before. The new tests failed both times; the two original tests did not catch either change.\n\nThere is an untracked `eval/` folder in the repo that I didn't create and left alone.",
+  "ttft_ms": 2370,
+  "type": "result",
+  "duration_ms": 92290,
+  "uuid": "605ad764-9ef4-496a-ad04-11c931970726",
+  "ttft_stream_ms": 961,
+  "time_to_request_ms": 103,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 48,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 17,
+    "tool_schema_build": 7,
+    "message_normalization": 1,
+    "client_creation": 2,
+    "request_build": 3
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 3,
+  "time_to_request_cpu_ms": 158,
+  "time_to_request_major_faults": 2,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 4,
+    "cpu_ms": 6,
+    "major_faults": 2
+  },
+  "first_content_frame_ms": 961,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 9175,
+      "cacheReadInputTokens": 225144,
+      "cacheCreationInputTokens": 20286,
+      "webSearchRequests": 0,
+      "costUSD": 0.3908648,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2503,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 20286,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

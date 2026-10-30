@@ -1,0 +1,94 @@
+diff --git a/eval/results/levels-2026-10-30/runs/7-hard-queue__PROMAX__r2/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/7-hard-queue__PROMAX__r2/tokenfisher/update.json
+new file mode 100644
+index 0000000..de27b22
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/7-hard-queue__PROMAX__r2/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793332252983}
+\ No newline at end of file
+diff --git a/src/queue.js b/src/queue.js
+index 0645d89..484e5d3 100644
+--- a/src/queue.js
++++ b/src/queue.js
+@@ -15,21 +15,28 @@ function createQueue({ concurrency = 1 } = {}) {
+   let idleWaiters = [];
+ 
+   function next() {
+-    if (paused || running >= concurrency || pending.length === 0) return;
+-    const { fn, resolve, reject } = pending.shift();
+-    running++;
+-    fn().then((value) => {
+-      running--;
+-      resolve(value);
+-      next();
+-      checkIdle();
+-    }, reject);
++    while (!paused && running < concurrency && pending.length > 0) {
++      const { fn, resolve, reject } = pending.shift();
++      running++;
++      let result;
++      try {
++        result = Promise.resolve(fn());
++      } catch (err) {
++        result = Promise.reject(err);
++      }
++      result.then(resolve, reject).then(() => {
++        running--;
++        next();
++        checkIdle();
++      });
++    }
+   }
+ 
+   function checkIdle() {
+-    if (pending.length === 0) {
+-      idleWaiters.forEach((wake) => wake());
++    if (pending.length === 0 && running === 0) {
++      const waiters = idleWaiters;
+       idleWaiters = [];
++      waiters.forEach((wake) => wake());
+     }
+   }
+ 
+diff --git a/test/queue.test.js b/test/queue.test.js
+index be49570..2b9ea88 100644
+--- a/test/queue.test.js
++++ b/test/queue.test.js
+@@ -15,3 +15,37 @@ test('starts jobs in order with concurrency 1', async () => {
+   await Promise.all(['a', 'b', 'c'].map((x) => q.add(async () => { order.push(x); await sleep(1); })));
+   assert.deepStrictEqual(order, ['a', 'b', 'c']);
+ });
++
++test('keeps going after a job fails (async and sync throw)', async () => {
++  const q = createQueue();
++  const bad = q.add(async () => { throw new Error('boom'); });
++  const bad2 = q.add(() => { throw new Error('sync'); });
++  const good = q.add(() => 42);
++  await assert.rejects(bad, /boom/);
++  await assert.rejects(bad2, /sync/);
++  assert.strictEqual(await good, 42);
++  await q.onIdle();
++  assert.strictEqual(q.running, 0);
++});
++
++test('onIdle waits for running jobs, resolves immediately when idle', async () => {
++  const q = createQueue({ concurrency: 2 });
++  await q.onIdle();
++  let done = false;
++  q.add(async () => { await sleep(20); done = true; });
++  assert.strictEqual(q.pending, 0);
++  assert.strictEqual(q.running, 1);
++  await q.onIdle();
++  assert.ok(done);
++});
++
++test('resume fills all free slots', async () => {
++  const q = createQueue({ concurrency: 4 });
++  q.pause();
++  const ps = [1, 2, 3, 4, 5].map(() => q.add(() => sleep(20)));
++  assert.strictEqual(q.running, 0);
++  q.resume();
++  assert.strictEqual(q.running, 4);
++  assert.strictEqual(q.pending, 1);
++  await Promise.all(ps);
++});

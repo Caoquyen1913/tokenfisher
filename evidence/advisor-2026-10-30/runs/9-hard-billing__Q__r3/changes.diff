@@ -1,0 +1,70 @@
+diff --git a/eval/results/advisor-2026-10-30/runs/9-hard-billing__Q__r3/tokenfisher/update.json b/eval/results/advisor-2026-10-30/runs/9-hard-billing__Q__r3/tokenfisher/update.json
+new file mode 100644
+index 0000000..68eafca
+--- /dev/null
++++ b/eval/results/advisor-2026-10-30/runs/9-hard-billing__Q__r3/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793328446193}
+\ No newline at end of file
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..8e3a16a 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,24 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Callers may hold the gateway's lower-case form ("jpy"); look up by the canonical upper-case code.
++function lookup(code) {
++  const key = String(code).trim().toUpperCase();
++  return Object.prototype.hasOwnProperty.call(CURRENCIES, key) ? CURRENCIES[key] : undefined;
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return lookup(code) !== undefined;
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..b8545dd 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -9,6 +9,25 @@ test('USD invoice is charged in cents', () => {
+   assert.strictEqual(p.currency, 'usd');
+ });
+ 
++test('zero-decimal invoices (JPY, KRW) are charged in whole units', () => {
++  const jpy = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(jpy.amount, 1500);
++  assert.strictEqual(jpy.currency, 'jpy');
++  const krw = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 20000 }, customer);
++  assert.strictEqual(krw.amount, 20000);
++});
++
++test('three-decimal invoices (KWD) are charged in fils', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'KWD', total: 1.5 }, customer);
++  assert.strictEqual(p.amount, 1500);
++});
++
++test('minor-unit conversion is case-insensitive on the currency code', () => {
++  const { toMinor } = require('../src/lib/money/minor');
++  assert.strictEqual(toMinor(1500, 'jpy'), 1500);
++  assert.strictEqual(toMinor(1500, 'JPY'), 1500);
++});
++
+ test('EUR invoice is charged in cents', () => {
+   const p = buildChargePayload({ id: 'i2', number: 'INV-2', currency: 'EUR', total: 99.99 }, customer);
+   assert.strictEqual(p.amount, 9999);

@@ -1,0 +1,272 @@
+diff --git a/eval/results/levels-2026-10-30/runs/6-hard-semver__PROMAX__r1/tokenfisher/update.json b/eval/results/levels-2026-10-30/runs/6-hard-semver__PROMAX__r1/tokenfisher/update.json
+new file mode 100644
+index 0000000..bd415a4
+--- /dev/null
++++ b/eval/results/levels-2026-10-30/runs/6-hard-semver__PROMAX__r1/tokenfisher/update.json
+@@ -0,0 +1 @@
++{"checked":1793331695625}
+\ No newline at end of file
+diff --git a/src/semver.js b/src/semver.js
+index 0ff5fc8..751d858 100644
+--- a/src/semver.js
++++ b/src/semver.js
+@@ -1,6 +1,190 @@
+ // See docs/SPEC.md.
++const ID = '[0-9A-Za-z-]+';
++const DOTTED = `${ID}(?:\\.${ID})*`;
++const NUM = '0|[1-9]\\d*';
++const FULL_RE = new RegExp(`^v?(${NUM})\\.(${NUM})\\.(${NUM})(?:-(${DOTTED}))?(?:\\+${DOTTED})?$`);
++const PART = `(${NUM}|[xX*])`;
++const PARTIAL_RE = new RegExp(
++  `^v?${PART}(?:\\.${PART}(?:\\.${PART}(?:-(${DOTTED}))?(?:\\+${DOTTED})?)?)?$`
++);
++const WILD = /^[xX*]$/;
++
++function parseVersion(str) {
++  if (typeof str !== 'string') return null;
++  const m = FULL_RE.exec(str.trim());
++  if (!m) return null;
++  return { t: [BigInt(m[1]), BigInt(m[2]), BigInt(m[3])], pre: m[4] ? m[4].split('.') : [] };
++}
++
++function cmpNum(a, b) {
++  return a < b ? -1 : a > b ? 1 : 0;
++}
++
++function cmpPre(a, b) {
++  if (!a.length && !b.length) return 0;
++  if (!a.length) return 1;
++  if (!b.length) return -1;
++  for (let i = 0; i < Math.min(a.length, b.length); i++) {
++    const x = a[i];
++    const y = b[i];
++    const xn = /^\d+$/.test(x);
++    const yn = /^\d+$/.test(y);
++    let c;
++    if (xn && yn) c = cmpNum(BigInt(x), BigInt(y));
++    else if (xn) c = -1;
++    else if (yn) c = 1;
++    else c = x < y ? -1 : x > y ? 1 : 0;
++    if (c) return c;
++  }
++  return cmpNum(a.length, b.length);
++}
++
++function cmpTuple(a, b) {
++  for (let i = 0; i < 3; i++) {
++    const c = cmpNum(a[i], b[i]);
++    if (c) return c;
++  }
++  return 0;
++}
++
++function compare(a, b) {
++  return cmpTuple(a.t, b.t) || cmpPre(a.pre, b.pre);
++}
++
++// Parses a possibly partial version into { k, t, pre }: k = number of specified parts.
++function parsePartial(str) {
++  const m = PARTIAL_RE.exec(str);
++  if (!m) return null;
++  const t = [0n, 0n, 0n];
++  let k = 0;
++  let wild = false;
++  for (let i = 0; i < 3; i++) {
++    const s = m[i + 1];
++    if (s === undefined) { wild = true; continue; }
++    if (WILD.test(s)) { wild = true; continue; }
++    if (wild) return null; // a number after a wildcard, e.g. 1.x.3
++    t[i] = BigInt(s);
++    k++;
++  }
++  const pre = m[4] ? m[4].split('.') : [];
++  if (pre.length && k < 3) return null;
++  return { k, t, pre };
++}
++
++const v = (t, pre = []) => ({ t, pre });
++const cmpr = (op, ver) => ({ op, v: ver });
++// Upper bound just past everything matching the partial version p.
++function next(p) {
++  const [a, b] = p.t;
++  return p.k === 1 ? v([a + 1n, 0n, 0n]) : v([a, b + 1n, 0n]);
++}
++
++function expand(op, p) {
++  const lo = v(p.t, p.pre);
++  const any = p.k === 0;
++  switch (op) {
++    case '':
++    case '=':
++      if (any) return [];
++      if (p.k === 3) return [cmpr('=', lo)];
++      return [cmpr('>=', lo), cmpr('<', next(p))];
++    case '>':
++      if (any) return [cmpr('<', v([0n, 0n, 0n]))];
++      return p.k === 3 ? [cmpr('>', lo)] : [cmpr('>=', next(p))];
++    case '>=':
++      return any ? [] : [cmpr('>=', lo)];
++    case '<':
++      return any ? [cmpr('<', v([0n, 0n, 0n]))] : [cmpr('<', lo)];
++    case '<=':
++      if (any) return [];
++      return p.k === 3 ? [cmpr('<=', lo)] : [cmpr('<', next(p))];
++    case '~': {
++      if (any) return [];
++      const [a, b] = p.t;
++      const hi = p.k === 1 ? v([a + 1n, 0n, 0n]) : v([a, b + 1n, 0n]);
++      return [cmpr('>=', lo), cmpr('<', hi)];
++    }
++    case '^': {
++      if (any) return [];
++      const [a, b, c] = p.t;
++      let hi;
++      if (a > 0n) hi = v([a + 1n, 0n, 0n]);
++      else if (p.k === 1) hi = v([1n, 0n, 0n]);
++      else if (b > 0n) hi = v([0n, b + 1n, 0n]);
++      else if (p.k === 2) hi = v([0n, 1n, 0n]);
++      else hi = v([0n, 0n, c + 1n]);
++      return [cmpr('>=', lo), cmpr('<', hi)];
++    }
++  }
++  return null;
++}
++
++const HYPHEN_RE = /^(\S+)\s+-\s+(\S+)$/;
++const TOKEN_RE = /^(<=|>=|<|>|=|~|\^)?(\S+)$/;
++
++function parseSet(str) {
++  str = str.trim();
++  const h = HYPHEN_RE.exec(str);
++  if (h) {
++    const a = parsePartial(h[1]);
++    const b = parsePartial(h[2]);
++    if (!a || !b) return null;
++    const out = a.k === 0 ? [] : [cmpr('>=', v(a.t, a.pre))];
++    if (b.k === 3) out.push(cmpr('<=', v(b.t, b.pre)));
++    else if (b.k > 0) out.push(cmpr('<', next(b)));
++    return out;
++  }
++  if (str === '') return [];
++  const tokens = str.replace(/(<=|>=|<|>|=|~|\^)\s+/g, '$1').split(/\s+/);
++  const out = [];
++  for (const tok of tokens) {
++    const m = TOKEN_RE.exec(tok);
++    if (!m) return null;
++    const p = parsePartial(m[2]);
++    if (!p) return null;
++    out.push(...expand(m[1] || '', p));
++  }
++  return out;
++}
++
++function parseRange(str) {
++  if (typeof str !== 'string') return null;
++  const sets = [];
++  for (const part of str.split('||')) {
++    const s = parseSet(part);
++    if (!s) return null;
++    sets.push(s);
++  }
++  return sets;
++}
++
++function test(ver, c) {
++  const d = compare(ver, c.v);
++  switch (c.op) {
++    case '=': return d === 0;
++    case '>': return d > 0;
++    case '>=': return d >= 0;
++    case '<': return d < 0;
++    case '<=': return d <= 0;
++  }
++  return false;
++}
++
++function matchSet(ver, set) {
++  if (!set.every((c) => test(ver, c))) return false;
++  if (!ver.pre.length) return true;
++  return set.some((c) => c.v.pre.length && cmpTuple(c.v.t, ver.t) === 0);
++}
++
+ function satisfies(version, range) {
+-  throw new Error('not implemented');
++  try {
++    const ver = parseVersion(version);
++    const sets = parseRange(range);
++    if (!ver || !sets) return false;
++    return sets.some((s) => matchSet(ver, s));
++  } catch (e) {
++    return false;
++  }
+ }
+ 
+ module.exports = { satisfies };
+diff --git a/test/satisfies.test.js b/test/satisfies.test.js
+new file mode 100644
+index 0000000..b3f652a
+--- /dev/null
++++ b/test/satisfies.test.js
+@@ -0,0 +1,62 @@
++const assert = require('assert');
++const { satisfies } = require('../src/semver');
++
++const yes = [
++  ['1.2.3', '1.2.3'], ['v1.2.3', '=1.2.3'], ['  1.2.3 ', '1.2.3+build'], ['1.2.3+a', '1.2.3+b'],
++  ['5.0.0', '*'], ['5.0.0', ''], ['5.0.0', 'x'],
++  ['1.9.9', '1'], ['1.5.0', '1.x'], ['1.2.9', '1.2'], ['1.2.9', '1.2.X'],
++  ['2.0.0', '>1'], ['1.3.0', '>1.2'], ['1.0.0', '>=1'], ['1.2.0', '>=1.2'],
++  ['0.9.9', '<1'], ['1.1.9', '<1.2'], ['1.9.9', '<=1'], ['1.2.9', '<=1.2'],
++  ['1.5.0', '=1'], ['1.2.5', '=1.2'], ['1.2.4', '>= 1.2.3'], ['1.2.3', '<=1.2.3'],
++  ['1.2.9', '~1.2.3'], ['1.2.5', '~1.2'], ['1.9.0', '~1'], ['1.2.3-beta.4', '~1.2.3-beta.2'],
++  ['1.9.9', '^1.2.3'], ['0.2.9', '^0.2.3'], ['0.0.3', '^0.0.3'], ['1.9.0', '^1.2'], ['1.9.0', '^1'],
++  ['0.2.9', '^0.2'], ['0.0.9', '^0.0'], ['0.9.0', '^0'], ['0.9.0', '^0.x'],
++  ['1.2.3-beta.4', '^1.2.3-beta.2'], ['1.5.0', '^1.2.3-beta.2'],
++  ['1.2.3', '1.2.3 - 2.3.4'], ['2.3.4', '1.2.3 - 2.3.4'], ['1.2.0', '1.2 - 2.3.4'],
++  ['2.3.9', '1.2.3 - 2.3'], ['2.9.9', '1.2.3 - 2'],
++  ['1.2.3', '1.0.0 || 1.2.3'], ['2.0.0', '<1 || >=2'], ['1.5.0', '>=1.2.0 <2.0.0'],
++  ['1.2.3-alpha.7', '>1.2.3-alpha.3'], ['1.0.0', '>1.0.0-rc.1'], ['1.0.0-alpha.1', '>1.0.0-alpha'],
++  ['1.0.0-alpha.beta', '>1.0.0-alpha.1'], ['1.0.0-b', '>1.0.0-a'], ['1.0.0-2', '>1.0.0-1'],
++  ['1.0.0-10', '>1.0.0-9'], ['1.5.0', '1.2.3 || ' ],
++];
++const no = [
++  ['1.2.4', '1.2.3'], ['2.0.0', '1'], ['1.3.0', '1.2'], ['1.0.0', '>1'], ['1.2.9', '>1.2'],
++  ['0.9.9', '>=1'], ['1.0.0', '<1'], ['2.0.0', '<=1'], ['1.3.0', '<=1.2'], ['2.0.0', '=1'],
++  ['1.3.0', '~1.2.3'], ['2.0.0', '~1'], ['1.2.2', '~1.2.3'],
++  ['2.0.0', '^1.2.3'], ['0.3.0', '^0.2.3'], ['0.0.4', '^0.0.3'], ['0.1.0', '^0.0'], ['1.0.0', '^0'],
++  ['1.2.2', '^1.2.3'], ['2.0.0', '^1'],
++  ['2.3.5', '1.2.3 - 2.3.4'], ['2.4.0', '1.2.3 - 2.3'], ['3.0.0', '1.2.3 - 2'], ['1.2.2', '1.2.3 - 2.3.4'],
++  ['1.2.3-alpha', '1.2.3'], ['3.4.5-alpha.9', '>1.2.3-alpha.3'], ['1.2.4-beta', '^1.2.3'],
++  ['1.0.0-alpha', '*'], ['1.0.0-rc.1', '>=0.0.0'], ['1.0.0-rc.1', '1.x'], ['2.0.0-alpha', '<2.0.0'],
++  ['1.0.0-rc.1', '>=1.0.0'], ['1.0.0-alpha', '>1.0.0-alpha'], ['1.0.0-alpha', '>1.0.0-alpha.1'],
++  ['1.0.0-1', '>1.0.0-a'], ['1.0.0-9', '>1.0.0-10'],
++  ['1.0.0', '>*'], ['1.0.0', '<*'],
++  // invalid versions
++  ['1.2', '*'], ['01.2.3', '*'], ['1.2.3.4', '*'], ['', '*'], ['x', '*'], ['1.2.3-', '*'],
++  ['1.2.3-a..b', '*'], ['1.2.x', '*'], [null, '*'], [undefined, '*'], [123, '*'], ['v 1.2.3', '*'],
++  // invalid ranges
++  ['1.2.3', 'foo'], ['1.2.3', '>=>1'], ['1.2.3', '1.2.3 -'], ['1.2.3', '1.x.3'], ['1.2.3', '01.2.3'],
++  ['1.2.3', '1.2-beta'], ['1.2.3', '1.2.3 - 2.0.0 - 3'], ['1.2.3', '>1 - 2'], ['1.2.3', null],
++  ['1.2.3', '1.2.3 || foo'], ['1.2.3', '1.2.3-1.2.3'.replace('1.2.3-', '1.2.3-..')],
++  ['1.2.3', '1.2.3-2.0.0 - '],
++];
++
++test('satisfies: matching cases', () => {
++  for (const [ver, range] of yes) assert.strictEqual(satisfies(ver, range), true, `${ver} should satisfy "${range}"`);
++});
++
++test('satisfies: non-matching and invalid cases', () => {
++  for (const [ver, range] of no) assert.strictEqual(satisfies(ver, range), false, `${ver} should not satisfy "${range}"`);
++});
++
++test('satisfies: never throws', () => {
++  for (const x of [{}, [], Symbol('s'), () => 1, NaN]) {
++    assert.doesNotThrow(() => satisfies(x, x));
++    assert.strictEqual(satisfies('1.0.0', x), false);
++  }
++});
++
++test('satisfies: huge numbers compare exactly', () => {
++  assert.strictEqual(satisfies('99999999999999999999.0.0', '>=99999999999999999998.0.0'), true);
++  assert.strictEqual(satisfies('9007199254740993.0.0', '9007199254740992.0.0'), false);
++});

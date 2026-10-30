@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 28918,
+  "stop_reason": "end_turn",
+  "session_id": "2b5e0cb6-563f-40b6-8012-1400360b34f4",
+  "total_cost_usd": 0.2240006,
+  "usage": {
+    "input_tokens": 10,
+    "cache_creation_input_tokens": 16053,
+    "cache_read_input_tokens": 177483,
+    "output_tokens": 3002,
+    "output_tokens_details": {
+      "thinking_tokens": 364
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 16053,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 710,
+        "cache_read_input_tokens": 40181,
+        "cache_creation_input_tokens": 1983,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 1983
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3002,
+      "cacheReadInputTokens": 177483,
+      "cacheCreationInputTokens": 16053,
+      "webSearchRequests": 0,
+      "costUSD": 0.2240006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 364,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 16053,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 7,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "The 500s came from prices written with a thousands separator, like `\"1,299.00\"`. `parseAmount` in `src/money.js` didn't recognise that format, got no match back, and then read from the empty result anyway. That throws `TypeError: Cannot read properties of null (reading '1')`, which the server turns into a 500. It's fixed, and `npm test` passes (7 of 7).\n\n**What the log shows:** `logs/app.log` has 37 `ERROR POST /checkout 500` lines, all with that same TypeError. The DEBUG line just before each one shows the order contained `\"1,299.00\"`, `\"2,450.50\"` or `\"1,005.99\"`. Those three comma-formatted prices only ever appear in failing orders. That's why the failures looked random: they depended on which products were in the basket.\n\n**Fix (`src/money.js`):**\n- `parseAmount` now accepts properly grouped amounts like `1,299.00` and `1,234,567`, and removes the commas before converting.\n- When the input can't be parsed, it now throws `Error('Invalid amount: …')` as its own comment says it should, instead of failing on the empty match. Badly grouped input such as `12,34` or `1,2345.00` is rejected rather than guessed at.\n\n**Regression tests (`test/money.test.js`):**\n- Parsing the three exact prices from the log, plus a multi-group amount.\n- Malformed amounts are rejected with the \"Invalid amount\" error.\n- A full `checkout` call with a comma-formatted price.\n\nWith `src/` rolled back to the old code, the three new tests fail and the original four still pass, so they would have caught this bug.\n\n**Decision for you:** a price that genuinely can't be parsed still returns a 500, because `src/server.js` treats every error as an internal one. Returning a 400 would be more accurate, but it changes what the API returns, so I left it alone. It's a small change in `server.js` if you want it.\n\nAn untracked `eval/` folder showed up in `git status` during the run; I didn't create or touch it.",
+  "ttft_ms": 2732,
+  "type": "result",
+  "duration_ms": 33587,
+  "uuid": "799335de-b84c-485f-9e37-3fb97d88ded3",
+  "ttft_stream_ms": 1091,
+  "time_to_request_ms": 208,
+  "time_to_request_phases_ms": {
+    "other": 6,
+    "system_prompt": 8,
+    "resume_other": 0,
+    "process_user_input": 1,
+    "input_attachments": 5,
+    "input_hooks": 41,
+    "tool_pool_refresh": 1,
+    "init_message": 2,
+    "engine_pickup": 0,
+    "message_prep": 0,
+    "model_config_wait": 1,
+    "autocompact": 0,
+    "query_setup": 1,
+    "model_gates": 134,
+    "tool_schema_build": 4,
+    "message_normalization": 1,
+    "client_creation": 1,
+    "request_build": 2
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 5,
+  "time_to_request_cpu_ms": 158,
+  "time_to_request_major_faults": 1,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 1
+  },
+  "first_content_frame_ms": 1091,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 10,
+      "outputTokens": 3002,
+      "cacheReadInputTokens": 177483,
+      "cacheCreationInputTokens": 16053,
+      "webSearchRequests": 0,
+      "costUSD": 0.2240006,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 364,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 16053,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

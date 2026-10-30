@@ -1,0 +1,53 @@
+diff --git a/src/money.js b/src/money.js
+index 29e6d7c..bff0733 100644
+--- a/src/money.js
++++ b/src/money.js
+@@ -1,8 +1,10 @@
+ // Parses a user-entered amount such as "12.50" into integer cents.
+ // Throws Error('Invalid amount: <input>') for input that is not an amount.
+ function parseAmount(input) {
+-  const m = String(input).trim().match(/^(\d+)(?:\.(\d{1,2}))?$/);
+-  const whole = Number(m[1]);
++  // Accepts thousands separators ("1,299.00") as long as they group by threes.
++  const m = String(input).trim().match(/^(\d{1,3}(?:,\d{3})+|\d+)(?:\.(\d{1,2}))?$/);
++  if (!m) throw new Error(`Invalid amount: ${input}`);
++  const whole = Number(m[1].replace(/,/g, ''));
+   const frac = m[2] ? Number(m[2].padEnd(2, '0')) : 0;
+   return whole * 100 + frac;
+ }
+diff --git a/test/checkout-regression.test.js b/test/checkout-regression.test.js
+new file mode 100644
+index 0000000..a945273
+--- /dev/null
++++ b/test/checkout-regression.test.js
+@@ -0,0 +1,30 @@
++const assert = require('assert');
++const { parseAmount } = require('../src/money');
++const { handle } = require('../src/server');
++
++// Regression: prices with thousands separators ("1,299.00") crashed parseAmount
++// with "Cannot read properties of null (reading '1')", turning POST /checkout into a 500.
++test('parses amounts with thousands separators', () => {
++  assert.strictEqual(parseAmount('1,299.00'), 129900);
++  assert.strictEqual(parseAmount('2,450.50'), 245050);
++  assert.strictEqual(parseAmount('1,005.99'), 100599);
++  assert.strictEqual(parseAmount('1,000,000'), 100000000);
++});
++
++test('rejects malformed amounts with a descriptive error', () => {
++  for (const bad of ['abc', '1,29.00', '12,34', '1.234', '']) {
++    assert.throws(() => parseAmount(bad), { message: `Invalid amount: ${bad}` });
++  }
++});
++
++test('POST /checkout succeeds for a comma-formatted price', () => {
++  const origLog = console.log;
++  console.log = () => {};
++  try {
++    const res = handle({ method: 'POST', path: '/checkout', body: { id: 'ord_10181', items: [{ sku: 'P-76', price: '1,299.00', qty: 2 }] } });
++    assert.strictEqual(res.status, 200);
++    assert.deepStrictEqual(res.body, { orderId: 'ord_10181', totalCents: 259800 });
++  } finally {
++    console.log = origLog;
++  }
++});

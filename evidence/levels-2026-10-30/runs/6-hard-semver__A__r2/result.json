@@ -1,0 +1,150 @@
+{
+  "duration_api_ms": 103046,
+  "stop_reason": "end_turn",
+  "session_id": "9b92aae6-818c-4925-80b0-e06c7582a5d0",
+  "total_cost_usd": 0.49244519999999997,
+  "usage": {
+    "input_tokens": 12,
+    "cache_creation_input_tokens": 24361,
+    "cache_read_input_tokens": 238646,
+    "output_tokens": 12489,
+    "output_tokens_details": {
+      "thinking_tokens": 2989
+    },
+    "server_tool_use": {
+      "web_search_requests": 0,
+      "web_fetch_requests": 0
+    },
+    "service_tier": "standard",
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 24361,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "inference_geo": "global",
+    "iterations": [
+      {
+        "input_tokens": 2,
+        "output_tokens": 821,
+        "cache_read_input_tokens": 49758,
+        "cache_creation_input_tokens": 714,
+        "cache_creation": {
+          "ephemeral_5m_input_tokens": 0,
+          "ephemeral_1h_input_tokens": 714
+        },
+        "type": "message"
+      }
+    ],
+    "speed": "standard",
+    "fallback_credit": null
+  },
+  "modelUsage": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12489,
+      "cacheReadInputTokens": 238646,
+      "cacheCreationInputTokens": 24361,
+      "webSearchRequests": 0,
+      "costUSD": 0.49244519999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2989,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24361,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  },
+  "permission_denials": [],
+  "terminal_reason": "completed",
+  "fast_mode_state": "off",
+  "fast_mode_disabled_reason": "sdk_opt_in_required",
+  "subagent_stats": {
+    "spawned": 0,
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "started_in_background": 0,
+    "max_depth": 0,
+    "spawned_by_subagents": 0,
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "user": 0,
+      "system": 0
+    },
+    "refused": {
+      "depth_limit": 0,
+      "concurrency_limit": 0,
+      "budget": 0
+    },
+    "by_type": {}
+  },
+  "safety_stops": 0,
+  "is_error": false,
+  "num_turns": 10,
+  "subtype": "success",
+  "api_error_status": null,
+  "result": "I implemented `satisfies(version, range)` in `src/semver.js` and added tests in `test/satisfies.test.js`. `npm test` passes: 12 of 12 tests.\n\n**How it works:** each range is first rewritten as plain comparisons (`<`, `<=`, `>`, `>=`, `=`) against full versions, then checked using the spec's ordering rules. The prerelease rule is applied per comparator set: a prerelease version only matches if one of the set's own comparators has a prerelease on the same `MAJOR.MINOR.PATCH`. The function never throws. Anything that isn't a valid string, version or range returns `false`.\n\n**Tests:** every example in the spec has a test. There are also tests for:\n- the full prerelease ordering chain (`alpha < alpha.1 < alpha.beta < beta < beta.2 < beta.11 < rc.1 < release`);\n- ASCII ordering, including uppercase sorting before lowercase;\n- numeric prerelease identifiers larger than JavaScript can hold exactly;\n- invalid versions and ranges, and arguments that aren't strings.\n\nTwo test failures along the way were mistakes in my expected values, not in the code. `1.0.0-alpha` can't satisfy `<1.0.0` under the prerelease rule, and `-` sorts before letters in ASCII.\n\n**Where the spec is silent, I chose:**\n- **Leading `v`:** accepted inside ranges too (`^v1.2.3`), since ranges are made of versions.\n- **Spaces after an operator:** allowed only for the five comparison operators the spec lists. `~ 1.2` and `^ 1.2` are invalid.\n- **`>*` and `<*`:** match nothing. `>=*` and `<=*` match any version.\n- **A number after a wildcard** (`1.x.3`): treated as an invalid range.\n- **A prerelease on a partial version** (`1.2-beta`): invalid.\n- **An empty side of `||`** (`1.0.0 ||`): matches any version, the same as an empty range.\n- **Hyphen ranges:** may appear alongside other comparators in a set. A wildcard start (`* - 2`) has no lower bound.\n- **Numeric prerelease identifiers with leading zeros** (`1.0.0-01`): accepted, because the spec only lists the allowed characters. They compare by numeric value.\n\nNothing is committed.",
+  "ttft_ms": 2910,
+  "type": "result",
+  "duration_ms": 107566,
+  "uuid": "553c9557-3fe3-42f3-87b0-00517aaa714a",
+  "ttft_stream_ms": 1532,
+  "time_to_request_ms": 592,
+  "time_to_request_phases_ms": {
+    "other": 5,
+    "system_prompt": 36,
+    "resume_other": 6,
+    "process_user_input": 2,
+    "input_attachments": 4,
+    "input_hooks": 1,
+    "tool_pool_refresh": 1,
+    "init_message": 1,
+    "engine_pickup": 1,
+    "message_prep": 0,
+    "model_config_wait": 0,
+    "autocompact": 1,
+    "query_setup": 0,
+    "model_gates": 515,
+    "tool_schema_build": 7,
+    "message_normalization": 1,
+    "client_creation": 3,
+    "request_build": 8
+  },
+  "turn_start_resume_kind": "none",
+  "process_turn_index": 0,
+  "time_to_request_loop_lag_ms": 64,
+  "time_to_request_cpu_ms": 505,
+  "time_to_request_major_faults": 8,
+  "input_attachments_detail": {
+    "slowest_producer": "queued_commands",
+    "slowest_producer_ms": 3,
+    "cpu_ms": 7,
+    "major_faults": 0
+  },
+  "first_content_frame_ms": 1532,
+  "queued_turn_count": 0,
+  "result_index": 0,
+  "model_usage_since_last_result": {
+    "claude-opus-5-5": {
+      "inputTokens": 12,
+      "outputTokens": 12489,
+      "cacheReadInputTokens": 238646,
+      "cacheCreationInputTokens": 24361,
+      "webSearchRequests": 0,
+      "costUSD": 0.49244519999999997,
+      "contextWindow": 1000000,
+      "maxOutputTokens": 128000,
+      "thinkingTokens": 2989,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationEphemeral1hInputTokens": 24361,
+      "canonicalModel": "claude-opus-5-5",
+      "provider": "firstParty",
+      "costBasis": "list"
+    }
+  }
+}

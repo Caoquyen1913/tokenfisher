@@ -1,0 +1,84 @@
+diff --git a/src/lib/currency/registry.js b/src/lib/currency/registry.js
+index 0c7f322..a866bc4 100644
+--- a/src/lib/currency/registry.js
++++ b/src/lib/currency/registry.js
+@@ -19,17 +19,24 @@ const CURRENCIES = {
+ 
+ const DEFAULT_EXPONENT = 2;
+ 
++// Case-insensitive: a lower-case "jpy" must not fall through to DEFAULT_EXPONENT.
++function lookup(code) {
++  const key = String(code).trim().toUpperCase();
++  return Object.prototype.hasOwnProperty.call(CURRENCIES, key) ? CURRENCIES[key] : undefined;
++}
++
+ function exponent(code) {
+-  const c = CURRENCIES[code];
++  const c = lookup(code);
+   return c ? c.exponent : DEFAULT_EXPONENT;
+ }
+ 
+ function isSupported(code) {
+-  return Object.prototype.hasOwnProperty.call(CURRENCIES, code);
++  return lookup(code) !== undefined;
+ }
+ 
+ function symbol(code) {
+-  return CURRENCIES[code] ? CURRENCIES[code].symbol : code;
++  const c = lookup(code);
++  return c ? c.symbol : code;
+ }
+ 
+ module.exports = { exponent, isSupported, symbol, DEFAULT_EXPONENT };
+diff --git a/src/payments/gateway/payload.js b/src/payments/gateway/payload.js
+index 31fa0dc..6795db8 100644
+--- a/src/payments/gateway/payload.js
++++ b/src/payments/gateway/payload.js
+@@ -5,10 +5,10 @@ const { toGatewayCurrency } = require('../../lib/currency/normalize');
+ 
+ // Body of POST /v1/charges on the card gateway.
+ function buildChargePayload(invoice, customer) {
+-  const currency = toGatewayCurrency(invoice.currency);
+   return {
+-    amount: toMinor(invoice.total, currency),
+-    currency,
++    // Minor units from the invoice's ISO code; the gateway's lower-case form is for the wire only.
++    amount: toMinor(invoice.total, invoice.currency),
++    currency: toGatewayCurrency(invoice.currency),
+     customer: customer.gatewayId,
+     description: `Invoice ${invoice.number}`,
+     metadata: { invoice_id: invoice.id },
+diff --git a/test/charge.test.js b/test/charge.test.js
+index 321f791..f4fbace 100644
+--- a/test/charge.test.js
++++ b/test/charge.test.js
+@@ -14,3 +14,29 @@ test('EUR invoice is charged in cents', () => {
+   assert.strictEqual(p.amount, 9999);
+   assert.strictEqual(p.idempotency_key, 'inv_i2');
+ });
++
++// Regression: the lower-cased gateway code was used for the exponent lookup,
++// so zero-decimal currencies fell back to 2 decimals and were charged 100x.
++test('JPY invoice is charged in whole yen, not 100x', () => {
++  const p = buildChargePayload({ id: 'i3', number: 'INV-3', currency: 'JPY', total: 1500 }, customer);
++  assert.strictEqual(p.amount, 1500);
++  assert.strictEqual(p.currency, 'jpy');
++});
++
++test('KRW invoice is charged in whole won, not 100x', () => {
++  const p = buildChargePayload({ id: 'i4', number: 'INV-4', currency: 'KRW', total: 25000 }, customer);
++  assert.strictEqual(p.amount, 25000);
++  assert.strictEqual(p.currency, 'krw');
++});
++
++test('KWD invoice is charged in fils (3 decimals)', () => {
++  const p = buildChargePayload({ id: 'i5', number: 'INV-5', currency: 'KWD', total: 12.345 }, customer);
++  assert.strictEqual(p.amount, 12345);
++});
++
++test('minor-unit conversion ignores currency code case', () => {
++  const { toMinor } = require('../src/lib/money/minor');
++  assert.strictEqual(toMinor(1500, 'jpy'), 1500);
++  assert.strictEqual(toMinor(1500, 'JPY'), 1500);
++  assert.strictEqual(toMinor(12.5, 'usd'), 1250);
++});
